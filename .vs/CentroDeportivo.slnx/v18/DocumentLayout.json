@@ -1,0 +1,58 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\Usuario\\Desktop\\Facultad_Informatica\\CentroDeportivo\\CentroDeportivo\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{5B1EB5E4-DE8A-9061-38BF-539CE9B1BA75}|CentroDeportivo.UI\\CentroDeportivo.UI.csproj|c:\\users\\usuario\\desktop\\facultad_informatica\\centrodeportivo\\centrodeportivo\\centrodeportivo.ui\\components\\pages\\home.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{5B1EB5E4-DE8A-9061-38BF-539CE9B1BA75}|CentroDeportivo.UI\\CentroDeportivo.UI.csproj|solutionrelative:centrodeportivo.ui\\components\\pages\\home.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5B1EB5E4-DE8A-9061-38BF-539CE9B1BA75}|CentroDeportivo.UI\\CentroDeportivo.UI.csproj|c:\\users\\usuario\\desktop\\facultad_informatica\\centrodeportivo\\centrodeportivo\\centrodeportivo.ui\\components\\pages\\reservas.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{5B1EB5E4-DE8A-9061-38BF-539CE9B1BA75}|CentroDeportivo.UI\\CentroDeportivo.UI.csproj|solutionrelative:centrodeportivo.ui\\components\\pages\\reservas.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 2,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{aa2115a1-9712-457b-9047-dbb71ca2cdd2}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Reservas.razor",
+              "DocumentMoniker": "C:\\Users\\Usuario\\Desktop\\Facultad_Informatica\\CentroDeportivo\\CentroDeportivo\\CentroDeportivo.UI\\Components\\Pages\\Reservas.razor",
+              "RelativeDocumentMoniker": "CentroDeportivo.UI\\Components\\Pages\\Reservas.razor",
+              "ToolTip": "C:\\Users\\Usuario\\Desktop\\Facultad_Informatica\\CentroDeportivo\\CentroDeportivo\\CentroDeportivo.UI\\Components\\Pages\\Reservas.razor",
+              "RelativeToolTip": "CentroDeportivo.UI\\Components\\Pages\\Reservas.razor",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAGAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-04-30T20:45:09.088Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Home.razor",
+              "DocumentMoniker": "C:\\Users\\Usuario\\Desktop\\Facultad_Informatica\\CentroDeportivo\\CentroDeportivo\\CentroDeportivo.UI\\Components\\Pages\\Home.razor",
+              "RelativeDocumentMoniker": "CentroDeportivo.UI\\Components\\Pages\\Home.razor",
+              "ToolTip": "C:\\Users\\Usuario\\Desktop\\Facultad_Informatica\\CentroDeportivo\\CentroDeportivo\\CentroDeportivo.UI\\Components\\Pages\\Home.razor",
+              "RelativeToolTip": "CentroDeportivo.UI\\Components\\Pages\\Home.razor",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABwAAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-04-30T20:20:22.457Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
