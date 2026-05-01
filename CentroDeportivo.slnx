@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="CentroDeportivo.Aplicacion/CentroDeportivo.Aplicacion.csproj" />
+  <Project Path="CentroDeportivo.Infraestructura/CentroDeportivo.Infraestructura.csproj" />
+  <Project Path="CentroDeportivo.UI/CentroDeportivo.UI.csproj" />
+</Solution>
