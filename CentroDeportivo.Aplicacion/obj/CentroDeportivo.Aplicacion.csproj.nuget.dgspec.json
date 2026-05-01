@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Usuario\\Desktop\\Facultad_Informatica\\CentroDeportivo\\CentroDeportivo\\CentroDeportivo.Aplicacion\\CentroDeportivo.Aplicacion.csproj": {}
+    "C:\\Users\\Usuario\\Desktop\\Trabajos_De_Adoge_Innovations\\Paginas_Y_Aplicaciones\\CentroDeportivo\\CentroDeportivo.Aplicacion\\CentroDeportivo.Aplicacion.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Usuario\\Desktop\\Facultad_Informatica\\CentroDeportivo\\CentroDeportivo\\CentroDeportivo.Aplicacion\\CentroDeportivo.Aplicacion.csproj": {
+    "C:\\Users\\Usuario\\Desktop\\Trabajos_De_Adoge_Innovations\\Paginas_Y_Aplicaciones\\CentroDeportivo\\CentroDeportivo.Aplicacion\\CentroDeportivo.Aplicacion.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Usuario\\Desktop\\Facultad_Informatica\\CentroDeportivo\\CentroDeportivo\\CentroDeportivo.Aplicacion\\CentroDeportivo.Aplicacion.csproj",
+        "projectUniqueName": "C:\\Users\\Usuario\\Desktop\\Trabajos_De_Adoge_Innovations\\Paginas_Y_Aplicaciones\\CentroDeportivo\\CentroDeportivo.Aplicacion\\CentroDeportivo.Aplicacion.csproj",
         "projectName": "CentroDeportivo.Aplicacion",
-        "projectPath": "C:\\Users\\Usuario\\Desktop\\Facultad_Informatica\\CentroDeportivo\\CentroDeportivo\\CentroDeportivo.Aplicacion\\CentroDeportivo.Aplicacion.csproj",
+        "projectPath": "C:\\Users\\Usuario\\Desktop\\Trabajos_De_Adoge_Innovations\\Paginas_Y_Aplicaciones\\CentroDeportivo\\CentroDeportivo.Aplicacion\\CentroDeportivo.Aplicacion.csproj",
         "packagesPath": "C:\\Users\\Usuario\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Usuario\\Desktop\\Facultad_Informatica\\CentroDeportivo\\CentroDeportivo\\CentroDeportivo.Aplicacion\\obj\\",
+        "outputPath": "C:\\Users\\Usuario\\Desktop\\Trabajos_De_Adoge_Innovations\\Paginas_Y_Aplicaciones\\CentroDeportivo\\CentroDeportivo.Aplicacion\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -62,6 +62,20 @@
           ],
           "assetTargetFallback": true,
           "warn": true,
+          "downloadDependencies": [
+            {
+              "name": "Microsoft.AspNetCore.App.Ref",
+              "version": "[8.0.26, 8.0.26]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Ref",
+              "version": "[8.0.26, 8.0.26]"
+            },
+            {
+              "name": "Microsoft.WindowsDesktop.App.Ref",
+              "version": "[8.0.26, 8.0.26]"
+            }
+          ],
           "frameworkReferences": {
             "Microsoft.NETCore.App": {
               "privateAssets": "all"
