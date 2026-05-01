@@ -1,0 +1,79 @@
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.VC.db
+
+# Build output
+bin/
+obj/
+
+# Publish output
+publish/
+**/publish/
+*.Publish.xml
+
+# Visual Studio Code
+.vscode/
+
+# Rider
+.idea/
+*.sln.iml
+*.DotSettings.user
+
+# NuGet
+*.nupkg
+packages/
+project.lock.json
+.nuget/
+
+# ASP.NET / Blazor
+wwwroot/_framework/
+wwwroot/_content/
+wwwroot/build/
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-error.log
+.yarn/
+
+# Test and coverage
+TestResults/
+coverage/
+*.coverage
+*.coverageinfo
+
+# Logs
+*.log
+logs/
+
+# User-specific files
+*.userprefs
+*.userosscache
+
+# Resharper
+_ReSharper*/
+*.DotSettings
+
+# Secret and config
+secrets.json
+*.Secrets.*
+*.publishsettings
+
+# Database files
+*.mdf
+*.ldf
+*.sqlite
+*.db
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Other
+*.vspscc
+.classpath
+.project
+.settings/
