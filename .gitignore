@@ -1,3 +1,18 @@
+# =========================
+# 🔵 .NET / Build
+# =========================
+bin/
+obj/
+*.dll
+*.exe
+*.pdb
+*.cache
+*.deps.json
+*.runtimeconfig.json
+
+# =========================
+# 🟣 Visual Studio (IDE)
+# =========================
 .vs/
 *.user
 *.suo
@@ -5,75 +20,83 @@
 *.sln.docstates
 *.VC.db
 
-# Build output
-bin/
-obj/
+# =========================
+# 🟢 Visual Studio Code
+# =========================
+.vscode/*
 
-# Publish output
-publish/
-**/publish/
-*.Publish.xml
+# Permitir configs compartidas
+!.vscode/settings.json
+!.vscode/launch.json
+!.vscode/tasks.json
 
-# Visual Studio Code
-.vscode/
-
-# Rider
+# =========================
+# 🟡 Rider
+# =========================
 .idea/
 *.sln.iml
 *.DotSettings.user
 
-# NuGet
+# =========================
+# 📦 NuGet
+# =========================
 *.nupkg
 packages/
-project.lock.json
 .nuget/
+project.lock.json
 
-# ASP.NET / Blazor
+# =========================
+# 🌐 ASP.NET / Blazor
+# =========================
 wwwroot/_framework/
 wwwroot/_content/
 wwwroot/build/
 
-# Node
-node_modules/
-npm-debug.log*
-yarn-error.log
-.yarn/
-
-# Test and coverage
+# =========================
+# 🧪 Tests / Coverage
+# =========================
 TestResults/
 coverage/
 *.coverage
 *.coverageinfo
 
-# Logs
+# =========================
+# 📄 Logs
+# =========================
 *.log
 logs/
 
-# User-specific files
-*.userprefs
-*.userosscache
-
-# Resharper
-_ReSharper*/
-*.DotSettings
-
-# Secret and config
+# =========================
+# 🔐 Config sensible
+# =========================
 secrets.json
 *.Secrets.*
 *.publishsettings
 
-# Database files
+# =========================
+# 🗄️ Base de datos (⚠️ ajustar si usan SQLite real)
+# =========================
 *.mdf
 *.ldf
-*.sqlite
-*.db
+# *.sqlite
+# *.db
 
-# OS generated files
+# =========================
+# 🧰 Node (si usan frontend)
+# =========================
+node_modules/
+npm-debug.log*
+yarn-error.log
+.yarn/
+
+# =========================
+# 🖥️ Sistema operativo
+# =========================
 .DS_Store
 Thumbs.db
 
-# Other
-*.vspscc
-.classpath
-.project
-.settings/
+# =========================
+# 📁 Temporales
+# =========================
+*.tmp
+*.temp
