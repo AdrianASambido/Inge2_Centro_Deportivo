@@ -34,11 +34,19 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xIb21lLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
+<<<<<<< Updated upstream
 [C:/Users/Usuario/Desktop/Trabajos_De_Adoge_Innovations/Paginas_Y_Aplicaciones/CentroDeportivo/CentroDeportivo.UI/Components/Pages/Reservas.razor]
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xSZXNlcnZhcy5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/Usuario/Desktop/Trabajos_De_Adoge_Innovations/Paginas_Y_Aplicaciones/CentroDeportivo/CentroDeportivo.UI/Components/Routes.razor]
+=======
+[C:/Users/Usuario/Desktop/Facultad_Informatica/CentroDeportivo/CentroDeportivo/CentroDeportivo.UI/Components/Pages/Reservas.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xSZXNlcnZhcy5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Usuario/Desktop/Facultad_Informatica/CentroDeportivo/CentroDeportivo/CentroDeportivo.UI/Components/Routes.razor]
+>>>>>>> Stashed changes
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xSb3V0ZXMucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
