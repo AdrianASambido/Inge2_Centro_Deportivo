@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("CentroDeportivo.UI")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c19e42517d3375278efad749e1d46d4f095e6725")]
 [assembly: System.Reflection.AssemblyProductAttribute("CentroDeportivo.UI")]
 [assembly: System.Reflection.AssemblyTitleAttribute("CentroDeportivo.UI")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
