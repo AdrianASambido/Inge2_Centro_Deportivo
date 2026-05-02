@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("CentroDeportivo.Infraestructura")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+7b33871d9072d6f00e3895297ce8cad4a8851d18")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c19e42517d3375278efad749e1d46d4f095e6725")]
 [assembly: System.Reflection.AssemblyProductAttribute("CentroDeportivo.Infraestructura")]
 [assembly: System.Reflection.AssemblyTitleAttribute("CentroDeportivo.Infraestructura")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
