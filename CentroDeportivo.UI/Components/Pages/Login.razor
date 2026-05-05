@@ -1,0 +1,66 @@
+﻿@page "/Login"
+@inject LoginUseCase LoginUseCase
+@inject Sesion UsuarioSesion
+@inject NavigationManager Navegador
+@inject IRepositorioUsuario Repo
+
+@rendermode InteractiveServer
+
+<h3>Iniciar Sesión</h3>
+     
+<div class="mb-3">
+    <input placeholder="Correo" @bind="datos.Correo" class="form-control" />
+</div>
+
+<div class="mb-3">
+    <input placeholder="Contraseña" @bind="datos.Password" class="form-control" type="password" />
+</div>
+
+<div class="mb-3">
+    <button class="btn btn-primary" @onclick="IniciarSesion">Confirmar</button>
+    <button class="btn btn-danger" @onclick="Registrarse">Registrarme</button>
+</div>
+
+@if (!string.IsNullOrEmpty(error))
+{
+    <div class="alert alert-danger">@error</div>
+}
+
+@code {
+    public DatosLogin datos = new();
+    public string error = "";
+
+    protected override void OnInitialized()
+    {
+        
+    }
+
+    public void IniciarSesion()
+    {
+        error = ""; // Limpia errores previos
+
+        try
+        {
+            var usuario = LoginUseCase.Ejecutar(datos.Correo, datos.Password);
+            UsuarioSesion.IniciarSesion(usuario);
+            Navegador.NavigateTo("/usuarios");
+        }
+        catch (Exception ex)
+        {
+            error = ex.Message;
+            StateHasChanged();
+
+        }
+    }
+
+    void Registrarse()
+    {
+        Navegador.NavigateTo("/registrar");
+    }
+
+    public class DatosLogin
+    {
+        public string Correo { get; set; } = "";
+        public string Password { get; set; } = "";
+    }
+}
