@@ -79,7 +79,7 @@ secrets.json
 *.mdf
 *.ldf
 *.sqlite
- *.db
+*.db
 
 # =========================
 # 🧰 Node (si usan frontend)
