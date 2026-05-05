@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BCrypt.Net;
 
 namespace CentroDeportivo.Infraestructura.Servicios
 {
@@ -11,12 +12,12 @@ namespace CentroDeportivo.Infraestructura.Servicios
     {
         public string Hashear(string texto)
         {
-            throw new NotImplementedException();
+            return BCrypt.Net.BCrypt.HashPassword(texto);
         }
 
         public bool Verificar(string texto, string hash)
         {
-            throw new NotImplementedException();
+            return BCrypt.Net.BCrypt.Verify(texto, hash);
         }
     }
 }

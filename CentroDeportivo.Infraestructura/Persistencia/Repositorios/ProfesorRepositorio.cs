@@ -1,5 +1,7 @@
 ﻿using CentroDeportivo.Aplicacion.Entidades;
 using CentroDeportivo.Aplicacion.Interfaces;
+using CentroDeportivo.Infraestructura.Persistencia.Contexto;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,16 +10,17 @@ using System.Threading.Tasks;
 
 namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
 {
-    public class ProfesorRepositorio : IProfesorRepositorio
+    public class ProfesorRepositorio(CentroDeportivoContext contexto) : IProfesorRepositorio
     {
         public Task ActualizarAsync(Profesor profesor)
         {
             throw new NotImplementedException();
         }
 
-        public Task AgregarAsync(Profesor profesor)
+        public async Task AgregarAsync(Profesor profesor)
         {
-            throw new NotImplementedException();
+            await contexto.Profesores.AddAsync(profesor);
+            await contexto.SaveChangesAsync();
         }
 
         public Task EliminarAsync(int id)
@@ -43,6 +46,11 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
         public Task<IEnumerable<Profesor>> ObtenerTodosAsync()
         {
             throw new NotImplementedException();
+        }
+
+        public async Task<bool> YaExiste(string dni)
+        {
+            return await contexto.Profesores.AnyAsync(p => p.Dni == dni);
         }
     }
 }

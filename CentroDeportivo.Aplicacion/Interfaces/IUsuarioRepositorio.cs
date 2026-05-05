@@ -11,10 +11,13 @@ namespace CentroDeportivo.Aplicacion.Interfaces
     {
         Task<Usuario?> ObtenerPorIdAsync(int id);
         Task<Usuario?> ObtenerPorDniAsync(string dni);
+        Task<Usuario?> ObtenerPorEmail(string email);
         Task<IEnumerable<Usuario>> ObtenerTodosAsync();
         Task AgregarAsync(Usuario usuario);
         Task ActualizarAsync(Usuario usuario);
         Task EliminarAsync(int id);
+        Task<bool> YaExiste(string dni);
+        Task<bool> YaExisteEmail(string email);
 
     }
 }
