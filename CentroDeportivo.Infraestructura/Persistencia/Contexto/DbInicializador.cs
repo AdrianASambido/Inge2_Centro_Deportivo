@@ -21,16 +21,19 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Contexto
                 return; // La base ya tiene datos, no hacemos nada
             }
 
-            // Crear el Administrador por defecto
+            // Crear el Administrador por defecto si la BD esta vacia
             var admin = new Usuario
             {
                 Nombre = "Carlos",
                 Apellido = "Tevez",
+                Domicilio = "Calle 123",
+                Dni = "112345534",
                 Email = "admin@centrodeportivo.com",
-               
-                // para probar la conexión, valor temporal sin hash de la contra.
-                Password = "admin_hash_provisorio",
-                Rol = Rol.Administrador
+
+                
+                Password = BCrypt.Net.BCrypt.HashPassword("Admin1234"),
+                Rol = Rol.Administrador,
+                DebeCambiarPassword = false
             };
 
             context.Usuarios.Add(admin);

@@ -4,10 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CentroDeportivo.Aplicacion.Entidades
+namespace CentroDeportivo.Aplicacion.Validadores
 {
-    public enum EstadoReserva
+    public class TurnoValidador
     {
-        Reservado, Confirmado, Cancelado, PendienteDePago
     }
 }

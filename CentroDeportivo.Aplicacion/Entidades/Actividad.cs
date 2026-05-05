@@ -9,15 +9,15 @@ namespace CentroDeportivo.Aplicacion.Entidades
     public class Actividad
     {
         public int Id { get; private set; }
-        public string nombre { get; set; } = string.Empty;
-        public string descripcion { get; set; } = string.Empty;
-        public double precio { get; set; }
+        public string Nombre { get; set; } = string.Empty;
+        public string Descripcion { get; set; } = string.Empty;
+        public double Precio { get; set; }
 
         public Actividad(string nombre, string descripcion, double precio)
         {
-            this.nombre = nombre;
-            this.descripcion = descripcion;
-            this.precio = precio;
+            this.Nombre = nombre;
+            this.Descripcion = descripcion;
+            this.Precio = precio;
         }
 
         public Actividad() { }

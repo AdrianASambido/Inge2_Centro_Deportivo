@@ -4,10 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CentroDeportivo.Aplicacion.Entidades
+namespace CentroDeportivo.Aplicacion.Casos_de_uso.TurnoUseCase
 {
-    public enum EstadoReserva
+    public class ConsultarDisponibilidadUseCase
     {
-        Reservado, Confirmado, Cancelado, PendienteDePago
     }
 }
