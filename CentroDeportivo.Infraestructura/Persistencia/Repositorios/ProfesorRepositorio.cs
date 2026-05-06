@@ -12,9 +12,10 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
 {
     public class ProfesorRepositorio(CentroDeportivoContext contexto) : IProfesorRepositorio
     {
-        public Task ActualizarAsync(Profesor profesor)
+        public async Task ActualizarAsync(Profesor profesor)
         {
-            throw new NotImplementedException();
+            contexto.Profesores.Update(profesor);
+            await contexto.SaveChangesAsync();
         }
 
         public async Task AgregarAsync(Profesor profesor)
@@ -23,34 +24,67 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
             await contexto.SaveChangesAsync();
         }
 
-        public Task EliminarAsync(int id)
+        public async Task EliminarAsync(int id)
         {
-            throw new NotImplementedException();
+            var profesor = await this.ObtenerPorIdAsync(id);
+            if(profesor != null)
+            {
+                contexto.Profesores.Remove(profesor);
+                await contexto.SaveChangesAsync();
+            }
         }
 
-        public Task<IEnumerable<Profesor>> ObtenerDisponiblesAsync(DateOnly fecha, TimeOnly horarioInicio)
+        //para crear un turno, obtener los profesores disponibles
+        public async Task<IEnumerable<Profesor>> ObtenerDisponiblesAsync(DateOnly fecha, TimeOnly horarioInicio)
         {
-            throw new NotImplementedException();
+            
+            var profesOcupados = await contexto.Turnos
+                .Where(t => t.Fecha == fecha && t.HoraInicio == horarioInicio && (t.Estado == EstadoTurno.Disponible || t.Estado == EstadoTurno.Lleno))
+                .Select(t => t.Id_Profesor)
+                .ToListAsync();
+
+           
+            return await contexto.Profesores
+                .Where(p => !profesOcupados.Contains(p.Id))
+                .AsNoTracking()
+                .ToListAsync();
         }
 
-        public Task<Profesor?> ObtenerPorDniAsync(string dni)
+        public async Task<Profesor?> ObtenerPorDniAsync(string dni)
         {
-            throw new NotImplementedException();
+            return await contexto.Profesores.FirstOrDefaultAsync(p => p.Dni == dni);
         }
 
-        public Task<Profesor?> ObtenerPorIdAsync(int id)
+        public async Task<Profesor?> ObtenerPorIdAsync(int id)
         {
-            throw new NotImplementedException();
+            return await contexto.Profesores.FirstOrDefaultAsync(p => p.Id == id);
         }
 
-        public Task<IEnumerable<Profesor>> ObtenerTodosAsync()
+        public async Task<IEnumerable<Profesor>> ObtenerTodosAsync()
         {
-            throw new NotImplementedException();
+            return await contexto.Profesores.AsNoTracking().ToListAsync();
+
         }
 
+        //al momento de dar de alta un profesor, ver que ya no este registrado
         public async Task<bool> YaExiste(string dni)
         {
             return await contexto.Profesores.AnyAsync(p => p.Dni == dni);
         }
+
+        public async Task<bool> YaExisteDniParaEditar(string dni, int idActual)
+        {
+            return await contexto.Profesores.AnyAsync(p => p.Dni == dni && p.Id != idActual);
+        }
+
+        //si tiene turnos asignados no se puede eliminar el profesor
+        public async Task<bool> TieneTurnosAsignadosAsync(int profesorId)
+        {
+            return await contexto.Turnos.AnyAsync(t =>
+                t.Id_Profesor == profesorId &&
+                (t.Estado == EstadoTurno.Disponible || t.Estado == EstadoTurno.Lleno)
+            );
+        }
+
     }
 }

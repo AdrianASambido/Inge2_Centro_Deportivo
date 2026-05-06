@@ -31,5 +31,16 @@ namespace CentroDeportivo.Aplicacion.Validadores
             }
             return (string.IsNullOrEmpty(mensaje),mensaje);
         }
+
+        public async Task<(bool esValido, string mensaje)> ValidarEliminacion(int idProfesor) {
+            var profesor = await repo.ObtenerPorIdAsync(idProfesor);
+            if (profesor == null) {
+                return (false, "Error: el profesor no existe.");
+            }
+            if (await repo.TieneTurnosAsignadosAsync(idProfesor)) {
+                return (false, "Error al eliminar, el profesor posee turnos agendados.");
+            }
+            return (true, "");
+        }
     }
 }
