@@ -1,8 +1,7 @@
-﻿@page "/Login"
-@inject LoginUseCase LoginUseCase
+@page "/Login"
+@inject IniciarSesionUseCase LoginUseCase
 @inject Sesion UsuarioSesion
 @inject NavigationManager Navegador
-@inject IRepositorioUsuario Repo
 
 @rendermode InteractiveServer
 
@@ -35,13 +34,13 @@
         
     }
 
-    public void IniciarSesion()
+    public async Task IniciarSesion()
     {
         error = ""; // Limpia errores previos
 
         try
         {
-            var usuario = LoginUseCase.Ejecutar(datos.Correo, datos.Password);
+            var usuario = await LoginUseCase.ejecutar(datos.Correo, datos.Password);
             UsuarioSesion.IniciarSesion(usuario);
             Navegador.NavigateTo("/usuarios");
         }

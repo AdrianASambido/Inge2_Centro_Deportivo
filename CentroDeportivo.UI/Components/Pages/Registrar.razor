@@ -1,10 +1,9 @@
-﻿@page "/registrar"
+@page "/registrar"
 @inject Sesion UsuarioSesion
 @inject NavigationManager Navegador
-@inject ServicioHash Hash
 
 @rendermode InteractiveServer
-@inject AgregarUsuarioUseCase agregarUsuario
+@inject RegistrarUsuarioUseCase agregarUsuario
 
 <PageTitle> Registrarse </PageTitle>
 
@@ -41,7 +40,7 @@
         mensaje = msj;
     }
 
-    void Enviar()
+    async Task Enviar()
     {
 
         if (usr.Contrasenia != usr.Contrasenia2)
@@ -52,24 +51,19 @@
 
         try
         {
-            var usuario = new Usuario(usr.Nombre, usr.Apellido, usr.Contrasenia, usr.Correo);
+            var usuario = new Usuario(usr.Nombre, usr.Apellido, string.Empty, string.Empty, usr.Contrasenia, usr.Correo, false, Rol.Cliente);
             
-            agregarUsuario.Ejecutar(usuario);
+            await agregarUsuario.ejecutar(usuario);
             Navegador.NavigateTo("/usuarios");
         }
-        catch (ValidacionExcepcion ex)
+        catch (Exception ex)
         {
-            MostrarMensaje("Error de validación: " + ex.Message);
-        }
-        catch (DuplicadoExcepcion ex)
-        {
-            MostrarMensaje("Error de duplicado: " + ex.Message);
+            MostrarMensaje("Error al registrar usuario: " + ex.Message);
         }
     }
 
     void Cancelar()
     {
-        <!--volver al home-->
         Navegador.NavigateTo("/");
     }
     public class Datos
