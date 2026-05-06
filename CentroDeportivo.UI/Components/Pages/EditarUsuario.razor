@@ -1,5 +1,83 @@
-﻿<h3>EditarUsuario</h3>
+﻿@page "/editar-usr/{Id:int}"
+@rendermode InteractiveServer
+@inject IUsuarioRepositorio RepositorioUsuario
+@inject EditarUsuarioUseCase EditarUsuarioCase
+@inject Sesion SesionUsuario
+@inject NavigationManager Navegador
+
+<PageTitle>Editar Usuario</PageTitle>
+
+<h3>Datos del usuario</h3>
+
+@if (usuario == null)
+{
+
+}
+else
+{
+    <input placeholder="Nombre" @bind="nombre" class="form-control">
+    <input placeholder="Apellido" @bind="apellido" class="form-control">
+    <input placeholder="Correo" @bind="correo" class="form-control">
+   @*  <input placeholder="Contraseña" @bind="contrasenia1" class="form-control" type="password">
+    <input placeholder="Contraseña" @bind="contrasenia2" class="form-control" type="password"> *@
+}
+
+<button class="btn btn-success" @onclick="GuardarDatos">Guardar datos</button>
+<button class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
+
+@if (!string.IsNullOrEmpty(mensaje))
+{
+    <div class="alert alert-danger">@mensaje</div>
+}
+
 
 @code {
+    string mensaje = "";
 
+    [Parameter]
+    public int Id { get; set; }
+
+    public string nombre = "";
+    public string apellido = "";
+    public string correo = "";
+    public string contrasenia1 = "";
+    public string contrasenia2 = "";
+    public Usuario? usuario;
+    
+    protected override void OnInitialized()
+    {
+        usuario = RepositorioUsuario.RetornarUsuario(Id);
+        if (usuario != null)
+        {
+            nombre = usuario.Nombre;
+            apellido = usuario.Apellido;
+            correo = usuario.Email ?? "";
+            @* contrasenia1 = usuario.Contrasenia;
+            contrasenia2 = usuario.Contrasenia; *@
+        }
+    }
+
+    void GuardarDatos()
+    {
+        if (usuario == null)
+        {
+            return;
+        }
+
+        try
+        {
+            EditarUsuarioCase.Ejecutar(usuario, SesionUsuario.UsuarioActual!.Id);
+            Navegador.NavigateTo("/usuarios");
+        }
+        catch (Exception ex)
+        {
+            mensaje = ex.Message;
+        }
+
+    }
+
+    void Cancelar()
+    {
+        Navegador.NavigateTo("/usuarios");
+    }
 }

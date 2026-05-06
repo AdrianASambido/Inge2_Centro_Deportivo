@@ -1,5 +1,152 @@
-﻿<h3>Clientes</h3>
+﻿@page "/usuarios"
+@rendermode InteractiveServer
+@inject IUsuarioRepositorio RepositorioUsuario
+@* @inject EliminarUsuarioUseCase EliminarUsuariosCase
+@inject ListarUsuariosUseCase ListarUsuariosCase *@
+@inject Sesion UsuarioSesion
+@inject NavigationManager Navegador
 
+<PageTitle>Centro de Eventos</PageTitle>
+
+@if (!UsuarioSesion.EstaAutenticado())
+{
+    <p>No tenés acceso. <NavLink href="/Login">Iniciar sesión</NavLink></p>
+}
+else
+{
+    <h2>Usuarios</h2>
+
+    <p>Bienvenido, @UsuarioSesion.UsuarioActual!.Nombre</p>
+    <button class="btn btn-danger" @onclick="CerrarSesion">Cerrar sesión</button>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Apellido</th>
+                <th>Correo</th>
+                <th>Permisos</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var u in usuarios)
+            {
+                <tr>
+                    <td>@u.Id</td>
+                    <td>@u.Nombre</td>
+                    <td>@u.Apellido</td>
+                    <td>@u.Correo</td>
+                    <td>@string.Join(", ", u.ListaPermisos!)</td>
+                    <td>
+                        <button class="btn btn-primary"
+                                @onclick="() => Editar(u.Id)"
+                                disabled="@(!UsuarioSesion.TieneElPermiso(Permisos.UsuarioModificacion) && UsuarioSesion.UsuarioActual!.Id != u.Id)">
+                            Editar
+                        </button>
+
+                        <button class="btn btn-warning"
+                                @onclick="() => EditarPermisos(u.Id)"
+                                disabled="@(!UsuarioSesion.TieneElPermiso(Permisos.OtorgarPermiso) || (u.Id == 1 && UsuarioSesion.UsuarioActual!.Id != 1))">
+                        
+                            Permisos
+                        </button>
+
+                        <button class="btn btn-danger"
+                                @onclick="() => ConfirmarEliminacion(u.Id)"
+                                disabled="@(!UsuarioSesion.TieneElPermiso(Permisos.UsuarioBaja) || (u.Id == 1 && UsuarioSesion.UsuarioActual!.Id != 1))">
+                            Eliminar
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+
+    </table>
+
+   
+}
+
+@if (!string.IsNullOrEmpty(mensaje))
+{
+    <div class="alert alert-danger">@mensaje</div>
+}
+
+@if (mostrarDialog)
+{
+    <div class="modal show d-block" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmar eliminación</h5>
+                </div>
+                <div class="modal-body">
+                    <p>¿Estás seguro de que querés eliminar este usuario?</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" @onclick="() => mostrarDialog = false">Cancelar</button>
+                    <button class="btn btn-danger" @onclick="Eliminar">Confirmar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+    
 @code {
 
+    string mensaje = "";
+    bool mostrarDialog = false;
+    int idAEliminar;
+    void MostrarMensaje(string msj)
+    {
+        mensaje = msj;
+    }
+
+
+    List<Usuario> usuarios = new List<Usuario>();
+    
+    protected override void OnInitialized()
+    {
+        usuarios = ListarUsuariosCase.Ejecutar()!;
+    }
+    void CerrarSesion()
+    {
+        UsuarioSesion.CerrarSesion();
+        Navegador.NavigateTo("/Login", true);
+    }
+
+    public void Editar(int Id)
+    {
+        Navegador.NavigateTo($"/editar-usr/{Id}");
+    }
+
+    public void EditarPermisos(int Id)
+    {
+        Navegador.NavigateTo($"/editar-permisos/{Id}");
+    }
+
+    void ConfirmarEliminacion(int Id)
+    {
+        idAEliminar = Id;
+        mostrarDialog = true;
+    }
+
+
+    void Eliminar()
+    {
+        mostrarDialog = false;
+        try
+        {
+            @* EliminarUsuariosCase.Ejecutar(idAEliminar, UsuarioSesion.UsuarioActual!.Id); *@
+            usuarios = ListarUsuariosCase.Ejecutar()!;
+            MostrarMensaje("Usuario eliminado correctamente.");
+        }
+        catch (Exception ex)
+        {
+            MostrarMensaje(ex.Message);
+        }
+        
+    }
 }

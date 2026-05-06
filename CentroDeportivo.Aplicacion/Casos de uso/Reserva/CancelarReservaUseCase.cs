@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace CentroDeportivo.Aplicacion.Casos_de_uso.Reserva
 {
-    internal class CancelarReservaUseCase
+    public class CancelarReservaUseCase
     {
     }
 }

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace CentroDeportivo.Aplicacion.Casos_de_uso.Usuario
 {
-    internal class ListarEmpleadosUseCase
+    public class ListarEmpleadosUseCase
     {
     }
 }

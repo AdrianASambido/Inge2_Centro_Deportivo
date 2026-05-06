@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace CentroDeportivo.Aplicacion.Casos_de_uso.Cancha
 {
-    internal class EditarCanchaUseCase
+    public class EditarCanchaUseCase
     {
     }
 }
