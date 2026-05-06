@@ -1,0 +1,82 @@
+﻿@page "/editar-cancha/{Id:int}"
+@rendermode InteractiveServer
+@inject ICanchaRepositorio RepositorioCancha
+@inject EditarCanchaUseCase EditarCanchaCase
+@inject Sesion SesionUsuario
+@inject NavigationManager Navegador
+
+<PageTitle>Editar Cancha</PageTitle>
+
+<h3>Datos de la Cancha</h3>
+
+@if (cancha == null)
+{
+
+}
+else
+{
+    <input placeholder="Numero de Cancha" @bind="numero" class="form-control">
+    <input placeholder="Capacidad" @bind="Capacidad" class="form-control">
+}
+
+<button class="btn btn-success" @onclick="GuardarDatos">Guardar datos</button>
+<button class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
+
+@if (!string.IsNullOrEmpty(mensaje))
+{
+    <div class="alert alert-danger">@mensaje</div>
+}
+
+
+@code {
+    
+    [Parameter]
+    public int Id { get; set; }
+    public int idCanchaAEditar;
+    public int numero;
+    public int Capacidad;
+
+    public Cancha? cancha;
+    
+    public string mensaje = "";
+    protected override void OnInitialized()
+    {
+        cancha = RepositorioCancha.ObtenerPorIdAsync(Id);
+        if (cancha != null)
+        {
+            idCanchaAEditar = cancha.Id;
+            numero = cancha.Numero;
+            Capacidad = cancha.Capacidad;
+        }
+    }
+    void MostrarMensaje(string msj)
+    {
+        mensaje = msj;
+    }
+    void GuardarDatos()
+    {
+        if (cancha == null)
+        {
+            return;
+        }
+
+        try
+        {
+            mensaje = "";
+            var canchaNueva = new Cancha(numero,Capacidad);
+            EditarCanchaCase.Ejecutar(canchaNueva, idCanchaAEditar, SesionUsuario.UsuarioActual!.Id);
+            Navegador.NavigateTo("/canchas");
+        }
+        catch (Exception ex)
+        {
+            mensaje = ex.Message;
+            MostrarMensaje(mensaje);
+        }
+
+    }
+    void Cancelar()
+    {
+        Navegador.NavigateTo("/canchas");
+        mensaje = "";
+    }
+}

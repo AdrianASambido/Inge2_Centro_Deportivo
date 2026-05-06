@@ -12,11 +12,14 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 header {
-    padding: 10px 20px;
-    background-color: #f5f5f5;
     display: flex;
     align-items: center;
-    gap: 10px;
+    height: 70px;
+}
+
+.logo {
+    height: auto;
+    width: 150px;
 }
 
 .sidebar {
