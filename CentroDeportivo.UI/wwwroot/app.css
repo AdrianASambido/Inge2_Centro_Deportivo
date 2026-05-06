@@ -36,3 +36,19 @@ header {
     display: flex;
     align-items: center;
 }
+
+table {
+    font-family: var(--font-datos);
+}
+
+button {
+    font-family: var(--font-datos);
+}
+
+.card {
+    border-radius: 12px;
+}
+
+.btn {
+    border-radius: 8px;
+}

@@ -41,9 +41,10 @@ else
     public Profesor? profesor;
 
     public string mensaje = "";
-    protected override void OnInitialized()
+
+    protected override async Task OnInitializedAsync()
     {
-        profesor = RepositorioProfesor.ObtenerPorIdAsync(Id);
+        profesor = await RepositorioProfesor.ObtenerPorIdAsync(Id);
         if (profesor != null)
         {
             idProfesorAEditar = profesor.Id;
@@ -52,6 +53,7 @@ else
             dni = profesor.Dni;
         }
     }
+
     void MostrarMensaje(string msj)
     {
         mensaje = msj;

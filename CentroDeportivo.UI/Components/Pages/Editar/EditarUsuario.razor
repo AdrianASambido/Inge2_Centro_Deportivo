@@ -44,9 +44,9 @@ else
     public string contrasenia2 = "";
     public Usuario? usuario;
     
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        usuario = RepositorioUsuario.ObtenerPorIdAsync(Id);
+        usuario = await RepositorioUsuario.ObtenerPorIdAsync(Id);
         if (usuario != null)
         {
             nombre = usuario.Nombre;

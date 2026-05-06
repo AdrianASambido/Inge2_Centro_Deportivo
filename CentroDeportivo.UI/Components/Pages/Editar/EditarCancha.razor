@@ -39,9 +39,9 @@ else
     public Cancha? cancha;
     
     public string mensaje = "";
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        cancha = RepositorioCancha.ObtenerPorIdAsync(Id);
+        cancha = await RepositorioCancha.ObtenerPorIdAsync(Id);
         if (cancha != null)
         {
             idCanchaAEditar = cancha.Id;
