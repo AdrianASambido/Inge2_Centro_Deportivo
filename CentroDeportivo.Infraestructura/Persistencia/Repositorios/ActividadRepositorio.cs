@@ -5,19 +5,22 @@ using System.Text;
 using System.Threading.Tasks;
 using CentroDeportivo.Aplicacion.Entidades;
 using CentroDeportivo.Aplicacion.Interfaces;
+using CentroDeportivo.Infraestructura.Persistencia.Contexto;
 
 namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
 {
-    public class ActividadRepositorio : IActividadRepositorio
+    public class ActividadRepositorio(CentroDeportivoContext context) : IActividadRepositorio
     {
         public Task ActualizarAsync(Actividad actividad)
         {
             throw new NotImplementedException();
         }
 
-        public Task AgregarAsync(Actividad actividad)
+        public async Task AgregarAsync(Actividad actividad)
         {
-            throw new NotImplementedException();
+           await context.Actividades.AddAsync(actividad);
+           await context.SaveChangesAsync();
+
         }
 
         public Task EliminarAsync(int id)
@@ -36,6 +39,11 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
         }
 
         public Task<bool> TieneInscriptosAsync(int actividadId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> YaExiste(string nombre)
         {
             throw new NotImplementedException();
         }

@@ -10,8 +10,8 @@ namespace CentroDeportivo.Aplicacion.Entidades
     {
         public int Id { get; private set; }
         public DateOnly Fecha { get; set; }
-        public DateOnly HoraInicio { get; set; }
-        public DateOnly HoraFin { get; set; }
+        public TimeOnly HoraInicio { get; set; }
+        public TimeOnly HoraFin { get; set; }
         public int CupoMaximo { get; set; }
         public int CupoDisponible { get; set; }
         public EstadoTurno Estado {get; set;}

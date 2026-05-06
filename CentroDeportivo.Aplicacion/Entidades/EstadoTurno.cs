@@ -10,7 +10,7 @@ namespace CentroDeportivo.Aplicacion.Entidades
     {
         Disponible,   // Hay cupo o el turno está activo.
         Lleno,        // Se completó el cupo máximo.
-        Cancelado,    // El negocio decidió dar de baja este turno (ej: mantenimiento).
+        Cancelado,    // El negocio decidió dar de baja este turno
         Finalizado    // La hora ya pasó.
     }
 }

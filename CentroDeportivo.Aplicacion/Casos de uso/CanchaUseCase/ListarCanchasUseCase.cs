@@ -4,10 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CentroDeportivo.Aplicacion.Entidades
+namespace CentroDeportivo.Aplicacion.Casos_de_uso.CanchaUseCase
 {
-    public enum EstadoReserva
+    public class ListarCanchasUseCase
     {
-        Reservado, Confirmado, Cancelado, PendienteDePago
     }
 }
