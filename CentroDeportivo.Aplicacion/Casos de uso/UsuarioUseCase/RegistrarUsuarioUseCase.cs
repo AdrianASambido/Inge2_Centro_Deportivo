@@ -18,7 +18,7 @@ public class RegistrarUsuarioUseCase (IUsuarioRepositorio repo, UsuarioClienteVa
             throw new Exception(mensaje);
         }
 
-        repoHash.Hashear(u.Password);
+        u.Password = repoHash.Hashear(u.Password);
         u.Rol = Rol.Cliente;
 
        await repo.AgregarAsync(u);

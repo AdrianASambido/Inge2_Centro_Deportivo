@@ -16,5 +16,6 @@ namespace CentroDeportivo.Aplicacion.Interfaces
         Task EliminarAsync(int id);
         Task<bool> TieneInscriptosAsync(int actividadId);
         Task<bool> YaExiste(string nombre);
+        Task<bool> YaExisteParaEditar(string nombreActividad, int idActividad);
     }
 }

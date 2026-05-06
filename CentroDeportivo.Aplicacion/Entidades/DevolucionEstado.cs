@@ -4,9 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CentroDeportivo.Aplicacion.Casos_de_uso.ActividadUseCases
+namespace CentroDeportivo.Aplicacion.Entidades
 {
-    public class EditarActividadUseCase
+    public enum DevolucionEstado
     {
+        Pendiente, Confirmado
     }
 }
