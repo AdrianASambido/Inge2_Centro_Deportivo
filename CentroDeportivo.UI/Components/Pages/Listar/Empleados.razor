@@ -1,10 +1,10 @@
-﻿@page "/Actividades"
+﻿@page "/Empleados"
 @rendermode InteractiveServer
-@inject IActividadRepositorio RepositorioActividad
+@inject IUsuarioRepositorio RepositorioUsuario
 @inject Sesion UsuarioSesion
 @inject NavigationManager Navegador
 
-<PageTitle>Actividades</PageTitle>
+<PageTitle>Empleados</PageTitle>
 
 @if (!UsuarioSesion.EstaAutenticado())
 {
@@ -12,38 +12,38 @@
 }
 else
 {
-    <h2>Actividades</h2>
+    <h2>Empleados</h2>
 
     <p>Bienvenido, @UsuarioSesion.UsuarioActual!.Nombre</p>
     <button class="btn btn-danger" @onclick="CerrarSesion">Cerrar sesión</button>
-    <button class="btn btn-success" @onclick="CrearActividad">Crear actividad</button>
+    <button class="btn btn-success" @onclick="CrearEmpleado">Registrar empleado</button>
 
     <table class="table">
         <thead>
             <tr>
                 <th>ID</th>
                 <th>Nombre</th>
-                <th>Descripcion</th>
-                <th>Precio</th>
+                <th>Apellido</th>
+                <th>DNI</th>
                 <th>Acciones</th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var a in actividad)
+            @foreach (var e in empleado)
             {
                 <tr>
-                    <td>@a.Id</td>
-                    <td>@a.nombre</td>
-                    <td>@a.descripcion</td>
-                    <td>@a.precio</td>
+                    <td>@e.Id</td>
+                    <td>@e.Nombre</td>
+                    <td>@e.Apellido</td>
+                    <td>@e.Dni</td>
                     <td>
                         <button class="btn btn-primary"
-                                @onclick="() => Editar(a.Id)">
+                                @onclick="() => Editar(e.Id)">
                             Editar
                         </button>
 
                         <button class="btn btn-danger"
-                                @onclick="() => ConfirmarEliminacion(a.Id)">
+                                @onclick="() => ConfirmarEliminacion(e.Id)">
                             Eliminar
                         </button>
                     </td>
@@ -70,7 +70,7 @@ else
                     <h5 class="modal-title">Confirmar eliminación</h5>
                 </div>
                 <div class="modal-body">
-                    <p>¿Estás seguro de que querés eliminar esta actividad?</p>
+                    <p>¿Estás seguro de que querés eliminar este empleado?</p>
                 </div>
                 <div class="modal-footer">
                     <button class="btn btn-secondary" @onclick="() => mostrarDialog = false">Cancelar</button>
@@ -87,17 +87,20 @@ else
     string mensaje = "";
     bool mostrarDialog = false;
     int idAEliminar;
+    bool quiereAgregar = false;
+    Datos emp = new Datos();
+
     void MostrarMensaje(string msj)
     {
         mensaje = msj;
     }
 
 
-    List<Actividad> actividad = new List<Actividad>();
-    
+    List<Usuario> empleado = new List<Usuario>();
+
     protected override void OnInitialized()
     {
-        actividad = ListarActividadesUseCase.Ejecutar()!;
+        empleado = ListarEmpleadosUseCase.Ejecutar()!;
     }
     void CerrarSesion()
     {
@@ -105,14 +108,14 @@ else
         Navegador.NavigateTo("/Login", true);
     }
 
-    void CrearActividad()
+    void CrearEmpleado()
     {
-        Navegador.NavigateTo("/crear-actividad", true);
+        quiereAgregar = true;
     }
 
     public void Editar(int Id)
     {
-        Navegador.NavigateTo($"/editar-actividad/{Id}");
+        Navegador.NavigateTo($"/editar-empleado/{Id}");
     }
 
     void ConfirmarEliminacion(int Id)
@@ -126,14 +129,42 @@ else
         mostrarDialog = false;
         try
         {
-            EliminarActividadUseCase.Ejecutar(idAEliminar, UsuarioSesion.UsuarioActual!.Id);
-            actividad = ListarActividadesUseCase.Ejecutar()!;
-            MostrarMensaje("Actividad eliminada correctamente.");
+            EliminarEmpleadoUseCase.Ejecutar(idAEliminar, UsuarioSesion.UsuarioActual!.Id);
+            empleado = ListarProfesoresUseCase.Ejecutar()!;
+            MostrarMensaje("Empleado eliminado correctamente.");
         }
         catch (Exception ex)
         {
             MostrarMensaje(ex.Message);
         }
-        
+
+    }
+
+    void Aceptar()
+    {
+        try
+        {
+            CrearEmpleadoUseCase.Ejecutar(emp.nombre, emp.apellido, emp.dni, UsuarioSesion.UsuarioActual!.Id);
+            empleado = ListarEmpleadosUseCase.Ejecutar()!;
+            MostrarMensaje("Emlpeado creado correctamente.");
+            quiereAgregar = false;
+        }
+        catch (Exception ex)
+        {
+            MostrarMensaje(ex.Message);
+        }
+    }
+
+    void Cancelar()
+    {
+        quiereAgregar = false;
+        mensaje = "";
+    }
+
+    public class Datos
+    {
+        public string nombre { get; set; } = "";
+        public string apellido { get; set; } = "";
+        public double dni { get; set; }
     }
 }

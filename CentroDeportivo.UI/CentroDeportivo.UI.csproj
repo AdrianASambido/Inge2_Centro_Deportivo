@@ -18,10 +18,4 @@
     <ProjectReference Include="..\CentroDeportivo.Infraestructura\CentroDeportivo.Infraestructura.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Components\Pages\Login\" />
-    <Folder Include="Components\Pages\Cargar\" />
-    <Folder Include="Components\Pages\Reservar\" />
-  </ItemGroup>
-
 </Project>

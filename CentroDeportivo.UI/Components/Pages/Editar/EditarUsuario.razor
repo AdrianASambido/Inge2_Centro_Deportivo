@@ -46,7 +46,7 @@ else
     
     protected override void OnInitialized()
     {
-        usuario = RepositorioUsuario.RetornarUsuario(Id);
+        usuario = RepositorioUsuario.ObtenerPorIdAsync(Id);
         if (usuario != null)
         {
             nombre = usuario.Nombre;
