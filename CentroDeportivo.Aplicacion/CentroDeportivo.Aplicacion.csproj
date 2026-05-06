@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Folder Include="Casos de uso\Actividad\" />
     <Folder Include="Excepciones\" />
   </ItemGroup>
 
