@@ -1,0 +1,170 @@
+﻿@page "/Empleados"
+@rendermode InteractiveServer
+@inject IUsuarioRepositorio RepositorioUsuario
+@inject Sesion UsuarioSesion
+@inject NavigationManager Navegador
+
+<PageTitle>Empleados</PageTitle>
+
+@if (!UsuarioSesion.EstaAutenticado())
+{
+    <p>No tenés acceso. <NavLink href="/Login">Iniciar sesión</NavLink></p>
+}
+else
+{
+    <h2>Empleados</h2>
+
+    <p>Bienvenido, @UsuarioSesion.UsuarioActual!.Nombre</p>
+    <button class="btn btn-danger" @onclick="CerrarSesion">Cerrar sesión</button>
+    <button class="btn btn-success" @onclick="CrearEmpleado">Registrar empleado</button>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Apellido</th>
+                <th>DNI</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var e in empleado)
+            {
+                <tr>
+                    <td>@e.Id</td>
+                    <td>@e.Nombre</td>
+                    <td>@e.Apellido</td>
+                    <td>@e.Dni</td>
+                    <td>
+                        <button class="btn btn-primary"
+                                @onclick="() => Editar(e.Id)">
+                            Editar
+                        </button>
+
+                        <button class="btn btn-danger"
+                                @onclick="() => ConfirmarEliminacion(e.Id)">
+                            Eliminar
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+
+    </table>
+
+   
+}
+
+@if (!string.IsNullOrEmpty(mensaje))
+{
+    <div class="alert alert-danger">@mensaje</div>
+}
+
+@if (mostrarDialog)
+{
+    <div class="modal show d-block" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmar eliminación</h5>
+                </div>
+                <div class="modal-body">
+                    <p>¿Estás seguro de que querés eliminar este empleado?</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" @onclick="() => mostrarDialog = false">Cancelar</button>
+                    <button class="btn btn-danger" @onclick="Eliminar">Confirmar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+    
+@code {
+
+    string mensaje = "";
+    bool mostrarDialog = false;
+    int idAEliminar;
+    bool quiereAgregar = false;
+    Datos emp = new Datos();
+
+    void MostrarMensaje(string msj)
+    {
+        mensaje = msj;
+    }
+
+
+    List<Usuario> empleado = new List<Usuario>();
+
+    protected override void OnInitialized()
+    {
+        empleado = ListarEmpleadosUseCase.Ejecutar()!;
+    }
+    void CerrarSesion()
+    {
+        UsuarioSesion.CerrarSesion();
+        Navegador.NavigateTo("/Login", true);
+    }
+
+    void CrearEmpleado()
+    {
+        quiereAgregar = true;
+    }
+
+    public void Editar(int Id)
+    {
+        Navegador.NavigateTo($"/editar-empleado/{Id}");
+    }
+
+    void ConfirmarEliminacion(int Id)
+    {
+        idAEliminar = Id;
+        mostrarDialog = true;
+    }
+
+    void Eliminar()
+    {
+        mostrarDialog = false;
+        try
+        {
+            EliminarEmpleadoUseCase.Ejecutar(idAEliminar, UsuarioSesion.UsuarioActual!.Id);
+            empleado = ListarProfesoresUseCase.Ejecutar()!;
+            MostrarMensaje("Empleado eliminado correctamente.");
+        }
+        catch (Exception ex)
+        {
+            MostrarMensaje(ex.Message);
+        }
+
+    }
+
+    void Aceptar()
+    {
+        try
+        {
+            CrearEmpleadoUseCase.Ejecutar(emp.nombre, emp.apellido, emp.dni, UsuarioSesion.UsuarioActual!.Id);
+            empleado = ListarEmpleadosUseCase.Ejecutar()!;
+            MostrarMensaje("Emlpeado creado correctamente.");
+            quiereAgregar = false;
+        }
+        catch (Exception ex)
+        {
+            MostrarMensaje(ex.Message);
+        }
+    }
+
+    void Cancelar()
+    {
+        quiereAgregar = false;
+        mensaje = "";
+    }
+
+    public class Datos
+    {
+        public string nombre { get; set; } = "";
+        public string apellido { get; set; } = "";
+        public double dni { get; set; }
+    }
+}

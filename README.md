@@ -6,7 +6,7 @@ Trabajo en grupo de la materia ingeniería de software 2
 
 - Bautista Aguilar
 - Gabriel Aguirre
-- Hugo Contrera
+- Hugo Contreraa
 - Nelson Joaquin Piñanelli
 - Adrián Alejandro Sambido
 

@@ -1,7 +1,15 @@
+<<<<<<< HEAD
 @page "/Login"
 @inject IniciarSesionUseCase LoginUseCase
 @inject Sesion UsuarioSesion
 @inject NavigationManager Navegador
+=======
+﻿@page "/Login"
+@inject IniciarSesionUseCase IniciarSesionUseCase
+@inject Sesion UsuarioSesion
+@inject NavigationManager Navegador
+@inject IUsuarioRepositorio Repo
+>>>>>>> 76738d239c256c39b77153a84ae48dd5834e798a
 
 @rendermode InteractiveServer
 
@@ -40,7 +48,11 @@
 
         try
         {
+<<<<<<< HEAD
             var usuario = await LoginUseCase.ejecutar(datos.Correo, datos.Password);
+=======
+            var usuario = IniciarSesionUseCase.Ejecutar(datos.Correo, datos.Password);
+>>>>>>> 76738d239c256c39b77153a84ae48dd5834e798a
             UsuarioSesion.IniciarSesion(usuario);
             Navegador.NavigateTo("/usuarios");
         }
