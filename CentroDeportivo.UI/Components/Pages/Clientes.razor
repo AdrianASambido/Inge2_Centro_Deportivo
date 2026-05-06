@@ -1,8 +1,8 @@
-﻿@page "/usuarios"
+﻿
+@page "/usuarios"
 @rendermode InteractiveServer
 @inject IUsuarioRepositorio RepositorioUsuario
-@* @inject EliminarUsuarioUseCase EliminarUsuariosCase
-@inject ListarUsuariosUseCase ListarUsuariosCase *@
+@*@inject EliminarUsuarioUseCase EliminarUsuariosCase *@
 @inject Sesion UsuarioSesion
 @inject NavigationManager Navegador
 
@@ -37,7 +37,7 @@ else
                     <td>@u.Id</td>
                     <td>@u.Nombre</td>
                     <td>@u.Apellido</td>
-                    <td>@u.Correo</td>
+                    <td>@u.Email</td>
                     <td>@string.Join(", ", u.ListaPermisos!)</td>
                     <td>
                         <button class="btn btn-primary"

@@ -1,6 +1,6 @@
 ﻿@page "/editar-reserva/{Id:int}"
 @rendermode InteractiveServer
-@inject IRepositorioReserva RepositorioReserva
+@inject IReservaRepositorio RepositorioReserva
 @inject EditarReservaUseCase EditarReservaCase
 @inject Sesion SesionUsuario
 @inject NavigationManager Navegador
@@ -29,6 +29,7 @@ else
 {
     <div class="alert alert-danger">@mensaje</div>
 }
+
 
 @code {
     

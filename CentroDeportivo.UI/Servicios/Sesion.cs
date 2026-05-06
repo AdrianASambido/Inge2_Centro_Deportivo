@@ -15,8 +15,4 @@ public class Sesion
     public bool EstaAutenticado()
         => UsuarioActual != null;
 
-    public bool TieneElPermiso(Permisos p)
-    {
-        return UsuarioActual!.TienePermiso(p);
-    }
 }
