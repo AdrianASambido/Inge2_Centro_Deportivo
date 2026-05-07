@@ -36,7 +36,7 @@ else
     public int idProfesorAEditar;
     public string nombre;
     public string apellido;
-    public int dni;
+    public string dni;
 
     public Profesor? profesor;
 
@@ -69,7 +69,7 @@ else
         {
             mensaje = "";
             var profesorNuevo = new Profesor(nombre, apellido, dni);
-            EditarProfesorCase.Ejecutar(profesorNuevo, idProfesorAEditar, SesionUsuario.UsuarioActual!.Id);
+            EditarProfesorCase.ejecutar(profesorNuevo, idProfesorAEditar, SesionUsuario.UsuarioActual!.Id);
             Navegador.NavigateTo("/profesores");
         }
         catch (Exception ex)

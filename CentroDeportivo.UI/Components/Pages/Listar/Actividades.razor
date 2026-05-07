@@ -2,6 +2,7 @@
 @rendermode InteractiveServer
 @inject CrearActividadUseCase CrearActividadUseCase
 @inject ListarActividadesUseCase ListarActividadesUseCase
+@inject EliminarActividadUseCase EliminarActividadUseCase
 @inject IActividadRepositorio RepositorioActividad
 @inject Sesion UsuarioSesion
 @inject NavigationManager Navegador
@@ -113,10 +114,11 @@ else
 
     List<Actividad> actividad = new List<Actividad>();
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        actividad = ListarActividadesUseCase.ejecutar()!;
+        actividad = (await ListarActividadesUseCase.ejecutar()).ToList();
     }
+
     void CerrarSesion()
     {
         UsuarioSesion.CerrarSesion();
@@ -139,29 +141,31 @@ else
         mostrarDialog = true;
     }
 
-    void Eliminar()
+    async Task Eliminar()
     {
+        @*
         mostrarDialog = false;
         try
         {
-            EliminarActividadUseCase.ejecutar(idAEliminar, UsuarioSesion.UsuarioActual!.Id);
-            actividad = ListarActividadesUseCase.ejecutar()!;
+            EliminarActividadUseCase.ejecutar(idAEliminar);
+            actividad = (await ListarActividadesUseCase.ejecutar()).ToList();
             MostrarMensaje("Actividad eliminada correctamente.");
+            StateHasChanged();
         }
         catch (Exception ex)
         {
             MostrarMensaje(ex.Message);
         }
-
+        *@
     }
 
-    void Aceptar()
+    async Task Aceptar()
     {
         try
         {
             var acti = new Actividad(act.nombre, act.descripcion, act.precio);
             CrearActividadUseCase.ejecutar(acti);
-            actividad = ListarActividadesUseCase.ejecutar()!;
+            actividad = (await ListarActividadesUseCase.ejecutar()).ToList();
             MostrarMensaje("Actividad creada correctamente.");
             quiereAgregar = false;
             StateHasChanged();

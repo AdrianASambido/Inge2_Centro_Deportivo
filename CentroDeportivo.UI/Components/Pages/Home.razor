@@ -1,27 +1,29 @@
 ﻿@page "/"
 @inject NavigationManager Navigation
+@rendermode InteractiveServer
 
 <PageTitle>Inicio - Centro Deportivo</PageTitle>
 
-<div class="container text-center mt-5">
-    <div class="p-5 mb-4 bg-light rounded-3 shadow-sm">
-        <h1 class="display-5 fw-bold text-primary">Bienvenido al Centro Deportivo</h1>
-        <p class="fs-4 mt-3">Gestioná tus actividades, socios y turnos de forma fácil y rápida.</p>
-        
-        <hr class="my-4">
+    <div class="container text-center mt-5">
+        <div class="p-5 mb-4 bg-light rounded-3 shadow-sm">
+            <h1 class="display-5 fw-bold text-primary">Bienvenido al Centro Deportivo</h1>
+            <p class="fs-4 mt-3">Gestioná tus actividades, socios y turnos de forma fácil y rápida.</p>
 
-        <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
-            <!-- Botón que lleva a Reservas -->
-            <button class="btn btn-primary btn-lg px-4 gap-3" @onclick="IrAReservas">
-                <i class="bi bi-calendar-check"></i> Realizar una Reserva
-            </button>
-            
-            <button class="btn btn-outline-secondary btn-lg px-4">
-                Ver Actividades
-            </button>
+            <hr class="my-4">
+
+            <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+                <!-- Botón que lleva a Reservas -->
+                <button class="btn btn-primary btn-lg px-4 gap-3" @onclick="IrAReservas">
+                    <i class="bi bi-calendar-check"></i> Realizar una Reserva
+                </button>
+
+                <button class="btn btn-outline-secondary btn-lg px-4">
+                    Ver Actividades
+                </button>
+            </div>
         </div>
     </div>
-</div>
+
 
 @code {
     // Método para navegar mediante código C#

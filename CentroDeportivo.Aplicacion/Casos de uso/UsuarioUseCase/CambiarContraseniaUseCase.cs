@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace CentroDeportivo.Aplicacion.Casos_de_uso.UsuarioUseCase
 {
-    public class CambiarContraseniaUseCase(IUsuarioRepositorio repo, UsuarioValidadorBase validador, IHashServicio repoHash)
+    public class CambiarContraseniaUseCase(IUsuarioRepositorio repo, IHashServicio repoHash)
     {
         public async Task ejecutar(string contraVieja, string contraNueva, int idUsuario) 
         {

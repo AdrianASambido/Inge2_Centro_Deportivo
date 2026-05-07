@@ -2,6 +2,7 @@
 @rendermode InteractiveServer
 @inject CrearEmpleadoUseCase CrearEmpleadoUseCase
 @inject ListarEmpleadosUseCase ListarEmpleadosUseCase
+@inject EliminarEmpleadoUseCase EliminarEmpleadoUseCase 
 @inject IUsuarioRepositorio RepositorioUsuario
 @inject Sesion UsuarioSesion
 @inject NavigationManager Navegador
@@ -113,9 +114,9 @@ else
 
     List<Usuario> empleado = new List<Usuario>();
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        empleado = ListarEmpleadosUseCase.ejecutar()!;
+        empleado = (await ListarEmpleadosUseCase.ejecutar()).ToList();
     }
     void CerrarSesion()
     {
@@ -139,14 +140,15 @@ else
         mostrarDialog = true;
     }
 
-    void Eliminar()
+    async Task Eliminar()
     {
         mostrarDialog = false;
         try
         {
-            EliminarEmpleadoUseCase.ejecutar(idAEliminar, UsuarioSesion.UsuarioActual!.Id);
-            empleado = ListarProfesoresUseCase.ejecutar()!;
+            EliminarEmpleadoUseCase.ejecutar(idAEliminar);
+            empleado = (await ListarEmpleadosUseCase.ejecutar()).ToList();
             MostrarMensaje("Empleado eliminado correctamente.");
+            StateHasChanged();
         }
         catch (Exception ex)
         {
@@ -155,15 +157,16 @@ else
 
     }
 
-    void Aceptar()
+    async Task Aceptar()
     {
         try
         {
             var emple = new Usuario(emp.nombre, emp.apellido, "", emp.dni, "1234", "", false, Rol.Empleado);
             CrearEmpleadoUseCase.ejecutar(emple);
-            empleado = ListarEmpleadosUseCase.ejecutar()!;
+            empleado = (await ListarEmpleadosUseCase.ejecutar()).ToList();
             MostrarMensaje("Emlpeado creado correctamente.");
             quiereAgregar = false;
+            StateHasChanged();
         }
         catch (Exception ex)
         {
@@ -181,6 +184,6 @@ else
     {
         public string nombre { get; set; } = "";
         public string apellido { get; set; } = "";
-        public int dni { get; set; }
+        public string dni { get; set; }
     }
 }
