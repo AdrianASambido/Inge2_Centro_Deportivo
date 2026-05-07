@@ -12,22 +12,25 @@
             <hr class="my-4">
 
             <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
-                <!-- Botón que lleva a Reservas -->
-                <button class="btn btn-primary btn-lg px-4 gap-3" @onclick="IrAReservas">
-                    <i class="bi bi-calendar-check"></i> Realizar una Reserva
-                </button>
+                
+            <button class="btn btn-primary btn-lg px-4 gap-3" @onclick="IrALogin">
+                <i class="bi bi-calendar-check"></i> Iniciar Sesion
+            </button>
 
-                <button class="btn btn-outline-secondary btn-lg px-4">
-                    Ver Actividades
-                </button>
+            <button class="btn btn-danger btn-lg px-4 gap-3" @onclick="IrARegistrar">
+                <i class="bi bi-calendar-check"></i> Registrarme
+            </button>
             </div>
         </div>
     </div>
 
 
 @code {
-    // Método para navegar mediante código C#
-    private void IrAReservas()    {
-        Navigation.NavigateTo("reservas");
+    private void IrARegistrar()    {
+        Navigation.NavigateTo("registrar");
+    }
+
+    private void IrALogin()    {
+        Navigation.NavigateTo("login");
     }
 }

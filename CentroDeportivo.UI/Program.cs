@@ -13,6 +13,7 @@ using CentroDeportivo.Aplicacion.Casos_de_uso.TurnoUseCase;
 using CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase;
 using CentroDeportivo.Infraestructura.Servicios;
 using CentroDeportivo.Infraestructura.Persistencia.Repositorios;
+using CentroDeportivo.UI.Servicios;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -62,6 +63,7 @@ builder.Services.AddScoped<ListarEmpleadosUseCase>();
 builder.Services.AddScoped<CrearReservaUseCase>();
 builder.Services.AddScoped<ListarReservasUseCase>();
 
+builder.Services.AddScoped<Sesion>();
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
