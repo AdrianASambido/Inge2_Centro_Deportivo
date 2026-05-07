@@ -48,7 +48,7 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
             throw new NotImplementedException();
         }
 
-        public async Task<bool> YaExiste(string dni)
+        public async Task<bool> YaExiste(int dni)
         {
             return await context.Usuarios.AnyAsync(u => u.Dni == dni);
         }

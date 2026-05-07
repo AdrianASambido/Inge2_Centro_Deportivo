@@ -35,21 +35,21 @@
         
     }
 
-    public void IniciarSesion()
+    public async Task IniciarSesion()
     {
-        error = ""; // Limpia errores previos
+        error = "";
 
         try
         {
-            var usuario = IniciarSesionUseCase.Ejecutar(datos.Correo, datos.Password);
+            var usuario = await IniciarSesionUseCase.ejecutar(datos.Correo, datos.Password);
+
             UsuarioSesion.IniciarSesion(usuario);
+
             Navegador.NavigateTo("/usuarios");
         }
         catch (Exception ex)
         {
             error = ex.Message;
-            StateHasChanged();
-
         }
     }
 

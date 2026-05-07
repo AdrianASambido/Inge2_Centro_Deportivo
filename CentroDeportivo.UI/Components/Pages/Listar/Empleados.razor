@@ -1,5 +1,7 @@
 ﻿@page "/Empleados"
 @rendermode InteractiveServer
+@inject CrearEmpleadoUseCase CrearEmpleadoUseCase
+@inject ListarEmpleadosUseCase ListarEmpleadosUseCase
 @inject IUsuarioRepositorio RepositorioUsuario
 @inject Sesion UsuarioSesion
 @inject NavigationManager Navegador
@@ -56,6 +58,19 @@ else
    
 }
 
+@if (quiereAgregar)
+{
+    <h3>Datos del empleado</h3>
+
+    <input placeholder="Nombre" @bind="emp.nombre" class="form-control" />
+    <input placeholder="apellido" @bind="emp.apellido" class="form-control" />
+    <input placeholder="DNI" @bind="emp.dni" class="form-control" />
+
+    <button class="btn btn-primary" @onclick="Aceptar">Aceptar</button>
+    <button class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
+
+}
+
 @if (!string.IsNullOrEmpty(mensaje))
 {
     <div class="alert alert-danger">@mensaje</div>
@@ -100,7 +115,7 @@ else
 
     protected override void OnInitialized()
     {
-        empleado = ListarEmpleadosUseCase.Ejecutar()!;
+        empleado = ListarEmpleadosUseCase.ejecutar()!;
     }
     void CerrarSesion()
     {
@@ -129,8 +144,8 @@ else
         mostrarDialog = false;
         try
         {
-            EliminarEmpleadoUseCase.Ejecutar(idAEliminar, UsuarioSesion.UsuarioActual!.Id);
-            empleado = ListarProfesoresUseCase.Ejecutar()!;
+            EliminarEmpleadoUseCase.ejecutar(idAEliminar, UsuarioSesion.UsuarioActual!.Id);
+            empleado = ListarProfesoresUseCase.ejecutar()!;
             MostrarMensaje("Empleado eliminado correctamente.");
         }
         catch (Exception ex)
@@ -144,8 +159,9 @@ else
     {
         try
         {
-            CrearEmpleadoUseCase.Ejecutar(emp.nombre, emp.apellido, emp.dni, UsuarioSesion.UsuarioActual!.Id);
-            empleado = ListarEmpleadosUseCase.Ejecutar()!;
+            var emple = new Usuario(emp.nombre, emp.apellido, "", emp.dni, "1234", "", false, Rol.Empleado);
+            CrearEmpleadoUseCase.ejecutar(emple);
+            empleado = ListarEmpleadosUseCase.ejecutar()!;
             MostrarMensaje("Emlpeado creado correctamente.");
             quiereAgregar = false;
         }
@@ -165,6 +181,6 @@ else
     {
         public string nombre { get; set; } = "";
         public string apellido { get; set; } = "";
-        public double dni { get; set; }
+        public int dni { get; set; }
     }
 }

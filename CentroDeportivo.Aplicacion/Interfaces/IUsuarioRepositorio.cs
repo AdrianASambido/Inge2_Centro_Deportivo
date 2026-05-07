@@ -16,7 +16,7 @@ namespace CentroDeportivo.Aplicacion.Interfaces
         Task AgregarAsync(Usuario usuario);
         Task ActualizarAsync(Usuario usuario);
         Task EliminarAsync(int id);
-        Task<bool> YaExiste(string dni);
+        Task<bool> YaExiste(int dni);
         Task<bool> YaExisteEmail(string email);
 
     }

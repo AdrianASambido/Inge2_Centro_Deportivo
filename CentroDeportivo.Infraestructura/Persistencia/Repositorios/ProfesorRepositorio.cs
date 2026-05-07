@@ -48,7 +48,7 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
             throw new NotImplementedException();
         }
 
-        public async Task<bool> YaExiste(string dni)
+        public async Task<bool> YaExiste(int dni)
         {
             return await contexto.Profesores.AnyAsync(p => p.Dni == dni);
         }

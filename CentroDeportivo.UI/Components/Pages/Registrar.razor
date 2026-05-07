@@ -56,17 +56,13 @@
         try
         {
             var usuario = new Usuario(usr.Nombre, usr.Apellido, usr.Domicilio, usr.DNI, usr.Contrasenia, usr.Correo, false, Rol.Cliente);
-            
-            registrarUsuario.Ejecutar(usuario);
-            Navegador.NavigateTo("/usuarios");
+
+            registrarUsuario.ejecutar(usuario);
+            Navegador.NavigateTo("/Login");
         }
-        catch (ValidacionExcepcion ex)
+        catch (Exception ex)
         {
             MostrarMensaje("Error de validación: " + ex.Message);
-        }
-        catch (DuplicadoExcepcion ex)
-        {
-            MostrarMensaje("Error de duplicado: " + ex.Message);
         }
     }
 

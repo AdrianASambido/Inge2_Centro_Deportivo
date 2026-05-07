@@ -16,6 +16,6 @@ namespace CentroDeportivo.Aplicacion.Interfaces
         Task AgregarAsync(Profesor profesor);
         Task ActualizarAsync(Profesor profesor);
         Task EliminarAsync(int id);
-        Task<bool> YaExiste(string dni);
+        Task<bool> YaExiste(int dni);
     }
 }
