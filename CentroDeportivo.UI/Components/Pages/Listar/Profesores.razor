@@ -2,6 +2,7 @@
 @rendermode InteractiveServer
 @inject CrearProfesorUseCase CrearProfesorUseCase
 @inject ListarProfesoresUseCase ListarProfesoresUseCase
+@inject EliminarProfesorUseCase EliminarProfesorUseCase
 @inject IProfesorRepositorio RepositorioProfesor
 @inject Sesion UsuarioSesion
 @inject NavigationManager Navegador
@@ -113,9 +114,9 @@ else
 
     List<Profesor> profesor = new List<Profesor>();
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        profesor = ListarProfesoresUseCase.ejecutar()!;
+        profesor = (await ListarProfesoresUseCase.ejecutar()).ToList();
     }
 
     void CerrarSesion()
@@ -140,14 +141,15 @@ else
         mostrarDialog = true;
     }
 
-    void Eliminar()
+    async Task Eliminar()
     {
         mostrarDialog = false;
         try
         {
-            EliminarProfesorUseCase.ejecutar(idAEliminar, UsuarioSesion.UsuarioActual!.Id);
-            profesor = ListarProfesoresUseCase.ejecutar()!;
+            EliminarProfesorUseCase.ejecutar(idAEliminar);
+            profesor = (await ListarProfesoresUseCase.ejecutar()).ToList();
             MostrarMensaje("Profesor eliminado correctamente.");
+            StateHasChanged();
         }
         catch (Exception ex)
         {
@@ -156,15 +158,16 @@ else
 
     }
 
-    void Aceptar()
+    async Task Aceptar()
     {
         try
         {
             var profe = new Profesor(pro.nombre, pro.apellido, pro.dni);
             CrearProfesorUseCase.ejecutar(profe);
-            profesor = ListarProfesoresUseCase.ejecutar()!;
+            profesor = (await ListarProfesoresUseCase.ejecutar()).ToList();
             MostrarMensaje("Profesor creado correctamente.");
             quiereAgregar = false;
+            StateHasChanged();
         }
         catch (Exception ex)
         {
@@ -182,6 +185,6 @@ else
     {
         public string nombre { get; set; } = "";
         public string apellido { get; set; } = "";
-        public int dni { get; set; }
+        public string dni { get; set; }
     }
 }

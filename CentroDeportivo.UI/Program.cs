@@ -53,7 +53,15 @@ builder.Services.AddScoped<CrearProfesorUseCase>();
 builder.Services.AddScoped<CrearActividadUseCase>();
 builder.Services.AddScoped<EliminarActividadUseCase>();
 builder.Services.AddScoped<EliminarCanchaUseCase>();
-builder.Services.AddScoped<Sesion>();
+builder.Services.AddScoped<ListarProfesoresUseCase>();
+builder.Services.AddScoped<EliminarProfesorUseCase>();
+builder.Services.AddScoped<ListarCanchasUseCase>();
+builder.Services.AddScoped<ListarActividadesUseCase>();
+builder.Services.AddScoped<CambiarContraseniaUseCase>();
+builder.Services.AddScoped<EliminarEmpleadoUseCase>();
+builder.Services.AddScoped<ListarEmpleadosUseCase>();
+builder.Services.AddScoped<CrearReservaUseCase>();
+builder.Services.AddScoped<ListarReservasUseCase>();
 
 // Add services to the container.
 builder.Services.AddRazorComponents()

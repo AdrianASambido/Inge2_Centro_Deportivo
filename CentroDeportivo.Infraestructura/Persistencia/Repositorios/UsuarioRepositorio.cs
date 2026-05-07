@@ -72,7 +72,7 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
                  .ToListAsync();
         }
 
-        public async Task<bool> YaExiste(int dni)
+        public async Task<bool> YaExiste(string dni)
         {
             return await context.Usuarios.AnyAsync(u => u.Dni == dni);
         }

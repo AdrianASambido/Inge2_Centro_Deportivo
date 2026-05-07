@@ -10,6 +10,7 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.UsuarioUseCase
 {
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     public class CambiarContraseniaUseCase
 =======
     public class CambiarContraseniaUseCase(IUsuarioRepositorio repo, UsuarioValidadorBase validador, IHashServicio repoHash)
@@ -17,6 +18,9 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.UsuarioUseCase
 =======
     public class CambiarContraseniaUseCase(IUsuarioRepositorio repo, UsuarioValidadorBase validador, IHashServicio repoHash)
 >>>>>>> a943cce8b7fc8333aec9f9ec2929422bb86ba659
+=======
+    public class CambiarContraseniaUseCase(IUsuarioRepositorio repo, IHashServicio repoHash)
+>>>>>>> 9d1fe58a89e9a264d85f4728f2b12e29814c2019
     {
         public async Task ejecutar(string contraVieja, string contraNueva, int idUsuario) 
         {

@@ -1,31 +1,8 @@
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
 @page "/Login"
-@inject IniciarSesionUseCase LoginUseCase
-@inject Sesion UsuarioSesion
-@inject NavigationManager Navegador
-=======
-﻿@page "/Login"
 @inject IniciarSesionUseCase IniciarSesionUseCase
 @inject Sesion UsuarioSesion
 @inject NavigationManager Navegador
-@inject IUsuarioRepositorio Repo
->>>>>>> 76738d239c256c39b77153a84ae48dd5834e798a
-
-=======
-=======
->>>>>>> a943cce8b7fc8333aec9f9ec2929422bb86ba659
-﻿@*@page "/Login"
-@inject LoginUseCase LoginUseCase
-@inject Sesion UsuarioSesion
-@inject NavigationManager Navegador
-@inject IRepositorioUsuario Repo
- *@
-<<<<<<< HEAD
->>>>>>> d2f48e2d146661fe7a41a53c37d5e54b8d046751
-=======
->>>>>>> a943cce8b7fc8333aec9f9ec2929422bb86ba659
+@inject IUsuarioRepositorio UsuarioRepositorio
 @rendermode InteractiveServer
 
 <h3>Iniciar Sesión</h3>
@@ -41,6 +18,9 @@
 <div class="mb-3">
     <button class="btn btn-primary" @onclick="IniciarSesion">Confirmar</button>
     <button class="btn btn-danger" @onclick="Registrarse">Registrarme</button>
+    <NavLink href="/olvide-contrasenia" class="text-primary">
+        ¿Olvidaste tu contraseña?
+    </NavLink>
 </div>
 
 @if (!string.IsNullOrEmpty(error))
@@ -52,27 +32,14 @@
     public DatosLogin datos = new();
     public string error = "";
 
-    protected override void OnInitialized()
-    {
-        
-    }
-
     public async Task IniciarSesion()
     {
         error = "";
 
         try
         {
-<<<<<<< HEAD
-<<<<<<< HEAD
-            var usuario = await LoginUseCase.ejecutar(datos.Correo, datos.Password);
-=======
-            var usuario = IniciarSesionUseCase.Ejecutar(datos.Correo, datos.Password);
->>>>>>> 76738d239c256c39b77153a84ae48dd5834e798a
-=======
             var usuario = await IniciarSesionUseCase.ejecutar(datos.Correo, datos.Password);
 
->>>>>>> a943cce8b7fc8333aec9f9ec2929422bb86ba659
             UsuarioSesion.IniciarSesion(usuario);
 
             Navegador.NavigateTo("/usuarios");
