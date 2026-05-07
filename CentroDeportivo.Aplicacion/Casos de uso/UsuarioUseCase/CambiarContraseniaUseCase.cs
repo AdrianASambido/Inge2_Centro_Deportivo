@@ -9,10 +9,14 @@ using System.Threading.Tasks;
 namespace CentroDeportivo.Aplicacion.Casos_de_uso.UsuarioUseCase
 {
 <<<<<<< HEAD
+<<<<<<< HEAD
     public class CambiarContraseniaUseCase
 =======
     public class CambiarContraseniaUseCase(IUsuarioRepositorio repo, UsuarioValidadorBase validador, IHashServicio repoHash)
 >>>>>>> d2f48e2d146661fe7a41a53c37d5e54b8d046751
+=======
+    public class CambiarContraseniaUseCase(IUsuarioRepositorio repo, UsuarioValidadorBase validador, IHashServicio repoHash)
+>>>>>>> a943cce8b7fc8333aec9f9ec2929422bb86ba659
     {
         public async Task ejecutar(string contraVieja, string contraNueva, int idUsuario) 
         {

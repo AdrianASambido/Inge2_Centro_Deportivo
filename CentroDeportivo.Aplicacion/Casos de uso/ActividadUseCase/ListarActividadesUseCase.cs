@@ -9,10 +9,14 @@ using System.Threading.Tasks;
 namespace CentroDeportivo.Aplicacion.Casos_de_uso.ActividadUseCase
 {
 <<<<<<< HEAD
+<<<<<<< HEAD
     public class ListarActividadesUseCase
 =======
     public class ListarActividadesUseCase (IActividadRepositorio repo)
 >>>>>>> d2f48e2d146661fe7a41a53c37d5e54b8d046751
+=======
+    public class ListarActividadesUseCase (IActividadRepositorio repo)
+>>>>>>> a943cce8b7fc8333aec9f9ec2929422bb86ba659
     {
         public async Task<IEnumerable<Actividad>> ejecutar() { 
             return await repo.ObtenerTodasAsync();

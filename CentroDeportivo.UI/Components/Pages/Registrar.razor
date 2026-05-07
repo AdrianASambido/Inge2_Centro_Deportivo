@@ -67,6 +67,7 @@
             await agregarUsuario.ejecutar(usuario);
 =======
             var usuario = new Usuario(usr.Nombre, usr.Apellido, usr.Domicilio, usr.DNI, usr.Contrasenia, usr.Correo, false, Rol.Cliente);
+<<<<<<< HEAD
             
             registrarUsuario.Ejecutar(usuario);
 >>>>>>> 76738d239c256c39b77153a84ae48dd5834e798a
@@ -75,6 +76,15 @@
         catch (Exception ex)
         {
             MostrarMensaje("Error al registrar usuario: " + ex.Message);
+=======
+
+            registrarUsuario.ejecutar(usuario);
+            Navegador.NavigateTo("/Login");
+        }
+        catch (Exception ex)
+        {
+            MostrarMensaje("Error de validación: " + ex.Message);
+>>>>>>> a943cce8b7fc8333aec9f9ec2929422bb86ba659
         }
     }
 
