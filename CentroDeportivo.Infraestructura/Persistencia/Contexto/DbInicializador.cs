@@ -27,7 +27,7 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Contexto
                 Nombre = "Carlos",
                 Apellido = "Tevez",
                 Domicilio = "Calle 123",
-                Dni = 112345534,
+                Dni = "112345534",
                 Email = "admin@centrodeportivo.com",
 
                 

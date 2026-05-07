@@ -2,6 +2,7 @@
 @rendermode InteractiveServer
 @inject ListarCanchasUseCase ListarCanchasUseCase
 @inject CrearCanchaUseCase CrearCanchaUseCase
+@inject EliminarCanchaUseCase EliminarCanchaUseCase
 @inject ICanchaRepositorio RepositorioCancha
 @inject Sesion UsuarioSesion
 @inject NavigationManager Navegador
@@ -114,9 +115,9 @@ else
 
     List<Cancha> cancha = new List<Cancha>();
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        cancha = ListarCanchasUseCase.ejecutar()!;
+        cancha = (await ListarCanchasUseCase.ejecutar()).ToList() ;
     }
     void CerrarSesion()
     {
@@ -135,14 +136,15 @@ else
         mostrarDialog = true;
     }
 
-    void Eliminar()
+    async Task Eliminar()
     {
         mostrarDialog = false;
         try
         {
-            EliminarCanchaUseCase.ejecutar(idAEliminar, UsuarioSesion.UsuarioActual!.Id);
-            cancha = ListarCanchasUseCase.ejecutar()!;
+            EliminarCanchaUseCase.ejecutar(idAEliminar);
+            cancha = (await ListarCanchasUseCase.ejecutar()).ToList();
             MostrarMensaje("Cancha eliminada correctamente.");
+            StateHasChanged();
         }
         catch (Exception ex)
         {
@@ -156,14 +158,14 @@ else
         quiereAgregar = true;
     }
 
-    void Aceptar()
+    async Task Aceptar()
     {
         try
         {
             mensaje = "";
-            var cancha = new Cancha(can.numero, can.capacidad);
-            CrearCanchaUseCase.ejecutar(cancha);
-            cancha = ListarCanchasUseCase.ejecutar();
+            var c = new Cancha(can.numero, can.capacidad);
+            CrearCanchaUseCase.ejecutar(c);
+            cancha = (await ListarCanchasUseCase.ejecutar()).ToList();
             quiereAgregar = false;
             StateHasChanged();
         }

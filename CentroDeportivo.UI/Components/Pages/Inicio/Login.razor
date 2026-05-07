@@ -18,6 +18,9 @@
 <div class="mb-3">
     <button class="btn btn-primary" @onclick="IniciarSesion">Confirmar</button>
     <button class="btn btn-danger" @onclick="Registrarse">Registrarme</button>
+    <NavLink href="/olvide-contrasenia" class="text-primary">
+        ¿Olvidaste tu contraseña?
+    </NavLink>
 </div>
 
 @if (!string.IsNullOrEmpty(error))
@@ -28,11 +31,6 @@
 @code {
     public DatosLogin datos = new();
     public string error = "";
-
-    protected override void OnInitialized()
-    {
-        
-    }
 
     public async Task IniciarSesion()
     {
