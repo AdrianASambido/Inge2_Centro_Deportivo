@@ -7,10 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Remove="Components\Pages\EditarReserva.razor" />
-    <Content Remove="Components\Pages\Login.razor" />
-    <Content Remove="Components\Pages\Registrar.razor" />
+    <Content Remove="Components\Pages\Editar\EditarReserva.razor" />
   </ItemGroup>
+
 
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.26">
