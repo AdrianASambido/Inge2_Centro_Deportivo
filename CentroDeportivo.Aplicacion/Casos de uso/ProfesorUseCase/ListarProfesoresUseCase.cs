@@ -1,4 +1,5 @@
 ﻿using CentroDeportivo.Aplicacion.Interfaces;
+using CentroDeportivo.Aplicacion.Entidades;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,8 +10,8 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ProfesorUseCase
 {
     public class ListarProfesoresUseCase(IProfesorRepositorio repo)
     {
-        public async Task ejecutar() { 
-            
+        public async Task<IEnumerable<Profesor>> ejecutar() {
+            return await repo.ObtenerTodosAsync();
         }
     }
 }

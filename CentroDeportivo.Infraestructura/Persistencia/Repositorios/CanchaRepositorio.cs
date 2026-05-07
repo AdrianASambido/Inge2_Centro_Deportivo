@@ -15,7 +15,8 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
 
         public async Task ActualizarAsync(Cancha cancha)
         {
-            throw new NotImplementedException();
+            contexto.Canchas.Update(cancha);
+            await contexto.SaveChangesAsync();
         }
 
         public async Task AgregarAsync(Cancha cancha)
@@ -24,39 +25,61 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
             await contexto.SaveChangesAsync();
         }
 
-        public async Task<int> capacidad(int idCancha)
-        {
-            throw new NotImplementedException();
-        }
-
         public async Task EliminarAsync(int id)
         {
-            throw new NotImplementedException();
+            var cancha = await this.ObtenerPorIdAsync(id);
+            if (cancha != null) { 
+                contexto.Canchas.Remove(cancha);
+                await contexto.SaveChangesAsync();
+            }
         }
 
         public async Task<IEnumerable<Cancha>> ObtenerDisponiblesAsync(DateOnly fecha, TimeOnly horarioInicio)
         {
-            throw new NotImplementedException();
+            var canchasOcupadas = await contexto.Turnos
+                .Where(t => t.Fecha == fecha && t.HoraInicio == horarioInicio && (t.Estado == EstadoTurno.Disponible || t.Estado == EstadoTurno.Lleno))
+                .Select(t => t.Id_Cancha)
+                .ToListAsync();
+
+
+            return await contexto.Canchas
+                .Where(c => !canchasOcupadas.Contains(c.Id))
+                .AsNoTracking()
+                .ToListAsync();
         }
 
         public async Task<Cancha?> ObtenerPorIdAsync(int id)
         {
-            throw new NotImplementedException();
+            return await contexto.Canchas.FirstOrDefaultAsync(c => c.Id == id);
         }
 
         public async Task<Cancha?> ObtenerPorNumeroAsync(int numeroCancha)
         {
-            throw new NotImplementedException();
+            return await contexto.Canchas.FirstOrDefaultAsync(c => c.Numero == numeroCancha);
         }
 
         public async Task<IEnumerable<Cancha>> ObtenerTodasAsync()
         {
-            throw new NotImplementedException();
+            return await contexto.Canchas.AsNoTracking().ToListAsync();
         }
 
         public async Task<bool> YaExiste(int numero)
         {
             return await contexto.Canchas.AnyAsync(c => c.Numero == numero);
+        }
+
+        public async Task<bool> YaExisteNumeroParaEditar(int numero, int idActual)
+        {
+            return await contexto.Canchas.AnyAsync(c => c.Numero == numero && c.Id != idActual);
+        }
+
+        //si tiene turnos asignados no se puede eliminar ni editar la cancha
+        public async Task<bool> TieneTurnosAsignadosAsync(int canchaId)
+        {
+            return await contexto.Turnos.AnyAsync(t =>
+                t.Id_Cancha == canchaId &&
+                (t.Estado == EstadoTurno.Disponible || t.Estado == EstadoTurno.Lleno)
+            );
         }
     }
 }

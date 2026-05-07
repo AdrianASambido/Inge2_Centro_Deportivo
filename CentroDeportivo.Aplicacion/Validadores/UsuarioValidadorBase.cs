@@ -1,15 +1,17 @@
-﻿using CentroDeportivo.Aplicacion.Interfaces;
+﻿using CentroDeportivo.Aplicacion.Entidades;
+using CentroDeportivo.Aplicacion.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using CentroDeportivo.Aplicacion.Entidades;
 
 namespace CentroDeportivo.Aplicacion.Validadores
 {
     public abstract class UsuarioValidadorBase(IUsuarioRepositorio repo)
     {
+        protected readonly IUsuarioRepositorio _repo = repo;
         public async Task<(bool esValido, string mensaje)> ValidarDatosComunes(Usuario u) {
             string mensaje = "";
 
@@ -43,6 +45,18 @@ namespace CentroDeportivo.Aplicacion.Validadores
             }
 
             return (string.IsNullOrEmpty(mensaje), mensaje);
+        }
+
+        // Método estático para que el Caso de Uso lo use directamente
+        public static (bool esValido, string mensaje) ValidarFormatoPassword(string password)
+        {
+            if (string.IsNullOrWhiteSpace(password)) return (false, "La contraseña es obligatoria. \n");
+
+            if (!Regex.IsMatch(password, @"^(?=.*[A-Z])(?=.*\d).{8,}$"))
+            {
+                return (false, "La contraseña debe tener al menos 8 caracteres, una mayúscula y un número. \n");
+            }
+            return (true, "");
         }
 
         protected abstract (bool esValidoPass, string mensajePass) ValidarPassword(Usuario u);
