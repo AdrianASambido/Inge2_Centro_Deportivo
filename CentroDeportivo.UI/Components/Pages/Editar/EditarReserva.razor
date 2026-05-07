@@ -1,6 +1,6 @@
 ﻿@page "/editar-reserva/{Id:int}"
 @rendermode InteractiveServer
-@inject IRepositorioReserva RepositorioReserva
+@inject IReservaRepositorio RepositorioReserva
 @inject EditarReservaUseCase EditarReservaCase
 @inject Sesion SesionUsuario
 @inject NavigationManager Navegador
@@ -30,21 +30,22 @@ else
     <div class="alert alert-danger">@mensaje</div>
 }
 
+
 @code {
     
     [Parameter]
     public int Id { get; set; }
-    public int idReservaEditada;
+    public double precioPagado;
     public int personaId;
     public int eventoId;
-    public DateTime fechaAlta;
-    public EstadoAsistencia estado;
+    public DateTime fechaReserva;
+    public EstadoReserva estado;
     public Reserva? reserva;
     
     public string mensaje = "";
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        reserva = RepositorioReserva.RetornarReserva(Id);
+        reserva = await RepositorioReserva.ObtenerPorIdAsync(Id);
         if (reserva != null)
         {
             idReservaEditada = reserva.Id;

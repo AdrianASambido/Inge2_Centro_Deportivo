@@ -1,9 +1,9 @@
-﻿@*@page "/Login"
-@inject LoginUseCase LoginUseCase
+﻿@page "/Login"
+@inject IniciarSesionUseCase IniciarSesionUseCase
 @inject Sesion UsuarioSesion
 @inject NavigationManager Navegador
-@inject IRepositorioUsuario Repo
- *@
+@inject IUsuarioRepositorio Repo
+
 @rendermode InteractiveServer
 
 <h3>Iniciar Sesión</h3>
@@ -41,7 +41,7 @@
 
         try
         {
-            var usuario = LoginUseCase.Ejecutar(datos.Correo, datos.Password);
+            var usuario = IniciarSesionUseCase.Ejecutar(datos.Correo, datos.Password);
             UsuarioSesion.IniciarSesion(usuario);
             Navegador.NavigateTo("/usuarios");
         }

@@ -1,0 +1,87 @@
+﻿@page "/editar-profesor/{Id:int}"
+@rendermode InteractiveServer
+@inject IProfesorRepositorio RepositorioProfesor
+@inject EditarProfesorUseCase EditarProfesorCase
+@inject Sesion SesionUsuario
+@inject NavigationManager Navegador
+
+<PageTitle>Editar Profesor</PageTitle>
+
+<h3>Datos del Profesor</h3>
+
+@if (profesor == null)
+{
+
+}
+else
+{
+    <input placeholder="Nombre" @bind="nombre" class="form-control">
+    <input placeholder="Apellido" @bind="apellido" class="form-control">
+    <input placeholder="DNI" @bind="dni" class="form-control">
+}
+
+<button class="btn btn-success" @onclick="GuardarDatos">Guardar datos</button>
+<button class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
+
+@if (!string.IsNullOrEmpty(mensaje))
+{
+    <div class="alert alert-danger">@mensaje</div>
+}
+
+
+@code {
+
+    [Parameter]
+    public int Id { get; set; }
+    public int idProfesorAEditar;
+    public string nombre;
+    public string apellido;
+    public int dni;
+
+    public Profesor? profesor;
+
+    public string mensaje = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        profesor = await RepositorioProfesor.ObtenerPorIdAsync(Id);
+        if (profesor != null)
+        {
+            idProfesorAEditar = profesor.Id;
+            nombre = profesor.Nombre;
+            apellido = profesor.Apellido;
+            dni = profesor.Dni;
+        }
+    }
+
+    void MostrarMensaje(string msj)
+    {
+        mensaje = msj;
+    }
+    void GuardarDatos()
+    {
+        if (profesor == null)
+        {
+            return;
+        }
+
+        try
+        {
+            mensaje = "";
+            var profesorNuevo = new Profesor(nombre, apellido, dni);
+            EditarProfesorCase.Ejecutar(profesorNuevo, idProfesorAEditar, SesionUsuario.UsuarioActual!.Id);
+            Navegador.NavigateTo("/profesores");
+        }
+        catch (Exception ex)
+        {
+            mensaje = ex.Message;
+            MostrarMensaje(mensaje);
+        }
+
+    }
+    void Cancelar()
+    {
+        Navegador.NavigateTo("/profesores");
+        mensaje = "";
+    }
+}

@@ -1,0 +1,185 @@
+﻿@page "/canchas"
+@rendermode InteractiveServer
+@inject ICanchaRepositorio RepositorioCancha
+@inject Sesion UsuarioSesion
+@inject NavigationManager Navegador
+
+<PageTitle>Canchas</PageTitle>
+
+@if (!UsuarioSesion.EstaAutenticado())
+{
+    <p>No tenés acceso. <NavLink href="/Login">Iniciar sesión</NavLink></p>
+}
+else
+{
+    <h2>Canchas</h2>
+
+    <p>Bienvenido, @UsuarioSesion.UsuarioActual!.Nombre</p>
+    <button class="btn btn-danger" @onclick="CerrarSesion">Cerrar sesión</button>
+    <button class="btn btn-success" @onclick="CrearCancha">Crear cancha</button>
+    <input type="text" class="form-control mb-3" placeholder="Buscar por número de cancha" @bind="numeroBusquedaTexto" @bind:event="oninput"/>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Numero</th>
+                <th>Capacidad</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var c in canchasFiltradas)
+            {
+                <tr>
+                    <td>@c.Id</td>
+                    <td>@c.Numero</td>
+                    <td>@c.Capacidad</td>
+                    <td>
+                        <button class="btn btn-primary"
+                                @onclick="() => Editar(c.Id)">
+                            Editar
+                        </button>
+
+                        <button class="btn btn-danger"
+                                @onclick="() => ConfirmarEliminacion(c.Id)">
+                            Eliminar
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+
+    </table>
+
+   
+}
+
+
+@if (quiereAgregar)
+{
+    <h3>Datos de la cancha</h3>
+
+    <input placeholder="Numero de cancha" @bind="can.numero" class="form-control" />
+    <input placeholder="Capacidad" @bind="can.capacidad" class="form-control" />
+
+    <button class="btn btn-primary" @onclick="Aceptar">Aceptar</button>
+    <button class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
+
+}
+
+@if (!string.IsNullOrEmpty(mensaje))
+{
+    <div class="alert alert-danger">@mensaje</div>
+}
+
+@if (mostrarDialog)
+{
+    <div class="modal show d-block" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmar eliminación</h5>
+                </div>
+                <div class="modal-body">
+                    <p>¿Estás seguro de que querés eliminar esta cancha?</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" @onclick="() => mostrarDialog = false">Cancelar</button>
+                    <button class="btn btn-danger" @onclick="Eliminar">Confirmar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+
+    public Datos can = new Datos();
+    string numeroBusquedaTexto = "";
+
+    IEnumerable<Cancha> canchasFiltradas => string.IsNullOrWhiteSpace(numeroBusquedaTexto) ? cancha : cancha.Where(c => c.Numero.ToString().Contains(numeroBusquedaTexto));
+
+    public bool quiereAgregar;
+    string mensaje = "";
+    bool mostrarDialog = false;
+    int idAEliminar;
+    void MostrarMensaje(string msj)
+    {
+        mensaje = msj;
+    }
+
+
+    List<Cancha> cancha = new List<Cancha>();
+
+    protected override void OnInitialized()
+    {
+        cancha = ListarCanchasUseCase.Ejecutar()!;
+    }
+    void CerrarSesion()
+    {
+        UsuarioSesion.CerrarSesion();
+        Navegador.NavigateTo("/Login", true);
+    }
+
+    public void Editar(int Id)
+    {
+        Navegador.NavigateTo($"/editar-cancha/{Id}");
+    }
+
+    void ConfirmarEliminacion(int Id)
+    {
+        idAEliminar = Id;
+        mostrarDialog = true;
+    }
+
+    void Eliminar()
+    {
+        mostrarDialog = false;
+        try
+        {
+            EliminarCanchaUseCase.Ejecutar(idAEliminar, UsuarioSesion.UsuarioActual!.Id);
+            cancha = ListarCanchasUseCase.Ejecutar()!;
+            MostrarMensaje("Cancha eliminada correctamente.");
+        }
+        catch (Exception ex)
+        {
+            MostrarMensaje(ex.Message);
+        }
+
+    }
+
+    void CrearCancha()
+    {
+        quiereAgregar = true;
+    }
+
+    void Aceptar()
+    {
+        try
+        {
+            mensaje = "";
+            var cancha = new Cancha(can.numero, can.capacidad);
+            CrearCanchaUseCase.Ejecutar(cancha, UsuarioSesion.UsuarioActual!.Id);
+            cancha = ListarCanchasUseCase.Ejecutar();
+            quiereAgregar = false;
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            mensaje = ex.Message;
+        }
+    }
+
+    void Cancelar()
+    {
+        quiereAgregar = false;
+        mensaje = "";
+    }
+
+public class Datos
+    {
+        public int numero { get; set; }
+        public int capacidad { get; set; }
+    }
+}
