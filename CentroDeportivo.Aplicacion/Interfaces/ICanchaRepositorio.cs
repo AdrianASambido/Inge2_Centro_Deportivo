@@ -17,6 +17,7 @@ namespace CentroDeportivo.Aplicacion.Interfaces
         Task ActualizarAsync(Cancha cancha);
         Task EliminarAsync(int id);
         Task<bool> YaExiste(int numero);
-        Task<int> capacidad(int idCancha);
+        Task<bool> YaExisteNumeroParaEditar(int numeroCancha, int idCancha);
+        Task<bool> TieneTurnosAsignadosAsync(int idCancha);
     }
 }

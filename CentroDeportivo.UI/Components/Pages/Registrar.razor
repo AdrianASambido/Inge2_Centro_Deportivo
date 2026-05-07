@@ -1,12 +1,18 @@
-﻿@page "/registrar"
+@page "/registrar"
 @inject Sesion UsuarioSesion
 @inject NavigationManager Navegador
-@inject ServicioHash Hash
+<<<<<<< HEAD
 
 @rendermode InteractiveServer
-@inject AgregarUsuarioUseCase agregarUsuario
+@inject RegistrarUsuarioUseCase agregarUsuario
+=======
+@inject IHashServicio Hash
 
-<PageTitle> Registrarse </PageTitle>
+@rendermode InteractiveServer
+@inject RegistrarUsuarioUseCase registrarUsuario
+>>>>>>> 76738d239c256c39b77153a84ae48dd5834e798a
+
+<PageTitle> Registro </PageTitle>
 
 <h3>Registro de Usuario</h3>
 
@@ -20,6 +26,9 @@
 
 <input placeholder="Nombre" @bind="usr.Nombre" class="form-control">
 <input placeholder="Apellido" @bind="usr.Apellido" class="form-control">
+<input placeholder="DNI" @bind="usr.DNI" class="form-control">
+<input placeholder="Edad" @bind="usr.Edad" class="form-control">
+<input placeholder="Domicilio" @bind="usr.Domicilio" class="form-control">
 <input placeholder="Correo" @bind="usr.Correo" class="form-control">
 <input placeholder="Contraseña" @bind="usr.Contrasenia" class="form-control" type="password">
 <input placeholder="Repetir Contraseña" @bind="usr.Contrasenia2" class="form-control" type="password">
@@ -41,7 +50,7 @@
         mensaje = msj;
     }
 
-    void Enviar()
+    async Task Enviar()
     {
 
         if (usr.Contrasenia != usr.Contrasenia2)
@@ -52,30 +61,44 @@
 
         try
         {
-            var usuario = new Usuario(usr.Nombre, usr.Apellido, usr.Contrasenia, usr.Correo);
+<<<<<<< HEAD
+            var usuario = new Usuario(usr.Nombre, usr.Apellido, string.Empty, string.Empty, usr.Contrasenia, usr.Correo, false, Rol.Cliente);
             
-            agregarUsuario.Ejecutar(usuario);
+            await agregarUsuario.ejecutar(usuario);
+=======
+            var usuario = new Usuario(usr.Nombre, usr.Apellido, usr.Domicilio, usr.DNI, usr.Contrasenia, usr.Correo, false, Rol.Cliente);
+<<<<<<< HEAD
+            
+            registrarUsuario.Ejecutar(usuario);
+>>>>>>> 76738d239c256c39b77153a84ae48dd5834e798a
             Navegador.NavigateTo("/usuarios");
         }
-        catch (ValidacionExcepcion ex)
+        catch (Exception ex)
+        {
+            MostrarMensaje("Error al registrar usuario: " + ex.Message);
+=======
+
+            registrarUsuario.ejecutar(usuario);
+            Navegador.NavigateTo("/Login");
+        }
+        catch (Exception ex)
         {
             MostrarMensaje("Error de validación: " + ex.Message);
-        }
-        catch (DuplicadoExcepcion ex)
-        {
-            MostrarMensaje("Error de duplicado: " + ex.Message);
+>>>>>>> a943cce8b7fc8333aec9f9ec2929422bb86ba659
         }
     }
 
     void Cancelar()
     {
-        <!--volver al home-->
         Navegador.NavigateTo("/");
     }
     public class Datos
     {
         public string Nombre { get; set; } = "";
         public string Apellido { get; set; } = "";
+        public int DNI { get; set; }
+        public int Edad { get; set; } 
+        public string Domicilio { get; set; } = "";
         public string Correo { get; set; } = "";
         public string Contrasenia { get; set; } = "";
         public string Contrasenia2 { get; set; } = "";

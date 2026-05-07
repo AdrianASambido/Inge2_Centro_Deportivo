@@ -1,4 +1,4 @@
-﻿@using System.Net.Http
+@using System.Net.Http
 @using System.Net.Http.Json
 @using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.AspNetCore.Components.Routing
@@ -8,3 +8,14 @@
 @using Microsoft.JSInterop
 @using CentroDeportivo.UI
 @using CentroDeportivo.UI.Components
+@using CentroDeportivo.Aplicacion.Interfaces;
+@using CentroDeportivo.Aplicacion.Validadores;
+@using CentroDeportivo.Aplicacion.Casos_de_uso.UsuarioUseCase;
+@using CentroDeportivo.Aplicacion.Casos_de_uso.CanchaUseCase;
+@using CentroDeportivo.Aplicacion.Casos_de_uso.ProfesorUseCase;
+@using CentroDeportivo.Aplicacion.Casos_de_uso.ActividadUseCase;
+@using CentroDeportivo.Aplicacion.Casos_de_uso.DevolucionUseCase;
+@using CentroDeportivo.Aplicacion.Casos_de_uso.TurnoUseCase;
+@using CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase;
+@using CentroDeportivo.Infraestructura.Servicios;
+@using CentroDeportivo.Infraestructura.Persistencia.Repositorios;

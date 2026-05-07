@@ -12,9 +12,10 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
 {
     public class UsuarioRepositorio (CentroDeportivoContext context) : IUsuarioRepositorio 
     {
-        public Task ActualizarAsync(Usuario usuario)
+        public async Task ActualizarAsync(Usuario usuario)
         {
-            throw new NotImplementedException();
+            context.Usuarios.Update(usuario);
+            await context.SaveChangesAsync();
         }
 
         public async Task AgregarAsync(Usuario usuario)
@@ -25,12 +26,33 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
 
         public async Task EliminarAsync(int id)
         {
-            throw new NotImplementedException();
+            var usuario = await context.Usuarios.FindAsync(id);
+            if (usuario != null)
+            {
+                context.Usuarios.Remove(usuario);
+                await context.SaveChangesAsync();
+            }
+        }
+
+        public async Task<IEnumerable<Usuario>> ObtenerClientesAsync()
+        {
+            return await context.Usuarios
+                         .AsNoTracking()
+                         .Where(u => u.Rol == Rol.Cliente)
+                         .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Usuario>> ObtenerEmpleadosAsync()
+        {
+            return await context.Usuarios
+                         .AsNoTracking()
+                         .Where(u => u.Rol == Rol.Empleado) 
+                         .ToListAsync();
         }
 
         public async Task<Usuario?> ObtenerPorDniAsync(string dni)
         {
-            throw new NotImplementedException();
+            return await context.Usuarios.FirstOrDefaultAsync(u =>  u.Dni == dni);
         }
 
         public async Task<Usuario?> ObtenerPorEmail(string email)
@@ -40,15 +62,17 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
 
         public async Task<Usuario?> ObtenerPorIdAsync(int id)
         {
-            throw new NotImplementedException();
+            return await context.Usuarios.FirstOrDefaultAsync(u =>u.Id == id);
         }
 
         public async Task<IEnumerable<Usuario>> ObtenerTodosAsync()
         {
-            throw new NotImplementedException();
+            return await context.Usuarios
+                 .AsNoTracking()
+                 .ToListAsync();
         }
 
-        public async Task<bool> YaExiste(string dni)
+        public async Task<bool> YaExiste(int dni)
         {
             return await context.Usuarios.AnyAsync(u => u.Dni == dni);
         }
@@ -56,6 +80,16 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
         public async Task<bool> YaExisteEmail(string email)
         {
             return await context.Usuarios.AnyAsync(u => u.Email == email);
+        }
+
+        public async Task<bool> YaExisteDniParaEditar(string dni, int idActual)
+        {
+            return await context.Usuarios.AnyAsync(u => u.Dni == dni && u.Id != idActual);
+        }
+
+        public async Task<bool> YaExisteEmailParaEditar(string email, int idActual)
+        {
+            return await context.Usuarios.AnyAsync(u => u.Email == email && u.Id != idActual);
         }
     }
 }

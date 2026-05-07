@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace CentroDeportivo.Aplicacion.Casos_de_uso.TurnoUseCase
 {
+
     public class CrearTurnoUseCase
     {
     }

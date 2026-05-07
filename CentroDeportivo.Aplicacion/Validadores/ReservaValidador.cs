@@ -6,7 +6,9 @@ using System.Threading.Tasks;
 
 namespace CentroDeportivo.Aplicacion.Validadores
 {
+
     public class ReservaValidador
+
     {
     }
 }

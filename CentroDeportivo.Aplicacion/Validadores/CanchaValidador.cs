@@ -34,5 +34,15 @@ namespace CentroDeportivo.Aplicacion.Validadores
 
             return (string.IsNullOrEmpty(mensaje),mensaje);
         }
+        public async Task<(bool esValido, string mensaje)> ValidarEliminacion(int id) {
+            var cancha = await repo.ObtenerPorIdAsync(id);
+            if (cancha == null) {
+                return (false, "Cancha inexistente");
+            }
+            if (await repo.TieneTurnosAsignadosAsync(id)){
+                return (false, "Error al eliminar, la cancha tiene turnos asignados");
+            }
+            return (true, "");
+        }
     }
 }

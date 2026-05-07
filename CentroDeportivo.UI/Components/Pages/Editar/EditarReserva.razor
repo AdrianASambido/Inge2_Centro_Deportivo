@@ -1,0 +1,80 @@
+@page "/editar-reserva/{Id:int}"
+@rendermode InteractiveServer
+@inject IReservaRepositorio RepositorioReserva
+<<<<<<< HEAD:CentroDeportivo.UI/Components/Pages/EditarReserva.razor
+=======
+@inject EditarReservaUseCase EditarReservaCase
+@inject Sesion SesionUsuario
+>>>>>>> 76738d239c256c39b77153a84ae48dd5834e798a:CentroDeportivo.UI/Components/Pages/Editar/EditarReserva.razor
+@inject NavigationManager Navegador
+
+<PageTitle>Editar Reserva</PageTitle>
+
+<h3>Datos de la Reserva</h3>
+
+@if (reserva == null)
+{
+    <div class="alert alert-warning">No se encontro la reserva solicitada.</div>
+}
+else
+{
+    <div class="card p-3 mb-3">
+        <p><strong>Id:</strong> @reserva.Id</p>
+        <p><strong>Usuario:</strong> @reserva.Id_Usuario</p>
+        <p><strong>Turno:</strong> @reserva.Id_Turno</p>
+        <p><strong>Estado:</strong> @reserva.Estado</p>
+        <p><strong>Fecha de reserva:</strong> @reserva.FechaReserva</p>
+    </div>
+}
+
+<button class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
+
+@if (!string.IsNullOrEmpty(mensaje))
+{
+    <div class="alert alert-danger">@mensaje</div>
+}
+
+
+@code {
+
+    [Parameter]
+    public int Id { get; set; }
+<<<<<<< HEAD:CentroDeportivo.UI/Components/Pages/EditarReserva.razor
+
+=======
+    public double precioPagado;
+    public int personaId;
+    public int eventoId;
+    public DateTime fechaReserva;
+    public EstadoReserva estado;
+>>>>>>> 76738d239c256c39b77153a84ae48dd5834e798a:CentroDeportivo.UI/Components/Pages/Editar/EditarReserva.razor
+    public Reserva? reserva;
+
+    public string mensaje = "";
+    protected override async Task OnInitializedAsync()
+    {
+        reserva = await RepositorioReserva.ObtenerPorIdAsync(Id);
+<<<<<<< HEAD:CentroDeportivo.UI/Components/Pages/EditarReserva.razor
+=======
+        if (reserva != null)
+        {
+            idReservaEditada = reserva.Id;
+            personaId = reserva.PersonaId;
+            eventoId = reserva.EventoDeportivoId;
+            fechaAlta = reserva.FechaAltaReserva;
+            estado = reserva.EstadoAsistencia;
+        }
+>>>>>>> 76738d239c256c39b77153a84ae48dd5834e798a:CentroDeportivo.UI/Components/Pages/Editar/EditarReserva.razor
+    }
+
+    void MostrarMensaje(string msj)
+    {
+        mensaje = msj;
+    }
+
+    void Cancelar()
+    {
+        Navegador.NavigateTo("/reservas");
+        mensaje = "";
+    }
+}
