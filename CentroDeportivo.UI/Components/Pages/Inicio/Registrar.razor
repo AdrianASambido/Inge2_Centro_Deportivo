@@ -1,8 +1,8 @@
 ﻿@page "/registrar"
+@inject IUsuarioRepositorio UsuarioRepositorio
 @inject Sesion UsuarioSesion
 @inject NavigationManager Navegador
 @inject IHashServicio Hash
-
 @rendermode InteractiveServer
 @inject RegistrarUsuarioUseCase registrarUsuario
 
@@ -44,7 +44,7 @@
         mensaje = msj;
     }
 
-    void Enviar()
+    async Task Enviar()
     {
 
         if (usr.Contrasenia != usr.Contrasenia2)
@@ -56,17 +56,13 @@
         try
         {
             var usuario = new Usuario(usr.Nombre, usr.Apellido, usr.Domicilio, usr.DNI, usr.Contrasenia, usr.Correo, false, Rol.Cliente);
-            
-            registrarUsuario.Ejecutar(usuario);
-            Navegador.NavigateTo("/usuarios");
+
+            await registrarUsuario.ejecutar(usuario);
+            Navegador.NavigateTo("/Login");
         }
-        catch (ValidacionExcepcion ex)
+        catch (Exception ex)
         {
             MostrarMensaje("Error de validación: " + ex.Message);
-        }
-        catch (DuplicadoExcepcion ex)
-        {
-            MostrarMensaje("Error de duplicado: " + ex.Message);
         }
     }
 
@@ -78,7 +74,7 @@
     {
         public string Nombre { get; set; } = "";
         public string Apellido { get; set; } = "";
-        public int DNI { get; set; }
+        public string DNI { get; set; }
         public int Edad { get; set; } 
         public string Domicilio { get; set; } = "";
         public string Correo { get; set; } = "";

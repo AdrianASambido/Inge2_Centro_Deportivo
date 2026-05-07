@@ -1,5 +1,8 @@
 ﻿@page "/Actividades"
 @rendermode InteractiveServer
+@inject CrearActividadUseCase CrearActividadUseCase
+@inject ListarActividadesUseCase ListarActividadesUseCase
+@inject EliminarActividadUseCase EliminarActividadUseCase
 @inject IActividadRepositorio RepositorioActividad
 @inject Sesion UsuarioSesion
 @inject NavigationManager Navegador
@@ -33,9 +36,9 @@ else
             {
                 <tr>
                     <td>@a.Id</td>
-                    <td>@a.nombre</td>
-                    <td>@a.descripcion</td>
-                    <td>@a.precio</td>
+                    <td>@a.Nombre</td>
+                    <td>@a.Descripcion</td>
+                    <td>@a.Precio</td>
                     <td>
                         <button class="btn btn-primary"
                                 @onclick="() => Editar(a.Id)">
@@ -54,6 +57,19 @@ else
     </table>
 
    
+}
+
+@if (quiereAgregar)
+{
+    <h3>Datos de la actividad</h3>
+
+    <input placeholder="Nombre de actividad" @bind="act.nombre" class="form-control" />
+    <input placeholder="Descripcion" @bind="act.descripcion" class="form-control" />
+    <input placeholder="Precio" @bind="act.precio" class="form-control" />
+
+    <button class="btn btn-primary" @onclick="Aceptar">Aceptar</button>
+    <button class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
+
 }
 
 @if (!string.IsNullOrEmpty(mensaje))
@@ -98,10 +114,11 @@ else
 
     List<Actividad> actividad = new List<Actividad>();
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        actividad = ListarActividadesUseCase.Ejecutar()!;
+        actividad = (await ListarActividadesUseCase.ejecutar()).ToList();
     }
+
     void CerrarSesion()
     {
         UsuarioSesion.CerrarSesion();
@@ -124,30 +141,34 @@ else
         mostrarDialog = true;
     }
 
-    void Eliminar()
+    async Task Eliminar()
     {
+        @*
         mostrarDialog = false;
         try
         {
-            EliminarActividadUseCase.Ejecutar(idAEliminar, UsuarioSesion.UsuarioActual!.Id);
-            actividad = ListarActividadesUseCase.Ejecutar()!;
+            EliminarActividadUseCase.ejecutar(idAEliminar);
+            actividad = (await ListarActividadesUseCase.ejecutar()).ToList();
             MostrarMensaje("Actividad eliminada correctamente.");
+            StateHasChanged();
         }
         catch (Exception ex)
         {
             MostrarMensaje(ex.Message);
         }
-
+        *@
     }
 
-    void Aceptar()
+    async Task Aceptar()
     {
         try
         {
-            CrearActividadUseCase.Ejecutar(act.nombre, act.descripcion, act.precio, UsuarioSesion.UsuarioActual!.Id);
-            actividad = ListarActividadesUseCase.Ejecutar()!;
+            var acti = new Actividad(act.nombre, act.descripcion, act.precio);
+            CrearActividadUseCase.ejecutar(acti);
+            actividad = (await ListarActividadesUseCase.ejecutar()).ToList();
             MostrarMensaje("Actividad creada correctamente.");
             quiereAgregar = false;
+            StateHasChanged();
         }
         catch (Exception ex)
         {

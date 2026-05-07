@@ -1,5 +1,8 @@
 ﻿@page "/Empleados"
 @rendermode InteractiveServer
+@inject CrearEmpleadoUseCase CrearEmpleadoUseCase
+@inject ListarEmpleadosUseCase ListarEmpleadosUseCase
+@inject EliminarEmpleadoUseCase EliminarEmpleadoUseCase 
 @inject IUsuarioRepositorio RepositorioUsuario
 @inject Sesion UsuarioSesion
 @inject NavigationManager Navegador
@@ -56,6 +59,19 @@ else
    
 }
 
+@if (quiereAgregar)
+{
+    <h3>Datos del empleado</h3>
+
+    <input placeholder="Nombre" @bind="emp.nombre" class="form-control" />
+    <input placeholder="apellido" @bind="emp.apellido" class="form-control" />
+    <input placeholder="DNI" @bind="emp.dni" class="form-control" />
+
+    <button class="btn btn-primary" @onclick="Aceptar">Aceptar</button>
+    <button class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
+
+}
+
 @if (!string.IsNullOrEmpty(mensaje))
 {
     <div class="alert alert-danger">@mensaje</div>
@@ -98,9 +114,9 @@ else
 
     List<Usuario> empleado = new List<Usuario>();
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        empleado = ListarEmpleadosUseCase.Ejecutar()!;
+        empleado = (await ListarEmpleadosUseCase.ejecutar()).ToList();
     }
     void CerrarSesion()
     {
@@ -124,14 +140,15 @@ else
         mostrarDialog = true;
     }
 
-    void Eliminar()
+    async Task Eliminar()
     {
         mostrarDialog = false;
         try
         {
-            EliminarEmpleadoUseCase.Ejecutar(idAEliminar, UsuarioSesion.UsuarioActual!.Id);
-            empleado = ListarProfesoresUseCase.Ejecutar()!;
+            EliminarEmpleadoUseCase.ejecutar(idAEliminar);
+            empleado = (await ListarEmpleadosUseCase.ejecutar()).ToList();
             MostrarMensaje("Empleado eliminado correctamente.");
+            StateHasChanged();
         }
         catch (Exception ex)
         {
@@ -140,14 +157,16 @@ else
 
     }
 
-    void Aceptar()
+    async Task Aceptar()
     {
         try
         {
-            CrearEmpleadoUseCase.Ejecutar(emp.nombre, emp.apellido, emp.dni, UsuarioSesion.UsuarioActual!.Id);
-            empleado = ListarEmpleadosUseCase.Ejecutar()!;
+            var emple = new Usuario(emp.nombre, emp.apellido, "", emp.dni, "1234", "", false, Rol.Empleado);
+            CrearEmpleadoUseCase.ejecutar(emple);
+            empleado = (await ListarEmpleadosUseCase.ejecutar()).ToList();
             MostrarMensaje("Emlpeado creado correctamente.");
             quiereAgregar = false;
+            StateHasChanged();
         }
         catch (Exception ex)
         {
@@ -165,6 +184,6 @@ else
     {
         public string nombre { get; set; } = "";
         public string apellido { get; set; } = "";
-        public double dni { get; set; }
+        public string dni { get; set; }
     }
 }
