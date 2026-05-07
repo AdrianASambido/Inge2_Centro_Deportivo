@@ -12,13 +12,13 @@ namespace CentroDeportivo.Aplicacion.Entidades
         public string Nombre { get; set; } = string.Empty;
         public string Apellido { get; set; } = string.Empty;
         public string Domicilio { get; set; } = string.Empty;
-        public int Dni { get; set; } 
+        public string Dni { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public bool DebeCambiarPassword { get; set; } = false;
         public Rol Rol { get; set; }
 
-        public Usuario(string nombre, string apellido, string domicilio, int dni, string password, string email, bool debeCambiarPassword, Rol rol)
+        public Usuario(string nombre, string apellido, string domicilio, string dni, string password, string email, bool debeCambiarPassword, Rol rol)
         {
             this.Nombre = nombre;
             this.Apellido = apellido;
