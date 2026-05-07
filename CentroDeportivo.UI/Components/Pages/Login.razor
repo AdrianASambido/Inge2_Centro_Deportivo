@@ -1,9 +1,9 @@
-﻿@page "/Login"
-@inject IniciarSesionUseCase IniciarSesionUseCase
+﻿@*@page "/Login"
+@inject LoginUseCase LoginUseCase
 @inject Sesion UsuarioSesion
 @inject NavigationManager Navegador
-@inject IUsuarioRepositorio Repo
-
+@inject IRepositorioUsuario Repo
+ *@
 @rendermode InteractiveServer
 
 <h3>Iniciar Sesión</h3>

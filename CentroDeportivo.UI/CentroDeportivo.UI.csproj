@@ -7,8 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Remove="Components\Pages\Editar\EditarReserva.razor" />
-    <Content Remove="Components\Pages\Editar\EditarUsuario.razor" />
+    <Content Remove="Components\Pages\EditarReserva.razor" />
+    <Content Remove="Components\Pages\Login.razor" />
+    <Content Remove="Components\Pages\Registrar.razor" />
   </ItemGroup>
 
   <ItemGroup>

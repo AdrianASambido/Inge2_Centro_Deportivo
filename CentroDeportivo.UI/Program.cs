@@ -8,6 +8,7 @@ using CentroDeportivo.Aplicacion.Casos_de_uso.UsuarioUseCase;
 using CentroDeportivo.Aplicacion.Casos_de_uso.CanchaUseCase;
 using CentroDeportivo.Aplicacion.Casos_de_uso.ProfesorUseCase;
 using CentroDeportivo.Aplicacion.Casos_de_uso.ActividadUseCase;
+using CentroDeportivo.Aplicacion.Casos_de_uso.DevolucionUseCase;
 using CentroDeportivo.Aplicacion.Casos_de_uso.TurnoUseCase;
 using CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase;
 using CentroDeportivo.Infraestructura.Servicios;
@@ -24,7 +25,10 @@ builder.Services.AddDbContext<CentroDeportivoContext>(options =>
 builder.Services.AddScoped<IUsuarioRepositorio, UsuarioRepositorio>();
 builder.Services.AddScoped<IProfesorRepositorio, ProfesorRepositorio>();
 builder.Services.AddScoped<ICanchaRepositorio, CanchaRepositorio>();
+builder.Services.AddScoped<IReservaRepositorio, ReservaRepositorio>();
+builder.Services.AddScoped<ITurnoRepositorio, TurnoRepositorio>();
 builder.Services.AddScoped<IActividadRepositorio, ActividadRepositorio>();
+builder.Services.AddScoped<IDevolucionRepositorio, DevolucionRepositorio>();
 builder.Services.AddScoped<IHashServicio, ServicioHash>();
 builder.Services.AddScoped<IEmailServicio, EmailServicio>();
 
@@ -33,8 +37,11 @@ builder.Services.AddScoped<UsuarioClienteValidador>();
 builder.Services.AddScoped<UsuarioEmpleadoValidador>();
 builder.Services.AddScoped<ActividadValidador>();
 builder.Services.AddScoped<CanchaValidador>();
+builder.Services.AddScoped<ReservaValidador>();
+builder.Services.AddScoped<TurnoValidador>();
 builder.Services.AddScoped<ProfesorValidador>();
 builder.Services.AddScoped<LoginValidador>();
+builder.Services.AddScoped<DevolucionValidador>();
 
 // --- 4. REGISTRAR CASOS DE USO ---
 builder.Services.AddScoped<RegistrarUsuarioUseCase>();
@@ -43,6 +50,8 @@ builder.Services.AddScoped<IniciarSesionUseCase>();
 builder.Services.AddScoped<CrearCanchaUseCase>();
 builder.Services.AddScoped<CrearProfesorUseCase>();
 builder.Services.AddScoped<CrearActividadUseCase>();
+builder.Services.AddScoped<EliminarActividadUseCase>();
+builder.Services.AddScoped<EliminarCanchaUseCase>();
 
 // Add services to the container.
 builder.Services.AddRazorComponents()

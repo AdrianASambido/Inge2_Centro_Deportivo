@@ -22,6 +22,7 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Contexto
         public DbSet<Actividad> Actividades { get; set; }
         public DbSet<Cancha> Canchas { get; set; }
         public DbSet<Profesor> Profesores { get; set; }
+        public DbSet<Devolucion> Devoluciones { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -32,6 +33,7 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Contexto
             modelBuilder.Entity<Actividad>().HasKey(a => a.Id);
             modelBuilder.Entity<Cancha>().HasKey(c => c.Id);
             modelBuilder.Entity<Profesor>().HasKey(p => p.Id);
+            modelBuilder.Entity<Devolucion>().HasKey(d => d.Id);
 
             // Relaciónes
             modelBuilder.Entity<Reserva>()
@@ -59,6 +61,16 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Contexto
                 .HasOne(t => t.Profesor)
                 .WithMany()
                 .HasForeignKey(t => t.Id_Profesor);
+
+            modelBuilder.Entity<Devolucion>()
+                .HasOne(d => d.Usuario)
+                .WithMany()
+                .HasForeignKey(d => d.Id_Usuario);
+
+            modelBuilder.Entity<Devolucion>()
+                .HasOne(d => d.Reserva)
+                .WithMany()
+                .HasForeignKey(d => d.Id_Reserva);
 
             base.OnModelCreating(modelBuilder);
         }

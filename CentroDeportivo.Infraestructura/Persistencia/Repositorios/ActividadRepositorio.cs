@@ -6,14 +6,16 @@ using System.Threading.Tasks;
 using CentroDeportivo.Aplicacion.Entidades;
 using CentroDeportivo.Aplicacion.Interfaces;
 using CentroDeportivo.Infraestructura.Persistencia.Contexto;
+using Microsoft.EntityFrameworkCore;
 
 namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
 {
     public class ActividadRepositorio(CentroDeportivoContext context) : IActividadRepositorio
     {
-        public Task ActualizarAsync(Actividad actividad)
+        public async Task ActualizarAsync(Actividad actividad)
         {
-            throw new NotImplementedException();
+            context.Actividades.Update(actividad);
+            await context.SaveChangesAsync();
         }
 
         public async Task AgregarAsync(Actividad actividad)
@@ -23,29 +25,38 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
 
         }
 
-        public Task EliminarAsync(int id)
+        public async Task EliminarAsync(int id)
         {
-            throw new NotImplementedException();
+            var actividad = await ObtenerPorIdAsync(id);
+            if (actividad != null) {
+                context.Actividades.Remove(actividad);
+                await context.SaveChangesAsync();
+            }
         }
 
-        public Task<Actividad?> ObtenerPorIdAsync(int id)
+        public async Task<Actividad?> ObtenerPorIdAsync(int id)
         {
-            throw new NotImplementedException();
+            return await context.Actividades.FirstOrDefaultAsync(x => x.Id == id);
         }
 
-        public Task<IEnumerable<Actividad>> ObtenerTodasAsync()
+        public async Task<IEnumerable<Actividad>> ObtenerTodasAsync()
         {
-            throw new NotImplementedException();
+            return await context.Actividades.AsNoTracking().ToListAsync();
         }
 
-        public Task<bool> TieneInscriptosAsync(int actividadId)
+        public async Task<bool> TieneInscriptosAsync(int actividadId)
         {
-            throw new NotImplementedException();
+            return await context.Turnos.AnyAsync(t => t.Id_Actividad == actividadId && (t.Estado == EstadoTurno.Disponible || t.Estado == EstadoTurno.Lleno));
         }
 
-        public Task<bool> YaExiste(string nombre)
+        public async Task<bool> YaExiste(string nombre)
         {
-            throw new NotImplementedException();
+            return await context.Actividades.AnyAsync(a => a.Nombre == nombre);
+        }
+        public async Task<bool> YaExisteParaEditar(string nombre, int idActual)
+        {
+            // Devuelve true solo si hay otra actividad con ese nombre, pero que NO sea la que estamos editando
+            return await context.Actividades.AnyAsync(a => a.Nombre == nombre && a.Id != idActual);
         }
     }
 }
