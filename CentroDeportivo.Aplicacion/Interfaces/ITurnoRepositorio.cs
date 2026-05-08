@@ -13,6 +13,8 @@ namespace CentroDeportivo.Aplicacion.Interfaces
         Task<IEnumerable<Turno>> ObtenerTodosAsync();
         Task<IEnumerable<Turno>> ObtenerPorActividadAsync(int actividadId);
         Task<IEnumerable<Turno>> ObtenerPorFechaAsync(DateOnly fecha);
+        Task<Turno?> ObtenerPorActividadFechaYHoraAsync(int actividadId, DateOnly fecha, TimeOnly horaInicio);
+        Task<IReadOnlyList<Turno>> ObtenerPorActividadYFechaAsync(int actividadId, DateOnly fecha);
         Task<IEnumerable<Turno>> ObtenerPorProfesorAsync(int profesorId);
         Task<IEnumerable<Turno>> ObtenerPorCanchaAsync(int canchaId);
         Task<IEnumerable<Turno>> ObtenerDisponiblesAsync();

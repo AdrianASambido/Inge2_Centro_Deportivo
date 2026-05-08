@@ -32,6 +32,7 @@ builder.Services.AddScoped<IActividadRepositorio, ActividadRepositorio>();
 builder.Services.AddScoped<IDevolucionRepositorio, DevolucionRepositorio>();
 builder.Services.AddScoped<IHashServicio, ServicioHash>();
 builder.Services.AddScoped<IEmailServicio, EmailServicio>();
+builder.Services.AddScoped<Sesion>();
 
 // --- 3. REGISTRAR VALIDADORES (Lógica de Negocio) ---
 builder.Services.AddScoped<UsuarioClienteValidador>();
@@ -60,6 +61,13 @@ builder.Services.AddScoped<ListarActividadesUseCase>();
 builder.Services.AddScoped<CambiarContraseniaUseCase>();
 builder.Services.AddScoped<EliminarEmpleadoUseCase>();
 builder.Services.AddScoped<ListarEmpleadosUseCase>();
+builder.Services.AddScoped<IListaEsperaRepositorio, ListaEsperaRepositorio>();
+builder.Services.AddScoped<AsegurarTurnosDelDiaUseCase>();
+builder.Services.AddScoped<ListarTurnosCalendarioUseCase>();
+builder.Services.AddScoped<OfertarSiguienteListaEsperaUseCase>();
+builder.Services.AddScoped<ProcesarOfertasListaEsperaVencidasUseCase>();
+builder.Services.AddScoped<AceptarOfertaListaEsperaUseCase>();
+builder.Services.AddScoped<CancelarReservaUseCase>();
 builder.Services.AddScoped<CrearReservaUseCase>();
 builder.Services.AddScoped<ListarReservasUseCase>();
 builder.Services.AddScoped<CancelarReservaUseCase>();

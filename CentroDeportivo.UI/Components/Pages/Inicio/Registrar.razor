@@ -1,10 +1,10 @@
-﻿@page "/registrar"
+@page "/registrar"
 @inject IUsuarioRepositorio UsuarioRepositorio
 @inject Sesion UsuarioSesion
 @inject NavigationManager Navegador
 @inject IHashServicio Hash
 @rendermode InteractiveServer
-@inject RegistrarUsuarioUseCase registrarUsuario
+@inject RegistrarUsuarioUseCase agregarUsuario
 
 <PageTitle> Registro </PageTitle>
 
@@ -66,14 +66,15 @@
 
         try
         {
-            var usuario = new Usuario(usr.Nombre, usr.Apellido, usr.Domicilio, usr.DNI, usr.Contrasenia, usr.Correo, false, Rol.Cliente);
-
-            await registrarUsuario.ejecutar(usuario);
+            var usuario = new Usuario(usr.Nombre, usr.Apellido, string.Empty, string.Empty, usr.Contrasenia, usr.Correo, false, Rol.Cliente);
+            
+            await agregarUsuario.ejecutar(usuario);
             Navegador.NavigateTo("/Login");
         }
         catch (Exception ex)
         {
             MostrarMensaje("Error de validación: " + ex.Message);
+
         }
     }
 

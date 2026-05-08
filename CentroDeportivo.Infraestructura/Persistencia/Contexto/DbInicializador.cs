@@ -1,27 +1,16 @@
 ﻿using CentroDeportivo.Aplicacion.Entidades;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
-namespace CentroDeportivo.Infraestructura.Persistencia.Contexto
+namespace CentroDeportivo.Infraestructura.Persistencia.Contexto;
+
+public static class DbInicializador
 {
-    public static class DbInicializador
+    public static void Initialize(CentroDeportivoContext context)
     {
-        public static void Initialize(CentroDeportivoContext context)
+        context.Database.EnsureCreated();
+
+        if (!context.Usuarios.Any())
         {
-            // Crea la base de datos y las tablas si no existen
-            context.Database.EnsureCreated();
-
-           
-            // Verificamos si ya existen usuarios para no duplicar el Admin 
-            if (context.Usuarios.Any())
-            {
-                return; // La base ya tiene datos, no hacemos nada
-            }
-
-            // Crear el Administrador por defecto si la BD esta vacia
             var admin = new Usuario
             {
                 Nombre = "Carlos",
@@ -29,18 +18,34 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Contexto
                 Domicilio = "Calle 123",
                 Dni = "112345534",
                 Email = "admin@centrodeportivo.com",
-
-                
                 Password = BCrypt.Net.BCrypt.HashPassword("Admin1234"),
                 Rol = Rol.Administrador,
                 DebeCambiarPassword = false
             };
-
             context.Usuarios.Add(admin);
-
-            // Guardar los cambios en el archivo .db
             context.SaveChanges();
         }
-    }
+
+        SeedCatalogoReservas(context);
     }
 
+    /// <summary>Cancha, profesor y actividades base si aún no existen (útil tras primera ejecución sólo con admin).</summary>
+    private static void SeedCatalogoReservas(CentroDeportivoContext context)
+    {
+        if (!context.Canchas.Any())
+            context.Canchas.Add(new Cancha(1, 30));
+
+        if (!context.Profesores.Any())
+            context.Profesores.Add(new Profesor("Profe", "General", "00000000"));
+
+        if (!context.Actividades.Any())
+        {
+            context.Actividades.Add(new Actividad("Pádel", "Clase grupal", 1500));
+            context.Actividades.Add(new Actividad("Fútbol", "Clase grupal", 1200));
+            context.Actividades.Add(new Actividad("Vóley", "Clase grupal", 1100));
+            context.Actividades.Add(new Actividad("Básquet", "Clase grupal", 1100));
+        }
+
+        context.SaveChanges();
+    }
+}
