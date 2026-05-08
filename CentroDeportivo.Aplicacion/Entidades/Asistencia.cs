@@ -4,9 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CentroDeportivo.Aplicacion.Casos_de_uso.DevolucionUseCase
+namespace CentroDeportivo.Aplicacion.Entidades
 {
-    public class ListarDevolucionesPendientes
+    public enum Asistencia
     {
+        Ausente,Presente
     }
 }

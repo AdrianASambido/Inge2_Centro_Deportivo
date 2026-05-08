@@ -39,5 +39,19 @@ namespace CentroDeportivo.Aplicacion.Validadores
             // Retornamos la tupla: es válido si el mensaje quedó vacío
             return (string.IsNullOrEmpty(mensaje), mensaje);
         }
+
+        public async Task<(bool esValido, string mensaje)> validarEliminacion(int idActividad) { 
+            var actividad = await repo.ObtenerPorIdAsync(idActividad);
+
+            if (actividad == null) {
+                return (false, "Actividad inexistente.");
+            }
+
+            if (await repo.TieneInscriptosAsync(idActividad)) {
+                return (false, "Error: la actividad posee turnos programados.");
+            }
+
+            return (true, "");
+        }
     }
 }

@@ -86,5 +86,15 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
             );
         }
 
+        public async Task<bool> EstaDisponibleAsync(int idProfesor, DateOnly fecha, TimeOnly horarioInicio)
+        {
+           bool ocupado = await contexto.Turnos
+                    .AnyAsync(t => t.Id_Profesor == idProfesor
+                    && t.Fecha == fecha
+                    && t.HoraInicio == horarioInicio
+                    && (t.Estado == EstadoTurno.Disponible || t.Estado == EstadoTurno.Lleno));
+
+            return !ocupado;
+        }
     }
 }

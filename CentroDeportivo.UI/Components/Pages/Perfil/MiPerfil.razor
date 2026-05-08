@@ -1,5 +1,70 @@
-﻿<h3>MiPerfil</h3>
+﻿@page "/MiPerfil"
+@rendermode InteractiveServer
+
+@inject Sesion UsuarioSesion
+@inject NavigationManager Navegador
+
+<PageTitle>Mi Perfil</PageTitle>
+
+<h1>Mi Perfil</h1>
+
+@if (UsuarioSesion.UsuarioActual == null)
+{
+    <p>No hay usuario autenticado.</p>
+
+    <button class="btn btn-primary"
+            @onclick="IrLogin">
+        Ir al Login
+    </button>
+}
+else
+{
+    <div class="card p-3">
+
+        <h3>Datos del usuario</h3>
+
+        <p><b>Nombre:</b> @UsuarioSesion.UsuarioActual.Nombre</p>
+        <p><b>Apellido:</b> @UsuarioSesion.UsuarioActual.Apellido</p>
+        <p><b>Email:</b> @UsuarioSesion.UsuarioActual.Email</p>
+
+        <hr />
+
+        <div class="d-flex gap-3 justify-content-center">
+            <NavLink class="btn btn-warning"
+                 href="@($"/editar-usr/{UsuarioSesion.UsuarioActual.Id}")">
+                Editar usuario
+            </NavLink>
+    
+            <button class="btn btn-danger ms-2"
+                    @onclick="CerrarSesion">
+                Cerrar sesión
+            </button>
+
+            <button class="btn btn-warning ms-2"
+                    @onclick="CambiarContraseña">
+                Cambiar contraseña
+            </button>
+
+        </div>
+    </div>
+}
 
 @code {
+
+    void IrLogin()
+    {
+        Navegador.NavigateTo("/Login");
+    }
+
+    void CerrarSesion()
+    {
+        UsuarioSesion.CerrarSesion();
+        Navegador.NavigateTo("/Login", true);
+    }
+
+    void CambiarContraseña()
+    {
+        Navegador.NavigateTo("/CambiarContraseña", true);
+    }
 
 }
