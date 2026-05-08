@@ -14,6 +14,7 @@ using CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase;
 using CentroDeportivo.Infraestructura.Servicios;
 using CentroDeportivo.Infraestructura.Persistencia.Repositorios;
 
+
 var builder = WebApplication.CreateBuilder(args);
 
 // 1. REGISTRAR EL CONTEXTO DE LA BASE DE DATOS
@@ -31,6 +32,7 @@ builder.Services.AddScoped<IActividadRepositorio, ActividadRepositorio>();
 builder.Services.AddScoped<IDevolucionRepositorio, DevolucionRepositorio>();
 builder.Services.AddScoped<IHashServicio, ServicioHash>();
 builder.Services.AddScoped<IEmailServicio, EmailServicio>();
+builder.Services.AddHostedService<TurnosBackgroundServicio>();
 
 // --- 3. REGISTRAR VALIDADORES (Lógica de Negocio) ---
 builder.Services.AddScoped<UsuarioClienteValidador>();
@@ -47,11 +49,43 @@ builder.Services.AddScoped<DevolucionValidador>();
 builder.Services.AddScoped<RegistrarUsuarioUseCase>();
 builder.Services.AddScoped<CrearEmpleadoUseCase>();
 builder.Services.AddScoped<IniciarSesionUseCase>();
-builder.Services.AddScoped<CrearCanchaUseCase>();
-builder.Services.AddScoped<CrearProfesorUseCase>();
+builder.Services.AddScoped<CambiarContraseniaUseCase>();
+builder.Services.AddScoped<EliminarEmpleadoUseCase>();
+builder.Services.AddScoped<RecuperarContraseniaUseCase>();
+builder.Services.AddScoped<ListarEmpleadosUseCase>();
+
 builder.Services.AddScoped<CrearActividadUseCase>();
+builder.Services.AddScoped<ListarActividadesUseCase>();
 builder.Services.AddScoped<EliminarActividadUseCase>();
+
 builder.Services.AddScoped<EliminarCanchaUseCase>();
+builder.Services.AddScoped<CrearCanchaUseCase>();
+builder.Services.AddScoped<ListarCanchasUseCase>();
+builder.Services.AddScoped<EditarCanchaUseCase>();
+
+builder.Services.AddScoped<CrearProfesorUseCase>();
+builder.Services.AddScoped<EliminarProfesorUseCase>();
+builder.Services.AddScoped<EditarProfesorUseCase>();
+builder.Services.AddScoped<ListarProfesoresUseCase>();
+
+builder.Services.AddScoped<CrearReservaUseCase>();
+builder.Services.AddScoped<CancelarReservaUseCase>();
+builder.Services.AddScoped<ListarInscriptosUseCase>();
+builder.Services.AddScoped<ListarReservasUseCase>();
+builder.Services.AddScoped<RegistrarAsistenciaManualUseCase>();
+builder.Services.AddScoped<RegistrarAsistenciaQrUseCase>();
+builder.Services.AddScoped<GenerarQrUseCase>();
+builder.Services.AddScoped<ConfirmarPagoReservaUseCase>();
+
+builder.Services.AddScoped<CrearTurnoUseCase>();
+builder.Services.AddScoped<EditarTurnoUseCase>();
+builder.Services.AddScoped<EliminarTurnoUseCase>();
+builder.Services.AddScoped<ListarTurnosUseCase>();
+builder.Services.AddScoped<ListarTurnosCalendarioUseCase>();
+builder.Services.AddScoped<ConsultarDisponibilidadUseCase>();
+
+builder.Services.AddScoped<ConfirmarDevolucionUseCase>();
+builder.Services.AddScoped<ListarDevolucionesPendientesUseCase>();
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
