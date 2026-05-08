@@ -16,6 +16,8 @@ namespace CentroDeportivo.Aplicacion.Interfaces
         Task<IEnumerable<Reserva>> ObtenerConDevolucionPendienteAsync();
         Task<bool> ExisteReservaActivaAsync(int usuarioId, int turnoId);
         Task<bool> TieneConflictoHorarioAsync(int usuarioId, DateOnly fecha, TimeOnly horarioInicio);
+        Task<int> ContarActivasPorTurnoAsync(int turnoId);
+        Task<IReadOnlyList<Reserva>> ObtenerPendientesDePagoAsync();
         Task AgregarAsync(Reserva reserva);
         Task ActualizarAsync(Reserva reserva);
     }

@@ -1,7 +1,191 @@
 ﻿@page "/Turnos"
 @rendermode InteractiveServer
+@using System.Globalization
+@inject Sesion UsuarioSesion
+@inject NavigationManager Navegador
+@inject ListarActividadesUseCase ListarActividadesUseCase
 
+<PageTitle>Reserva de turnos</PageTitle>
+
+<div class="container py-4">
+    <h2 class="text-center">Bienvenido a la reserva de turnos</h2>
+
+    @if (UsuarioSesion.UsuarioActual is null)
+    {
+        <p class="text-center">Redirigiendo al inicio de sesión…</p>
+    }
+    else
+    {
+        <p class="text-center">@UsuarioSesion.UsuarioActual.Nombre @UsuarioSesion.UsuarioActual.Apellido</p>
+
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <label class="form-label">Actividad</label>
+                <select class="form-select" @bind="SeleccionActividad" @bind:after="AlActividadCambiada">
+                    <option value="">— Seleccione una actividad —</option>
+                    @foreach (var a in actividades)
+                    {
+                        <option value="@a.Id">@a.Nombre</option>
+                    }
+                </select>
+            </div>
+        </div>
+
+        @if (int.TryParse(SeleccionActividad, out var aid) && aid > 0)
+        {
+            <div class="text-center my-4">
+                <div class="position-relative d-inline-block">
+                    <button type="button"
+                            class="btn btn-primary"
+                            @onclick="AlternarCalendarioCompleto"
+                            @onmouseenter="MostrarCalendarioMini"
+                            @onmouseleave="OcultarCalendarioMini">
+                        Reservar turnos
+                    </button>
+
+                    @if (mostrarCalendarioMini)
+                    {
+                        <div class="card position-absolute top-100 start-50 translate-middle-x mt-2 p-2 shadow" style="z-index: 1080; min-width: 220px;">
+                            <div class="small text-muted text-center">@TituloMes(ReferenciaMes)</div>
+                            @TablaCalendario(esMini: true, actividadParaNavegar: aid)
+                        </div>
+                    }
+                </div>
+            </div>
+
+            @if (mostrarCalendarioCompleto)
+            {
+                <div class="row justify-content-center">
+                    <div class="col-auto">
+                        <div class="text-center fw-semibold mb-2">@TituloMes(ReferenciaMes)</div>
+                        @TablaCalendario(esMini: false, actividadParaNavegar: aid)
+                    </div>
+                </div>
+            }
+        }
+    }
+</div>
 
 @code {
+    private static readonly string[] NombresActividades = ["Pádel", "Fútbol", "Vóley", "Básquet"];
+    private static readonly string[] DiasSemanaCortos = ["Lu", "Ma", "Mi", "Ju", "Vi", "Sa", "Do"];
 
+    private List<Actividad> actividades = [];
+    private string SeleccionActividad = "";
+    private bool mostrarCalendarioMini;
+    private bool mostrarCalendarioCompleto;
+
+    private DateOnly ReferenciaMes => new(DateTime.Today.Year, DateTime.Today.Month, 1);
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (UsuarioSesion.UsuarioActual is null)
+        {
+            Navegador.NavigateTo("/Login");
+            return;
+        }
+
+        var todas = await ListarActividadesUseCase.ejecutar();
+        actividades = todas.Where(a => NombresActividades.Contains(a.Nombre)).OrderBy(a => a.Nombre).ToList();
+    }
+
+    private void AlActividadCambiada()
+    {
+        mostrarCalendarioCompleto = false;
+        mostrarCalendarioMini = false;
+    }
+
+    private void AlternarCalendarioCompleto() => mostrarCalendarioCompleto = !mostrarCalendarioCompleto;
+
+    private void MostrarCalendarioMini() => mostrarCalendarioMini = true;
+
+    private void OcultarCalendarioMini() => mostrarCalendarioMini = false;
+
+    private string TituloMes(DateOnly primerDia)
+    {
+        var dt = new DateTime(primerDia.Year, primerDia.Month, 1);
+        return dt.ToString("MMMM yyyy", new CultureInfo("es-AR"));
+    }
+
+    private IReadOnlyList<DateOnly?> CeldasMes()
+    {
+        var primerDiaMes = ReferenciaMes;
+        var primer = new DateTime(primerDiaMes.Year, primerDiaMes.Month, 1);
+        var offset = ((int)primer.DayOfWeek + 6) % 7;
+        var diasEnMes = DateTime.DaysInMonth(primerDiaMes.Year, primerDiaMes.Month);
+        var lista = new List<DateOnly?>();
+        for (var i = 0; i < offset; i++)
+            lista.Add(null);
+        for (var d = 1; d <= diasEnMes; d++)
+            lista.Add(new DateOnly(primerDiaMes.Year, primerDiaMes.Month, d));
+        return lista;
+    }
+
+    private bool DiaHabilitado(DateOnly dia)
+    {
+        var hoy = DateOnly.FromDateTime(DateTime.Today);
+        return dia >= hoy && dia.Year == ReferenciaMes.Year && dia.Month == ReferenciaMes.Month;
+    }
+
+    private void IrADia(int actividadId, DateOnly fecha)
+    {
+        if (actividadId <= 0 || !DiaHabilitado(fecha))
+            return;
+        var f = fecha.ToString("yyyy-MM-dd");
+        Navegador.NavigateTo($"/Turnos/dia?actividadId={actividadId}&fecha={f}");
+    }
+
+    private RenderFragment TablaCalendario(bool esMini, int actividadParaNavegar) => __builder =>
+    {
+        var celdas = CeldasMes();
+        var claseTabla = esMini ? "table table-sm table-bordered mb-0" : "table table-bordered";
+
+        __builder.OpenElement(0, "table");
+        __builder.AddAttribute(1, "class", claseTabla);
+
+        __builder.OpenElement(2, "thead");
+        __builder.OpenElement(3, "tr");
+        foreach (var d in DiasSemanaCortos)
+        {
+            __builder.OpenElement(4, "th");
+            __builder.AddContent(5, d);
+            __builder.CloseElement();
+        }
+        __builder.CloseElement();
+        __builder.CloseElement();
+
+        __builder.OpenElement(6, "tbody");
+        for (var i = 0; i < celdas.Count; i += 7)
+        {
+            __builder.OpenElement(7, "tr");
+            for (var j = 0; j < 7; j++)
+            {
+                var idx = i + j;
+                __builder.OpenElement(8, "td");
+                if (idx < celdas.Count && celdas[idx] is { } diaCelda)
+                {
+                    if (DiaHabilitado(diaCelda))
+                    {
+                        var captAccion = diaCelda;
+                        __builder.OpenElement(9, "button");
+                        __builder.AddAttribute(10, "type", "button");
+                        __builder.AddAttribute(11, "class", "btn btn-link p-0");
+                        __builder.AddAttribute(12, "onclick",
+                            EventCallback.Factory.Create(this, () => IrADia(actividadParaNavegar, captAccion)));
+                        __builder.AddContent(13, captAccion.Day);
+                        __builder.CloseElement();
+                    }
+                    else
+                    {
+                        __builder.AddContent(14, diaCelda.Day);
+                    }
+                }
+                __builder.CloseElement();
+            }
+            __builder.CloseElement();
+        }
+        __builder.CloseElement();
+
+        __builder.CloseElement();
+    };
 }

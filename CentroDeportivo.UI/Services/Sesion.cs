@@ -15,4 +15,6 @@ public class Sesion
     {
         UsuarioActual = null;
     }
+
+    public bool EstaAutenticado() => UsuarioActual != null;
 }
