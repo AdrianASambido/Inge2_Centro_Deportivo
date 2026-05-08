@@ -1,15 +1,19 @@
-﻿using CentroDeportivo.Aplicacion.Entidades;
-using CentroDeportivo.Aplicacion.Interfaces;
-
-namespace CentroDeportivo.Aplicacion.Casos_de_uso.TurnoUseCase;
+﻿using CentroDeportivo.Aplicacion.Interfaces;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using CentroDeportivo.Aplicacion.Entidades;
 
 public class ListarTurnosCalendarioUseCase(
     AsegurarTurnosDelDiaUseCase asegurarTurnosDelDia,
     ITurnoRepositorio turnoRepositorio)
 {
-    public async Task<IReadOnlyList<Turno>> ejecutar(int actividadId, DateOnly fecha)
+    public class ListarTurnosCalendarioUseCase (ITurnoRepositorio repo)
     {
-        await asegurarTurnosDelDia.ejecutar(actividadId, fecha);
-        return await turnoRepositorio.ObtenerPorActividadYFechaAsync(actividadId, fecha);
+        public async Task<IEnumerable<Turno>> ejecutar(int idUsuario, int? idActividad = null) {
+           return await repo.ObtenerParaCalendarioAsync(idUsuario,idActividad);
+        }
     }
 }

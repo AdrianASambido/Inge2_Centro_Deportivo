@@ -81,6 +81,17 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
                 (t.Estado == EstadoTurno.Disponible || t.Estado == EstadoTurno.Lleno)
             );
         }
+
+        public async Task<bool> EstaDisponibleAsync(int idCancha, DateOnly fecha, TimeOnly horarioInicio)
+        {
+            bool ocupado = await contexto.Turnos
+                    .AnyAsync(t => t.Id_Cancha == idCancha
+                    && t.Fecha == fecha
+                    && t.HoraInicio == horarioInicio
+                    && (t.Estado == EstadoTurno.Disponible || t.Estado == EstadoTurno.Lleno));
+
+            return !ocupado;
+        }
     }
 }
 

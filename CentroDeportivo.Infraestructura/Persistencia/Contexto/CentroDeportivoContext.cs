@@ -43,26 +43,28 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Contexto
                 .WithMany()
                 .HasForeignKey(r => r.Id_Usuario);
 
-            
             modelBuilder.Entity<Reserva>()
-                .HasOne(r => r.Turno)
-                .WithMany()
-                .HasForeignKey(r => r.Id_Turno);
+                        .HasOne(r => r.Turno)
+                        .WithMany(t => t.Reservas) // <--- ACÁ: Le decimos que Turno tiene la lista "Reservas"
+                        .HasForeignKey(r => r.Id_Turno);
+
 
             modelBuilder.Entity<Turno>()
-        .HasOne(t => t.Actividad)
-        .WithMany()
-        .HasForeignKey(t => t.Id_Actividad);
+                        .HasOne(t => t.Actividad)
+                        .WithMany()
+                        .HasForeignKey(t => t.Id_Actividad);
 
             modelBuilder.Entity<Turno>()
-                .HasOne(t => t.Cancha)
-                .WithMany()
-                .HasForeignKey(t => t.Id_Cancha);
+                        .HasOne(t => t.Cancha)
+                        .WithMany()
+                        .HasForeignKey(t => t.Id_Cancha);
 
             modelBuilder.Entity<Turno>()
-                .HasOne(t => t.Profesor)
-                .WithMany()
-                .HasForeignKey(t => t.Id_Profesor);
+                        .HasOne(t => t.Profesor)
+                        .WithMany()
+                        .HasForeignKey(t => t.Id_Profesor);
+
+      
 
             modelBuilder.Entity<Devolucion>()
                 .HasOne(d => d.Usuario)

@@ -22,6 +22,8 @@ namespace CentroDeportivo.Aplicacion.Entidades
         public Cancha Cancha { get; set; } = null!;
         public Profesor Profesor { get; set; } = null!;
 
+        public ICollection<Reserva> Reservas { get; set; } = new List<Reserva>();
+
         public Turno() { }
 
     }

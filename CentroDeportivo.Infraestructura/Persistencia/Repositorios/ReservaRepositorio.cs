@@ -2,24 +2,27 @@
 using CentroDeportivo.Aplicacion.Interfaces;
 using CentroDeportivo.Infraestructura.Persistencia.Contexto;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios;
-
-public class ReservaRepositorio(CentroDeportivoContext contexto) : IReservaRepositorio
+namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
 {
-    private static readonly EstadoReserva[] EstadosOcupanCupo = [EstadoReserva.Reservado, EstadoReserva.Confirmado, EstadoReserva.PendienteDePago];
-
-    public async Task ActualizarAsync(Reserva reserva)
+    public class ReservaRepositorio(CentroDeportivoContext contexto) : IReservaRepositorio
     {
-        contexto.Reservas.Update(reserva);
-        await contexto.SaveChangesAsync();
-    }
+        public async Task ActualizarAsync(Reserva reserva)
+        {
+            contexto.Reservas.Update(reserva);
+            await contexto.SaveChangesAsync();
+        }
 
-    public async Task AgregarAsync(Reserva reserva)
-    {
-        await contexto.Reservas.AddAsync(reserva);
-        await contexto.SaveChangesAsync();
-    }
+        public async Task AgregarAsync(Reserva reserva)
+        {
+            await contexto.Reservas.AddAsync(reserva);
+            await contexto.SaveChangesAsync();  
+        }
 
     public async Task<bool> ExisteReservaActivaAsync(int usuarioId, int turnoId)
     {
@@ -29,22 +32,10 @@ public class ReservaRepositorio(CentroDeportivoContext contexto) : IReservaRepos
             EstadosOcupanCupo.Contains(r.Estado));
     }
 
-    public async Task<IEnumerable<Reserva>> ObtenerConDevolucionPendienteAsync()
-    {
-        return await contexto.Reservas
-            .AsNoTracking()
-            .Include(r => r.Turno)
-            .Include(r => r.Usuario)
-            .ToListAsync();
-    }
-
-    public async Task<Reserva?> ObtenerPorIdAsync(int id)
-    {
-        return await contexto.Reservas
-            .Include(r => r.Turno)
-            .Include(r => r.Usuario)
-            .FirstOrDefaultAsync(r => r.Id == id);
-    }
+        public async Task<Reserva?> ObtenerPorIdAsync(int id)
+        {
+            return await contexto.Reservas.FirstOrDefaultAsync(r => r.Id == id);
+        }
 
     public async Task<Reserva?> ObtenerPorQrTokenAsync(string qrToken)
     {
@@ -54,51 +45,61 @@ public class ReservaRepositorio(CentroDeportivoContext contexto) : IReservaRepos
             .FirstOrDefaultAsync(r => r.TokenQr == qrToken);
     }
 
-    public async Task<IEnumerable<Reserva>> ObtenerPorTurnoAsync(int turnoId)
-    {
-        return await contexto.Reservas
-            .AsNoTracking()
-            .Include(r => r.Usuario)
-            .Where(r => r.Id_Turno == turnoId)
-            .ToListAsync();
-    }
+        public async Task<IEnumerable<Reserva>> ObtenerPorTurnoAsync(int turnoId, string? dni = null)
+        {
+            var query = contexto.Reservas
+                        .Include(r => r.Usuario)
+                        .Where(r => r.Id_Turno == turnoId && r.Estado != EstadoReserva.Cancelado)
+                        .AsQueryable();
 
-    public async Task<IEnumerable<Reserva>> ObtenerPorUsuarioAsync(int usuarioId)
-    {
-        return await contexto.Reservas
-            .AsNoTracking()
-            .Include(r => r.Turno)!.ThenInclude(t => t!.Actividad)
-            .Where(r => r.Id_Usuario == usuarioId)
-            .ToListAsync();
-    }
 
-    public async Task<bool> TieneConflictoHorarioAsync(int usuarioId, DateOnly fecha, TimeOnly horarioInicio)
-    {
-        return await contexto.Reservas
-            .Where(r => r.Id_Usuario == usuarioId && EstadosOcupanCupo.Contains(r.Estado))
-            .Join(
-                contexto.Turnos,
-                r => r.Id_Turno,
-                t => t.Id,
-                (r, t) => t)
-            .AnyAsync(t => t.Fecha == fecha && t.HoraInicio == horarioInicio);
-    }
+                if (!string.IsNullOrWhiteSpace(dni))
+                       query = query.Where(r => r.Usuario!.Dni == dni);
 
-    public async Task<int> ContarActivasPorTurnoAsync(int turnoId)
-    {
-        return await contexto.Reservas.CountAsync(r =>
-            r.Id_Turno == turnoId &&
-            EstadosOcupanCupo.Contains(r.Estado));
-    }
+                return await query
+                            .OrderBy(r => r.Usuario!.Nombre)
+                            .AsNoTracking()
+                            .ToListAsync();
+        }
 
-    public async Task<IReadOnlyList<Reserva>> ObtenerPendientesDePagoAsync()
-    {
-        return await contexto.Reservas
-            .AsNoTracking()
-            .Include(r => r.Usuario)
-            .Include(r => r.Turno)!.ThenInclude(t => t!.Actividad)
-            .Where(r => r.Estado == EstadoReserva.PendienteDePago)
-            .OrderBy(r => r.FechaReserva)
-            .ToListAsync();
+        public async Task<IEnumerable<Reserva>> ObtenerPorUsuarioAsync(int usuarioId, int? actividadId = null, EstadoReserva? estado = null, bool incluirPasadas = false)
+        {
+            var hoy = DateOnly.FromDateTime(DateTime.Today);
+
+            var query = contexto.Reservas
+                .Include(r => r.Turno)
+                    .ThenInclude(t => t!.Actividad)
+                .Include(r => r.Turno)
+                    .ThenInclude(t => t!.Profesor)
+                .Where(r => r.Id_Usuario == usuarioId)
+                .AsQueryable();
+
+            // Por defecto solo muestra reservas activas 
+            if (!incluirPasadas)
+                query = query.Where(r => r.Turno!.Fecha >= hoy);
+
+            // Filtro por estado (pendienteDePago, confirmado, cancelado)
+            if (estado.HasValue)
+                query = query.Where(r => r.Estado == estado.Value);
+
+            // Filtro por actividad
+            if (actividadId.HasValue)
+                query = query.Where(r => r.Turno!.Id_Actividad == actividadId.Value);
+
+            return await query
+                .OrderBy(r => r.Turno!.Fecha)
+                .ThenBy(r => r.Turno!.HoraInicio)
+                .AsNoTracking()
+                .ToListAsync();
+        }
+
+        public async Task<bool> TieneConflictoHorarioAsync(int usuarioId, DateOnly fecha, TimeOnly horarioInicio)
+        {
+            return await contexto.Reservas
+                       .AnyAsync(r => r.Id_Usuario == usuarioId &&
+                       r.Turno.Fecha == fecha &&
+                       r.Turno.HoraInicio == horarioInicio &&
+                       (r.Estado == EstadoReserva.Confirmado || r.Estado == EstadoReserva.PendienteDePago));
+        }
     }
 }

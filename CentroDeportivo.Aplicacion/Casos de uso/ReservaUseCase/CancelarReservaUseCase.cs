@@ -1,6 +1,8 @@
-﻿using CentroDeportivo.Aplicacion.Entidades;
-using CentroDeportivo.Aplicacion.Interfaces;
-using CentroDeportivo.Aplicacion.Casos_de_uso.TurnoUseCase;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase;
 
@@ -10,28 +12,57 @@ public class CancelarReservaUseCase(
     ProcesarOfertasListaEsperaVencidasUseCase procesarOfertasListaEsperaVencidas,
     OfertarSiguienteListaEsperaUseCase ofertarSiguienteListaEspera)
 {
-    public async Task ejecutar(int reservaId)
+    public class CancelarReservaUseCase(IReservaRepositorio repoReserva, IDevolucionRepositorio repoDevolucion, ITurnoRepositorio repoTurno)
     {
-        await procesarOfertasListaEsperaVencidas.ejecutar();
+        public async Task<(bool conDevolucion, double monto)> Ejecutar(int idReserva) { 
+            var reserva = await repoReserva.ObtenerPorIdAsync(idReserva);
 
-        var reserva = await reservaRepositorio.ObtenerPorIdAsync(reservaId)
-            ?? throw new Exception("Reserva no encontrada.");
+            if (reserva == null) {
+                throw new Exception("Error: reserva inexistente.");
+            }
 
-        if (reserva.Estado == EstadoReserva.Cancelado)
-            return;
+            if (reserva.Estado == EstadoReserva.Cancelado || reserva.Turno.Estado == EstadoTurno.Finalizado) {
+                throw new Exception("Error: no se puede cancelar esta reserva");
+            }
 
-        reserva.Estado = EstadoReserva.Cancelado;
-        await reservaRepositorio.ActualizarAsync(reserva);
+            
 
-        var turno = await turnoRepositorio.ObtenerPorIdAsync(reserva.Id_Turno);
-        if (turno == null || turno.Estado == EstadoTurno.Cancelado)
-            return;
+            var ahora = DateTime.Now;
+            var fechaHoraTurno = reserva.Turno.Fecha.ToDateTime(reserva.Turno.HoraInicio);
+            var diferencia = fechaHoraTurno - ahora;
 
-        turno.CupoDisponible++;
-        if (turno.CupoDisponible > 0 && turno.Estado == EstadoTurno.Lleno)
-            turno.Estado = EstadoTurno.Disponible;
+            bool aplicaDevolucion = false;
+            double montoADevolver = 0;
 
-        await turnoRepositorio.ActualizarAsync(turno);
-        await ofertarSiguienteListaEspera.ejecutar(turno.Id);
+            if (diferencia.TotalHours > 24 && reserva.Estado == EstadoReserva.Confirmado) {
+                aplicaDevolucion = true;
+                montoADevolver = reserva.PrecioPagado / 2;
+                
+                var devolucion = new Devolucion
+                {
+                    MontoADevolver = montoADevolver,
+                    Estado = DevolucionEstado.Pendiente, 
+                    Id_Usuario = reserva.Id_Usuario,    
+                    Id_Reserva = reserva.Id,
+                    FechaGeneracion = ahora
+                };
+                await repoDevolucion.AgregarAsync(devolucion);
+            }
+
+            
+            var turno = await repoTurno.ObtenerPorIdAsync(reserva.Id_Turno);
+            turno!.CupoDisponible++;
+
+            if (turno.Estado == EstadoTurno.Lleno) {
+                turno.Estado = EstadoTurno.Disponible;
+            }
+
+            await repoTurno.ActualizarAsync(turno);
+
+            reserva.Estado = EstadoReserva.Cancelado;
+            await repoReserva.ActualizarAsync(reserva);
+
+            return (aplicaDevolucion, montoADevolver);
+        }
     }
 }
