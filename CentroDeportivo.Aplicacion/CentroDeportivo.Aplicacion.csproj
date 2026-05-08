@@ -8,12 +8,11 @@
 
   <ItemGroup>
     <Compile Remove="Casos de uso\Actividad\**" />
+    <Compile Remove="Excepciones\**" />
     <EmbeddedResource Remove="Casos de uso\Actividad\**" />
+    <EmbeddedResource Remove="Excepciones\**" />
     <None Remove="Casos de uso\Actividad\**" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Excepciones\" />
+    <None Remove="Excepciones\**" />
   </ItemGroup>
 
 </Project>
