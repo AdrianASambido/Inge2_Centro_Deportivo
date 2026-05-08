@@ -23,6 +23,7 @@ builder.Services.AddDbContext<CentroDeportivoContext>(options =>
     options.UseSqlite("Data Source=CentroDeportivo.db"));
 
 // --- 2. REGISTRAR SERVICIOS DE INFRAESTRUCTURA ---
+builder.Services.AddScoped<IListaEsperaRepositorio, ListaEsperaRepositorio>();
 builder.Services.AddScoped<IUsuarioRepositorio, UsuarioRepositorio>();
 builder.Services.AddScoped<IProfesorRepositorio, ProfesorRepositorio>();
 builder.Services.AddScoped<ICanchaRepositorio, CanchaRepositorio>();
@@ -61,7 +62,6 @@ builder.Services.AddScoped<ListarActividadesUseCase>();
 builder.Services.AddScoped<CambiarContraseniaUseCase>();
 builder.Services.AddScoped<EliminarEmpleadoUseCase>();
 builder.Services.AddScoped<ListarEmpleadosUseCase>();
-builder.Services.AddScoped<IListaEsperaRepositorio, ListaEsperaRepositorio>();
 builder.Services.AddScoped<AsegurarTurnosDelDiaUseCase>();
 builder.Services.AddScoped<ListarTurnosCalendarioUseCase>();
 builder.Services.AddScoped<OfertarSiguienteListaEsperaUseCase>();

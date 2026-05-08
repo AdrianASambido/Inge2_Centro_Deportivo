@@ -66,7 +66,7 @@
 
         try
         {
-            var usuario = new Usuario(usr.Nombre, usr.Apellido, string.Empty, string.Empty, usr.Contrasenia, usr.Correo, false, Rol.Cliente);
+            var usuario = new Usuario(usr.Nombre, usr.Apellido, usr.Domicilio, usr.DNI, usr.Contrasenia, usr.Correo, false, Rol.Cliente);
             
             await agregarUsuario.ejecutar(usuario);
             Navegador.NavigateTo("/Login");
