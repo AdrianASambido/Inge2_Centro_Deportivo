@@ -13,6 +13,7 @@ using CentroDeportivo.Aplicacion.Casos_de_uso.TurnoUseCase;
 using CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase;
 using CentroDeportivo.Infraestructura.Servicios;
 using CentroDeportivo.Infraestructura.Persistencia.Repositorios;
+using CentroDeportivo.UI.Services;
 
 
 var builder = WebApplication.CreateBuilder(args);

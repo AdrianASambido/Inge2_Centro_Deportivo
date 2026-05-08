@@ -1,9 +1,8 @@
-﻿@*@page "/Login"
-@inject LoginUseCase LoginUseCase
+@page "/Login"
+@inject IniciarSesionUseCase IniciarSesionUseCase
 @inject Sesion UsuarioSesion
 @inject NavigationManager Navegador
-@inject IRepositorioUsuario Repo
- *@
+@inject IUsuarioRepositorio UsuarioRepositorio
 @rendermode InteractiveServer
 
 <h3>Iniciar Sesión</h3>
@@ -19,6 +18,9 @@
 <div class="mb-3">
     <button class="btn btn-primary" @onclick="IniciarSesion">Confirmar</button>
     <button class="btn btn-danger" @onclick="Registrarse">Registrarme</button>
+    <NavLink href="/olvide-contrasenia" class="text-primary">
+        ¿Olvidaste tu contraseña?
+    </NavLink>
 </div>
 
 @if (!string.IsNullOrEmpty(error))
@@ -30,26 +32,21 @@
     public DatosLogin datos = new();
     public string error = "";
 
-    protected override void OnInitialized()
+    public async Task IniciarSesion()
     {
-        
-    }
-
-    public void IniciarSesion()
-    {
-        error = ""; // Limpia errores previos
+        error = "";
 
         try
         {
-            var usuario = LoginUseCase.Ejecutar(datos.Correo, datos.Password);
+            var usuario = await IniciarSesionUseCase.ejecutar(datos.Correo, datos.Password);
+
             UsuarioSesion.IniciarSesion(usuario);
+
             Navegador.NavigateTo("/usuarios");
         }
         catch (Exception ex)
         {
             error = ex.Message;
-            StateHasChanged();
-
         }
     }
 

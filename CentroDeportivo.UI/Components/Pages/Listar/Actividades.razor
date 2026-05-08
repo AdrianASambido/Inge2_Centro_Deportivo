@@ -1,0 +1,191 @@
+﻿@page "/Actividades"
+@rendermode InteractiveServer
+@inject CrearActividadUseCase CrearActividadUseCase
+@inject ListarActividadesUseCase ListarActividadesUseCase
+@inject EliminarActividadUseCase EliminarActividadUseCase
+@inject IActividadRepositorio RepositorioActividad
+@inject Sesion UsuarioSesion
+@inject NavigationManager Navegador
+
+<PageTitle>Actividades</PageTitle>
+
+@if (!UsuarioSesion.EstaAutenticado())
+{
+    <p>No tenés acceso. <NavLink href="/Login">Iniciar sesión</NavLink></p>
+}
+else
+{
+    <h2>Actividades</h2>
+
+    <p>Bienvenido, @UsuarioSesion.UsuarioActual!.Nombre</p>
+    <button class="btn btn-danger" @onclick="CerrarSesion">Cerrar sesión</button>
+    <button class="btn btn-success" @onclick="CrearActividad">Crear actividad</button>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Descripcion</th>
+                <th>Precio</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var a in actividad)
+            {
+                <tr>
+                    <td>@a.Id</td>
+                    <td>@a.Nombre</td>
+                    <td>@a.Descripcion</td>
+                    <td>@a.Precio</td>
+                    <td>
+                        <button class="btn btn-primary"
+                                @onclick="() => Editar(a.Id)">
+                            Editar
+                        </button>
+
+                        <button class="btn btn-danger"
+                                @onclick="() => ConfirmarEliminacion(a.Id)">
+                            Eliminar
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+
+    </table>
+
+   
+}
+
+@if (quiereAgregar)
+{
+    <h3>Datos de la actividad</h3>
+
+    <input placeholder="Nombre de actividad" @bind="act.nombre" class="form-control" />
+    <input placeholder="Descripcion" @bind="act.descripcion" class="form-control" />
+    <input placeholder="Precio" @bind="act.precio" class="form-control" />
+
+    <button class="btn btn-primary" @onclick="Aceptar">Aceptar</button>
+    <button class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
+
+}
+
+@if (!string.IsNullOrEmpty(mensaje))
+{
+    <div class="alert alert-danger">@mensaje</div>
+}
+
+@if (mostrarDialog)
+{
+    <div class="modal show d-block" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmar eliminación</h5>
+                </div>
+                <div class="modal-body">
+                    <p>¿Estás seguro de que querés eliminar esta actividad?</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" @onclick="() => mostrarDialog = false">Cancelar</button>
+                    <button class="btn btn-danger" @onclick="Eliminar">Confirmar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+    
+@code {
+
+    string mensaje = "";
+    bool mostrarDialog = false;
+    int idAEliminar;
+    bool quiereAgregar = false;
+    Datos act = new Datos();
+
+    void MostrarMensaje(string msj)
+    {
+        mensaje = msj;
+    }
+
+
+    List<Actividad> actividad = new List<Actividad>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        actividad = (await ListarActividadesUseCase.ejecutar()).ToList();
+    }
+
+    void CerrarSesion()
+    {
+        UsuarioSesion.CerrarSesion();
+        Navegador.NavigateTo("/Login", true);
+    }
+
+    void CrearActividad()
+    {
+        quiereAgregar = true;
+    }
+
+    public void Editar(int Id)
+    {
+        Navegador.NavigateTo($"/editar-actividad/{Id}");
+    }
+
+    void ConfirmarEliminacion(int Id)
+    {
+        idAEliminar = Id;
+        mostrarDialog = true;
+    }
+
+    async Task Eliminar()
+    {
+        @*
+        mostrarDialog = false;
+        try
+        {
+            EliminarActividadUseCase.ejecutar(idAEliminar);
+            actividad = (await ListarActividadesUseCase.ejecutar()).ToList();
+            MostrarMensaje("Actividad eliminada correctamente.");
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            MostrarMensaje(ex.Message);
+        }
+        *@
+    }
+
+    async Task Aceptar()
+    {
+        try
+        {
+            var acti = new Actividad(act.nombre, act.descripcion, act.precio);
+            CrearActividadUseCase.ejecutar(acti);
+            actividad = (await ListarActividadesUseCase.ejecutar()).ToList();
+            MostrarMensaje("Actividad creada correctamente.");
+            quiereAgregar = false;
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            MostrarMensaje(ex.Message);
+        }
+    }
+
+    void Cancelar()
+    {
+        quiereAgregar = false;
+        mensaje = "";
+    }
+
+    public class Datos
+    {
+        public string nombre { get; set; } = "";
+        public string descripcion { get; set; } = "";
+        public double precio { get; set; }
+    }
+}

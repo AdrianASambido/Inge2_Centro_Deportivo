@@ -7,6 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Casos de uso\Actividad\**" />
+    <EmbeddedResource Remove="Casos de uso\Actividad\**" />
+    <None Remove="Casos de uso\Actividad\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Folder Include="Excepciones\" />
   </ItemGroup>
 

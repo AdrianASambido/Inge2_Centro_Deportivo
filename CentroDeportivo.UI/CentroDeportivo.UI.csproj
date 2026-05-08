@@ -7,10 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Remove="Components\Pages\EditarReserva.razor" />
-    <Content Remove="Components\Pages\Login.razor" />
-    <Content Remove="Components\Pages\Registrar.razor" />
+    <Content Remove="Components\Pages\Editar\EditarCancha.razor" />
+    <Content Remove="Components\Pages\Editar\EditarProfesor.razor" />
+    <Content Remove="Components\Pages\Editar\EditarReserva.razor" />
+    <Content Remove="Components\Pages\Editar\EditarUsuario.razor" />
   </ItemGroup>
+
 
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.26">
@@ -22,6 +24,10 @@
   <ItemGroup>
     <ProjectReference Include="..\CentroDeportivo.Aplicacion\CentroDeportivo.Aplicacion.csproj" />
     <ProjectReference Include="..\CentroDeportivo.Infraestructura\CentroDeportivo.Infraestructura.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Components\Pages\Editar\" />
   </ItemGroup>
 
 </Project>
