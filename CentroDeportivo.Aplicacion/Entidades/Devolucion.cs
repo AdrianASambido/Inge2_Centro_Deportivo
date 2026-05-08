@@ -16,6 +16,7 @@ namespace CentroDeportivo.Aplicacion.Entidades
         public int Id_Reserva {  get; set; }
         public Reserva Reserva { get; set; }
         public DateTime FechaGeneracion { get; set; }
+        public DateTime? FechaDevolucion { get; set; }
 
         public Devolucion() { }
     }

@@ -5,39 +5,49 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using CentroDeportivo.Infraestructura.Persistencia.Contexto;
+using Microsoft.EntityFrameworkCore;
 
 namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
 {
-    public class DevolucionRepositorio : IDevolucionRepositorio
+    public class DevolucionRepositorio(CentroDeportivoContext contexto) : IDevolucionRepositorio
     {
-        public Task ActualizarAsync(Devolucion devolucion)
+        public async Task ActualizarAsync(Devolucion devolucion)
         {
-            throw new NotImplementedException();
+             contexto.Devoluciones.Update(devolucion);
+             await contexto.SaveChangesAsync();
         }
 
-        public Task AgregarAsync(Devolucion devolucion)
+        public async Task AgregarAsync(Devolucion devolucion)
         {
-            throw new NotImplementedException();
+            await contexto.Devoluciones.AddAsync(devolucion);
+            await contexto.SaveChangesAsync();
         }
 
-        public Task<IEnumerable<Devolucion>> ObtenerPendientesAsync()
+        public async Task<IEnumerable<Devolucion>> ObtenerPendientesAsync()
         {
-            throw new NotImplementedException();
+            return await contexto.Devoluciones
+                        .Include(d => d.Usuario) // Trae los datos personales del socio
+                        .Include(d => d.Reserva) // Trae los datos de la reserva original
+                        .ThenInclude(r => r.Turno) 
+                        .Where(d => d.Estado == DevolucionEstado.Pendiente)
+                        .AsNoTracking() 
+                        .ToListAsync();
         }
 
-        public Task<Devolucion?> ObtenerPorIdAsync(int id)
+        public async Task<Devolucion?> ObtenerPorIdAsync(int id)
         {
-            throw new NotImplementedException();
+            return await contexto.Devoluciones.FirstOrDefaultAsync(x => x.Id == id);
         }
 
-        public Task<Devolucion?> ObtenerPorReservaIdAsync(int reservaId)
+        public async Task<Devolucion?> ObtenerPorReservaIdAsync(int reservaId)
         {
-            throw new NotImplementedException();
+            return await contexto.Devoluciones.FirstOrDefaultAsync(x => x.Id_Reserva == reservaId);
         }
 
-        public Task<Devolucion?> ObtenerPorUsuarioIdAsync(int idUsuario)
+        public async Task<Devolucion?> ObtenerPorUsuarioIdAsync(int idUsuario)
         {
-            throw new NotImplementedException();
+            return await contexto.Devoluciones.FirstOrDefaultAsync(x => x.Id_Usuario == idUsuario);
         }
     }
 }

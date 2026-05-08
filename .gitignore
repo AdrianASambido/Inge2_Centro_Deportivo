@@ -99,5 +99,6 @@ Thumbs.db
 # 📁 Temporales
 # =========================
 *.tmp
-*.temp*.db-shm
+*.temp
+*.db-shm
 *.db-wal

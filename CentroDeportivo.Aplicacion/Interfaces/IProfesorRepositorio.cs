@@ -19,5 +19,6 @@ namespace CentroDeportivo.Aplicacion.Interfaces
         Task<bool> YaExiste(string dni);
         Task<bool> YaExisteDniParaEditar(string dni, int idProfesor);
         Task<bool> TieneTurnosAsignadosAsync(int idProfesor);
+        Task<bool> EstaDisponibleAsync (int idProfesor, DateOnly fecha, TimeOnly horarioInicio);
     }
 }

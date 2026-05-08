@@ -11,6 +11,7 @@ namespace CentroDeportivo.Aplicacion.Entidades
         public int Id { get; private set; }
         public double PrecioPagado { get; set; }
         public EstadoReserva Estado { get; set; }
+        public Asistencia Asistencia { get; set; }
         public DateOnly FechaReserva { get; set; }
         public DateOnly FechaAsistencia { get; set; }
         public string? TokenQr { get; set; }

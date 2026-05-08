@@ -10,6 +10,9 @@ namespace CentroDeportivo.Aplicacion.Interfaces
     public interface ITurnoRepositorio
     {
         Task<Turno?> ObtenerPorIdAsync(int id);
+        Task<IEnumerable<Turno>> BuscarTurnosAsync(DateOnly? fecha, int? actividadId, int? profeId, int? canchaId,EstadoTurno? estado);
+        Task<IEnumerable<Turno>> ObtenerParaCalendarioAsync(int idUsuario, int? actividad);
+        Task FinalizarTurnosVencidosAsync();
         Task<IEnumerable<Turno>> ObtenerTodosAsync();
         Task<IEnumerable<Turno>> ObtenerPorActividadAsync(int actividadId);
         Task<IEnumerable<Turno>> ObtenerPorFechaAsync(DateOnly fecha);
