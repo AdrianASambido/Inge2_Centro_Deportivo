@@ -1,8 +1,67 @@
-﻿<h3>MisReservas</h3>
+﻿@page "/MisReservas"
+@rendermode InteractiveServer
 
-@page "/MisReservas"
+@inject IReservaRepositorio ReservaRepositorio
+@inject Sesion UsuarioSesion
 
+<PageTitle>Mis Reservas</PageTitle>
+
+<h3>Mis Reservas</h3>
+
+@if (!UsuarioSesion.EstaAutenticado())
+{
+    <p>No estás logueado.</p>
+    <NavLink href="/login">Iniciar sesión</NavLink>
+}
+else if (reservas == null)
+{
+    <p>Cargando reservas...</p>
+}
+else if (!reservas.Any())
+{
+    <p>No tenés reservas registradas.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Actividad</th>
+                <th>Fecha</th>
+                <th>Horario</th>
+                <th>Cancha</th>
+                <th>Estado</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var r in reservas)
+            {
+                <tr>
+                    <td>@r.Turno?.Actividad?.Nombre</td>
+                    <td>@r.Turno?.Fecha</td>
+                    <td>@r.Turno?.HoraInicio</td>
+                    <td>@r.Turno?.Cancha?.Numero</td>
+                    <td>@r.Estado</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
 
 @code {
+    List<Reserva>? reservas;
 
+    protected override async Task OnInitializedAsync()
+    {
+        if (UsuarioSesion.UsuarioActual != null)
+        {
+            reservas = (await ReservaRepositorio.ObtenerPorUsuarioAsync(
+                UsuarioSesion.UsuarioActual.Id,
+                null,
+                null,
+                true // incluir pasadas si quieres historial
+            )).ToList();
+        }
+    }
 }

@@ -9,6 +9,11 @@
 
 <div class="container py-4">
     <h2 class="text-center">Bienvenido a la reserva de turnos</h2>
+    
+    <button class="btn btn-danger ms-2"
+        @onclick="MisReservas">
+    Cerrar sesión
+    </button>
 
     @if (UsuarioSesion.UsuarioActual is null)
     {
@@ -94,7 +99,9 @@
         mostrarCalendarioCompleto = false;
         mostrarCalendarioMini = false;
     }
-
+    void MisReservas(){
+        Navegador.NavigateTo("/MisReservas");
+    }
     private void AlternarCalendarioCompleto() => mostrarCalendarioCompleto = !mostrarCalendarioCompleto;
 
     private void MostrarCalendarioMini() => mostrarCalendarioMini = true;
