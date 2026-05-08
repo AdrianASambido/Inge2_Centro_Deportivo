@@ -8,32 +8,43 @@
 
 <PageTitle> Registro </PageTitle>
 
-<h3>Registro de Usuario</h3>
+<div class="container mt-5">
 
-<h6>Complete los datos</h6>
+    <div class="row justify-content-center">
 
-@if (!string.IsNullOrEmpty(mensaje))
-{
-    <p style="color: red">@mensaje</p>
-}
+        <div class="col-md-6 col-lg-5">
 
+            <div class="card shadow p-4">
 
-<input placeholder="Nombre" @bind="usr.Nombre" class="form-control">
-<input placeholder="Apellido" @bind="usr.Apellido" class="form-control">
-<input placeholder="DNI" @bind="usr.DNI" class="form-control">
-<input placeholder="Edad" @bind="usr.Edad" class="form-control">
-<input placeholder="Domicilio" @bind="usr.Domicilio" class="form-control">
-<input placeholder="Correo" @bind="usr.Correo" class="form-control">
-<input placeholder="Contraseña" @bind="usr.Contrasenia" class="form-control" type="password">
-<input placeholder="Repetir Contraseña" @bind="usr.Contrasenia2" class="form-control" type="password">
+                <h3 class="mb-3">Registro de Usuario</h3>
 
-<button class="btn btn-primary" @onclick="Enviar">Registrar</button>
-<button class="btn btn-danger" @onclick="Cancelar">Cancelar</button>
+                <h5 class="mb-4 text-muted">Complete los datos</h5>
 
-@if (!string.IsNullOrEmpty(mensaje))
-{
-    <div class="alert alert-danger">@mensaje</div>
-}
+                    <input placeholder="Nombre" @bind="usr.Nombre" class="form-control mb-3">
+                    <input placeholder="Apellido" @bind="usr.Apellido" class="form-control mb-3">
+                    <input placeholder="DNI" @bind="usr.DNI" class="form-control mb-3">
+                    <input placeholder="Edad" @bind="usr.Edad" class="form-control mb-3">
+                    <input placeholder="Domicilio" @bind="usr.Domicilio" class="form-control mb-3">
+                    <input placeholder="Correo" @bind="usr.Correo" class="form-control mb-3">
+                    <input placeholder="Contraseña" @bind="usr.Contrasenia" class="form-control mb-3" type="password">
+                    <input placeholder="Repetir Contraseña" @bind="usr.Contrasenia2" class="form-control mb-3" type="password">
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-primary" @onclick="Enviar">Registrar</button>
+                        <button class="btn btn-danger" @onclick="Cancelar">Cancelar</button>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(mensaje))
+                    {
+                        <div class="alert alert-danger">@mensaje</div>
+                    }
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
 
 @code {
     public string mensaje = "";
