@@ -24,7 +24,6 @@ builder.Services.AddDbContext<CentroDeportivoContext>(options =>
     options.UseSqlite("Data Source=CentroDeportivo.db"));
 
 // --- 2. REGISTRAR SERVICIOS DE INFRAESTRUCTURA ---
-builder.Services.AddScoped<IListaEsperaRepositorio, ListaEsperaRepositorio>();
 builder.Services.AddScoped<IUsuarioRepositorio, UsuarioRepositorio>();
 builder.Services.AddScoped<IProfesorRepositorio, ProfesorRepositorio>();
 builder.Services.AddScoped<ICanchaRepositorio, CanchaRepositorio>();
@@ -89,7 +88,8 @@ builder.Services.AddScoped<ConsultarDisponibilidadUseCase>();
 builder.Services.AddScoped<ConfirmarDevolucionUseCase>();
 builder.Services.AddScoped<ListarDevolucionesPendientesUseCase>();
 
-builder.Services.AddScoped<Sesion>();
+builder.Services.AddScoped<Sesion>(); 
+
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
@@ -109,7 +109,7 @@ using (var scope = app.Services.CreateScope())
     }
     catch (Exception ex)
     {
-        
+
         Console.WriteLine($"Error al inicializar la BD: {ex.Message}");
     }
 }

@@ -11,6 +11,7 @@
     <Content Remove="Components\Pages\Editar\EditarProfesor.razor" />
     <Content Remove="Components\Pages\Editar\EditarReserva.razor" />
     <Content Remove="Components\Pages\Editar\EditarUsuario.razor" />
+    <Content Remove="Components\Pages\Listar\ReservaTurnoDia.razor" />
   </ItemGroup>
 
 

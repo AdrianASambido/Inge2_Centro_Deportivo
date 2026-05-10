@@ -9,19 +9,21 @@ using CentroDeportivo.Aplicacion.Entidades;
 
 namespace CentroDeportivo.Aplicacion.Casos_de_uso.ActividadUseCase
 {
-    public class CrearActividadUseCase (IActividadRepositorio repo, ActividadValidador validador)
+    public class CrearActividadUseCase(IActividadRepositorio repo, ActividadValidador validador)
     {
-        public async Task ejecutar(Actividad actividad) {
+        public async Task ejecutar(Actividad actividad)
+        {
 
 
             var (esValido, mensaje) = await validador.Validar(actividad);
 
 
-            if (!esValido) {
+            if (!esValido)
+            {
                 throw new Exception(mensaje);
             }
 
-           await repo.AgregarAsync(actividad);
+            await repo.AgregarAsync(actividad);
         }
     }
 }

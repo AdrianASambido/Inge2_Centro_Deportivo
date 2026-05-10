@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 namespace CentroDeportivo.Aplicacion.Casos_de_uso.CanchaUseCase
 {
     public class EliminarCanchaUseCase(ICanchaRepositorio repo, CanchaValidador validador)
+
     {
         public async Task ejecutar(int id)
         {

@@ -21,29 +21,23 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
         public async Task AgregarAsync(Reserva reserva)
         {
             await contexto.Reservas.AddAsync(reserva);
-            await contexto.SaveChangesAsync();  
+            await contexto.SaveChangesAsync();
         }
 
-    public async Task<bool> ExisteReservaActivaAsync(int usuarioId, int turnoId)
-    {
-        return await contexto.Reservas.AnyAsync(r =>
-            r.Id_Usuario == usuarioId &&
-            r.Id_Turno == turnoId &&
-            EstadosOcupanCupo.Contains(r.Estado));
-    }
+        public async Task<bool> ExisteReservaActivaAsync(int usuarioId, int turnoId)
+        {
+            throw new NotImplementedException();
+        }
 
         public async Task<Reserva?> ObtenerPorIdAsync(int id)
         {
             return await contexto.Reservas.FirstOrDefaultAsync(r => r.Id == id);
         }
 
-    public async Task<Reserva?> ObtenerPorQrTokenAsync(string qrToken)
-    {
-        return await contexto.Reservas
-            .Include(r => r.Turno)
-            .Include(r => r.Usuario)
-            .FirstOrDefaultAsync(r => r.TokenQr == qrToken);
-    }
+        public async Task<Reserva?> ObtenerPorQrTokenAsync(string qrToken)
+        {
+            throw new NotImplementedException();
+        }
 
         public async Task<IEnumerable<Reserva>> ObtenerPorTurnoAsync(int turnoId, string? dni = null)
         {
@@ -53,13 +47,13 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
                         .AsQueryable();
 
 
-                if (!string.IsNullOrWhiteSpace(dni))
-                       query = query.Where(r => r.Usuario!.Dni == dni);
+            if (!string.IsNullOrWhiteSpace(dni))
+                query = query.Where(r => r.Usuario!.Dni == dni);
 
-                return await query
-                            .OrderBy(r => r.Usuario!.Nombre)
-                            .AsNoTracking()
-                            .ToListAsync();
+            return await query
+                        .OrderBy(r => r.Usuario!.Nombre)
+                        .AsNoTracking()
+                        .ToListAsync();
         }
 
         public async Task<IEnumerable<Reserva>> ObtenerPorUsuarioAsync(int usuarioId, int? actividadId = null, EstadoReserva? estado = null, bool incluirPasadas = false)
