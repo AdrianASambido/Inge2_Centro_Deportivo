@@ -5,20 +5,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using CentroDeportivo.Aplicacion.Casos_de_uso.TurnoUseCase;
 
 namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase;
 
 public class CancelarReservaUseCase(
     IReservaRepositorio reservaRepositorio,
-    ITurnoRepositorio turnoRepositorio,
-    ProcesarOfertasListaEsperaVencidasUseCase procesarOfertasListaEsperaVencidas,
-    OfertarSiguienteListaEsperaUseCase ofertarSiguienteListaEspera)
+    ITurnoRepositorio turnoRepositorio)
 {
     public async Task ejecutar(int reservaId)
     {
-        await procesarOfertasListaEsperaVencidas.ejecutar();
-
         var reserva = await reservaRepositorio.ObtenerPorIdAsync(reservaId)
             ?? throw new Exception("Reserva no encontrada.");
 
@@ -37,6 +32,5 @@ public class CancelarReservaUseCase(
             turno.Estado = EstadoTurno.Disponible;
 
         await turnoRepositorio.ActualizarAsync(turno);
-        await ofertarSiguienteListaEspera.ejecutar(turno.Id);
     }
 }

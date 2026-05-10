@@ -88,24 +88,6 @@ builder.Services.AddScoped<ConsultarDisponibilidadUseCase>();
 
 builder.Services.AddScoped<ConfirmarDevolucionUseCase>();
 builder.Services.AddScoped<ListarDevolucionesPendientesUseCase>();
-builder.Services.AddScoped<ListarProfesoresUseCase>();
-builder.Services.AddScoped<EliminarProfesorUseCase>();
-builder.Services.AddScoped<ListarCanchasUseCase>();
-builder.Services.AddScoped<ListarActividadesUseCase>();
-builder.Services.AddScoped<CambiarContraseniaUseCase>();
-builder.Services.AddScoped<EliminarEmpleadoUseCase>();
-builder.Services.AddScoped<ListarEmpleadosUseCase>();
-builder.Services.AddScoped<IListaEsperaRepositorio, ListaEsperaRepositorio>();
-builder.Services.AddScoped<AsegurarTurnosDelDiaUseCase>();
-builder.Services.AddScoped<ListarTurnosCalendarioUseCase>();
-builder.Services.AddScoped<OfertarSiguienteListaEsperaUseCase>();
-builder.Services.AddScoped<ProcesarOfertasListaEsperaVencidasUseCase>();
-builder.Services.AddScoped<AceptarOfertaListaEsperaUseCase>();
-builder.Services.AddScoped<CancelarReservaUseCase>();
-builder.Services.AddScoped<CrearReservaUseCase>();
-builder.Services.AddScoped<ListarReservasUseCase>();
-
-builder.Services.AddScoped<Sesion>();
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();

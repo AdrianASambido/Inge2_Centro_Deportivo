@@ -6,9 +6,6 @@
 @inject ListarTurnosCalendarioUseCase ListarTurnosCalendarioUseCase
 @inject IActividadRepositorio ActividadRepositorio
 @inject CrearReservaUseCase CrearReservaUseCase
-@inject AceptarOfertaListaEsperaUseCase AceptarOfertaListaEsperaUseCase
-@inject ProcesarOfertasListaEsperaVencidasUseCase ProcesarOfertasListaEsperaVencidas
-@inject IListaEsperaRepositorio ListaEsperaRepositorio
 
 <PageTitle>Horarios del día</PageTitle>
 
@@ -39,28 +36,10 @@
                 {
                     <div class="alert alert-success">@mensajeExito</div>
                 }
-                @if (!string.IsNullOrEmpty(mensajeInfo))
-                {
-                    <div class="alert alert-info">@mensajeInfo</div>
-                }
                 @if (!string.IsNullOrEmpty(mensajeError))
                 {
                     <div class="alert alert-danger">@mensajeError</div>
                 }
-
-                @if (tieneOfertaLista)
-                {
-                    <div class="alert alert-warning">
-                        Tiene un cupo ofrecido desde la lista de espera para uno de estos horarios.
-                        Confirmá dentro de los 15 minutos indicados en el correo.
-                        <div class="mt-2">
-                            <button type="button" class="btn btn-success" @onclick="ConfirmarOferta" disabled="@procesando">
-                                Confirmar reserva (lista de espera)
-                            </button>
-                        </div>
-                    </div>
-                }
-
                 <p class="small text-muted mb-3">
                     Horarios de 16:00 a 22:00. Verde: hay cupo libre. Gris: cupo completo.
                 </p>
@@ -103,16 +82,12 @@
     private DateOnly? fechaElegida;
     private string actividadNombre = "";
     private IReadOnlyList<Turno> turnos = [];
-    private readonly Dictionary<int, int> cantidadListaEsperaPorTurno = new();
-    private bool tieneOfertaLista;
     private bool procesando;
     private string? mensajeExito;
-    private string? mensajeInfo;
     private string? mensajeError;
 
     private RenderFragment FilaTurno(Turno t) => __builder =>
     {
-        var enLista = cantidadListaEsperaPorTurno.GetValueOrDefault(t.Id);
         var hayCupo = t.CupoDisponible > 0 && t.Estado != EstadoTurno.Cancelado;
         __builder.OpenElement(0, "li");
         __builder.AddAttribute(1, "class", "list-group-item " + (hayCupo ? "list-group-item-success" : "list-group-item-secondary"));
@@ -126,20 +101,15 @@
         __builder.CloseElement();
         __builder.CloseElement();
 
-        __builder.OpenElement(8, "div");
-        __builder.AddAttribute(9, "class", "small mt-1");
-        __builder.AddContent(10, $"Lista de espera (pendientes u oferta): {enLista}");
-        __builder.CloseElement();
-
         if (hayCupo)
         {
             var idCapt = t.Id;
-            __builder.OpenElement(11, "button");
-            __builder.AddAttribute(12, "type", "button");
-            __builder.AddAttribute(13, "class", "btn btn-sm btn-primary mt-2");
-            __builder.AddAttribute(14, "disabled", procesando);
-            __builder.AddAttribute(15, "onclick", EventCallback.Factory.Create(this, () => Reservar(idCapt)));
-            __builder.AddContent(16, "Seleccionar horario");
+            __builder.OpenElement(8, "button");
+            __builder.AddAttribute(9, "type", "button");
+            __builder.AddAttribute(10, "class", "btn btn-sm btn-primary mt-2");
+            __builder.AddAttribute(11, "disabled", procesando);
+            __builder.AddAttribute(12, "onclick", EventCallback.Factory.Create(this, () => Reservar(idCapt)));
+            __builder.AddContent(13, "Seleccionar horario");
             __builder.CloseElement();
         }
 
@@ -148,7 +118,7 @@
 
     protected override async Task OnParametersSetAsync()
     {
-        mensajeError = mensajeExito = mensajeInfo = null;
+        mensajeError = mensajeExito = null;
 
         if (UsuarioSesion.UsuarioActual is null)
         {
@@ -170,88 +140,35 @@
 
         parametrosOk = true;
         fechaElegida = fp;
-        await ProcesarOfertasListaEsperaVencidas.ejecutar();
 
         var act = await ActividadRepositorio.ObtenerPorIdAsync(ActividadId!.Value);
         actividadNombre = act?.Nombre ?? "Actividad";
 
-        await CargarTurnosYListas();
+        await CargarTurnos();
     }
 
-    private async Task CargarTurnosYListas()
+    private async Task CargarTurnos()
     {
         if (!parametrosOk || fechaElegida is null || ActividadId is null || UsuarioSesion.UsuarioActual is null)
             return;
 
         turnos = await ListarTurnosCalendarioUseCase.ejecutar(ActividadId.Value, fechaElegida.Value);
-        cantidadListaEsperaPorTurno.Clear();
-        tieneOfertaLista = false;
-
-        foreach (var t in turnos)
-        {
-            var lista = (await ListaEsperaRepositorio.ObtenerPorTurnoOrdenadasAsync(t.Id)).ToList();
-            cantidadListaEsperaPorTurno[t.Id] = lista.Count(x =>
-                x.Estado is EstadoListaEspera.EnEspera or EstadoListaEspera.OfertaEnviada);
-
-            if (await ListaEsperaRepositorio.ObtenerOfertaActivaUsuarioAsync(UsuarioSesion.UsuarioActual.Id, t.Id) != null)
-                tieneOfertaLista = true;
-        }
     }
 
     private async Task Reservar(int turnoId)
     {
         procesando = true;
-        mensajeError = mensajeExito = mensajeInfo = null;
+        mensajeError = mensajeExito = null;
         try
         {
             var uid = UsuarioSesion.UsuarioActual!.Id;
-            var (ok, msg, _, enLista) = await CrearReservaUseCase.ejecutar(uid, turnoId);
+            var (ok, msg, _) = await CrearReservaUseCase.ejecutar(uid, turnoId);
             if (ok)
                 mensajeExito = "Reserva exitosa";
-            else if (enLista)
-                mensajeInfo = msg;
             else
                 mensajeError = msg;
 
-            await CargarTurnosYListas();
-        }
-        catch (Exception ex)
-        {
-            mensajeError = ex.Message;
-        }
-        finally
-        {
-            procesando = false;
-        }
-    }
-
-    private async Task ConfirmarOferta()
-    {
-        procesando = true;
-        mensajeError = mensajeExito = mensajeInfo = null;
-        try
-        {
-            var uid = UsuarioSesion.UsuarioActual!.Id;
-            var confirmado = false;
-            foreach (var t in turnos)
-            {
-                var oferta = await ListaEsperaRepositorio.ObtenerOfertaActivaUsuarioAsync(uid, t.Id);
-                if (oferta == null)
-                    continue;
-                var (ok, msg, _) = await AceptarOfertaListaEsperaUseCase.ejecutar(uid, t.Id);
-                if (ok)
-                {
-                    mensajeExito = msg;
-                    confirmado = true;
-                    break;
-                }
-                mensajeError = msg;
-            }
-
-            if (!confirmado && mensajeError == null)
-                mensajeError = "No hay oferta vigente para confirmar.";
-
-            await CargarTurnosYListas();
+            await CargarTurnos();
         }
         catch (Exception ex)
         {

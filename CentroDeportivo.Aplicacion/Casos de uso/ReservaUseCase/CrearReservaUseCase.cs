@@ -1,51 +1,28 @@
 ﻿using CentroDeportivo.Aplicacion.Interfaces;
-using CentroDeportivo.Aplicacion.Validadores;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using CentroDeportivo.Aplicacion.Entidades;
-using CentroDeportivo.Aplicacion.Casos_de_uso.TurnoUseCase;
 
 namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase;
 
 public class CrearReservaUseCase(
     ITurnoRepositorio turnoRepositorio,
-    IReservaRepositorio reservaRepositorio,
-    IListaEsperaRepositorio listaEsperaRepositorio,
-    ProcesarOfertasListaEsperaVencidasUseCase procesarOfertasListaEsperaVencidas)
+    IReservaRepositorio reservaRepositorio)
 {
-    public async Task<(bool exito, string mensaje, int? reservaId, bool enListaEspera)> ejecutar(int usuarioId, int turnoId)
+    public async Task<(bool exito, string mensaje, int? reservaId)> ejecutar(int usuarioId, int turnoId)
     {
-        await procesarOfertasListaEsperaVencidas.ejecutar();
-
         var turno = await turnoRepositorio.ObtenerPorIdAsync(turnoId)
             ?? throw new Exception("Turno no encontrado.");
 
         if (turno.Estado == EstadoTurno.Cancelado)
-            return (false, "Este turno fue cancelado.", null, false);
+            return (false, "Este turno fue cancelado.", null);
 
         if (await reservaRepositorio.ExisteReservaActivaAsync(usuarioId, turnoId))
-            return (false, "Ya tiene una reserva activa en este turno.", null, false);
+            return (false, "Ya tiene una reserva activa en este turno.", null);
 
         if (await reservaRepositorio.TieneConflictoHorarioAsync(usuarioId, turno.Fecha, turno.HoraInicio))
-            return (false, "Ya tiene otra reserva en el mismo horario.", null, false);
+            return (false, "Ya tiene otra reserva en el mismo horario.", null);
 
         if (turno.CupoDisponible <= 0)
-        {
-            if (await listaEsperaRepositorio.UsuarioYaEnListaActivaAsync(usuarioId, turnoId))
-                return (false, "Ya está en la lista de espera de este turno.", null, false);
-
-            await listaEsperaRepositorio.AgregarAsync(new ListaEsperaEntrada
-            {
-                Id_Turno = turnoId,
-                Id_Usuario = usuarioId,
-                FechaAltaUtc = DateTime.UtcNow,
-                Estado = EstadoListaEspera.EnEspera
-            });
-            return (false, "No hay cupo en este horario. Quedó en lista de espera; le avisaremos si se libera un lugar.", null, true);
-        }
+            return (false, "No hay cupo en este horario.", null);
 
         turno.CupoDisponible--;
         if (turno.CupoDisponible <= 0)
@@ -63,6 +40,6 @@ public class CrearReservaUseCase(
         };
         await reservaRepositorio.AgregarAsync(reserva);
 
-        return (true, "Reserva exitosa", reserva.Id, false);
+        return (true, "Reserva exitosa", reserva.Id);
     }
 }
