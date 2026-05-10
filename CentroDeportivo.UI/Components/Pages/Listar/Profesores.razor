@@ -9,7 +9,7 @@
 
 <PageTitle>Profesores</PageTitle>
 
-@if (!UsuarioSesion.EstaAutenticado())
+@if (!(UsuarioSesion.EstaAutenticado() && (UsuarioSesion.esAdministrador() || UsuarioSesion.esEmpleado())))
 {
     <p>No tenés acceso. <NavLink href="/Login">Iniciar sesión</NavLink></p>
 }

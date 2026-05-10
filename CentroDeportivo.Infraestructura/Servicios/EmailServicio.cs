@@ -57,7 +57,17 @@ namespace CentroDeportivo.Infraestructura.Servicios
 
         public Task EnviarRecordatorioTurnoAsync(string email, Turno turno)
         {
-            throw new NotImplementedException();
+            Console.WriteLine($"[Email simulado] Recordatorio turno para {email}");
+            return Task.CompletedTask;
+        }
+
+        public Task EnviarCupoListaEsperaAsync(string email, Turno turno, int minutosParaResponder)
+        {
+            Console.WriteLine(
+                $"[Email simulado] Cupo liberado en lista de espera para {email}. " +
+                $"Actividad: {turno.Actividad?.Nombre}, {turno.Fecha:yyyy-MM-dd} {turno.HoraInicio}. " +
+                $"Tiene {minutosParaResponder} minutos para confirmar en el sitio (Turnos).");
+            return Task.CompletedTask;
         }
     }
 }

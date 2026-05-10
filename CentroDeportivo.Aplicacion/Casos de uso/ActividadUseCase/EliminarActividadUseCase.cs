@@ -10,7 +10,8 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ActividadUseCase
 {
     public class EliminarActividadUseCase(IActividadRepositorio repo, ActividadValidador validador)
     {
-        public async Task Ejecutar(int idActividad) {
+        public async Task Ejecutar(int idActividad)
+        {
             var (esValido, mensaje) = await validador.validarEliminacion(idActividad);
 
             if (!esValido)

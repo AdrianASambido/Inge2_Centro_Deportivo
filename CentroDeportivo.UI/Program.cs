@@ -13,7 +13,7 @@ using CentroDeportivo.Aplicacion.Casos_de_uso.TurnoUseCase;
 using CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase;
 using CentroDeportivo.Infraestructura.Servicios;
 using CentroDeportivo.Infraestructura.Persistencia.Repositorios;
-using CentroDeportivo.UI.Services;
+using CentroDeportivo.UI.Servicios;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -88,6 +88,8 @@ builder.Services.AddScoped<ConsultarDisponibilidadUseCase>();
 builder.Services.AddScoped<ConfirmarDevolucionUseCase>();
 builder.Services.AddScoped<ListarDevolucionesPendientesUseCase>();
 
+builder.Services.AddScoped<Sesion>(); 
+
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
@@ -107,7 +109,7 @@ using (var scope = app.Services.CreateScope())
     }
     catch (Exception ex)
     {
-        
+
         Console.WriteLine($"Error al inicializar la BD: {ex.Message}");
     }
 }

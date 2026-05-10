@@ -9,12 +9,14 @@ using CentroDeportivo.Aplicacion.Entidades;
 
 namespace CentroDeportivo.Aplicacion.Casos_de_uso.CanchaUseCase
 {
-    public class CrearCanchaUseCase (ICanchaRepositorio repo, CanchaValidador validador)
+    public class CrearCanchaUseCase(ICanchaRepositorio repo, CanchaValidador validador)
     {
-        public async Task ejecutar(Cancha c) {
+        public async Task ejecutar(Cancha c)
+        {
             var (esValido, mensaje) = await validador.validar(c);
 
-            if (!esValido) {
+            if (!esValido)
+            {
                 throw new Exception(mensaje);
             }
 

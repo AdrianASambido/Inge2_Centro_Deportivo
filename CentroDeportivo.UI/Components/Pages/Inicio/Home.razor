@@ -4,30 +4,40 @@
 
 <PageTitle>Inicio - Centro Deportivo</PageTitle>
 
-    <div class="container text-center mt-5">
-        <div class="p-5 mb-4 bg-light rounded-3 shadow-sm">
-            <h1 class="display-5 fw-bold text-primary">Bienvenido al Centro Deportivo</h1>
-            <p class="fs-4 mt-3">Gestioná tus actividades, socios y turnos de forma fácil y rápida.</p>
+<div class="container text-center mt-5">
 
-            <hr class="my-4">
+    <div class="p-5 mb-4 bg-light rounded-3 shadow-sm">
 
-            <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
-                <!-- Botón que lleva a Reservas -->
-                <button class="btn btn-primary btn-lg px-4 gap-3" @onclick="IrAReservas">
-                    <i class="bi bi-calendar-check"></i> Realizar una Reserva
-                </button>
+        <h1 class="display-5 fw-bold text-primary">
+            Bienvenido al Centro Deportivo
+        </h1>
 
-                <button class="btn btn-outline-secondary btn-lg px-4">
-                    Ver Actividades
-                </button>
-            </div>
+        <p class="fs-4 mt-3">
+            Gestioná tus actividades, socios y turnos de forma fácil y rápida.
+        </p>
+
+        <hr class="my-4">
+
+        <div class="d-flex justify-content-center gap-3 mt-4">
+
+            <button class="btn btn-primary btn-lg px-4" @onclick="IrALogin"> Iniciar Sesión </button>
+
+            <button class="btn btn-danger btn-lg px-4" @onclick="IrARegistrar"> Registrarme </button>
+
         </div>
+
     </div>
+
+</div>
 
 
 @code {
-    // Método para navegar mediante código C#
-    private void IrAReservas()    {
-        Navigation.NavigateTo("reservas");
+    private void IrARegistrar()    {
+        Navigation.NavigateTo("registrar");
     }
+
+    private void IrALogin()    {
+        Navigation.NavigateTo("login");
+    }
+
 }
