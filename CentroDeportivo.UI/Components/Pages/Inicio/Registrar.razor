@@ -30,10 +30,10 @@
             <input placeholder="Domicilio" @bind="usr.Domicilio" class="form-control">
         </div>
         <div class="mb-2">
-            <input placeholder="Correo" @bind="usr.Correo" type="email" class="form-control">
+            <input placeholder="Correo" @bind="usr.Correo" type="email" class="form-control" autocomplete="new-email">
         </div>
         <div class="mb-2">
-            <input placeholder="Contraseña" @bind="usr.Contrasenia" class="form-control" type="password">
+            <input placeholder="Contraseña" @bind="usr.Contrasenia" class="form-control" type="password" autocomplete="new-password">
         </div>
         <div class="mb-4">
             <input placeholder="Repetir Contraseña" @bind="usr.Contrasenia2" class="form-control" type="password">
@@ -84,7 +84,7 @@
         public string Nombre { get; set; } = "";
         public string Apellido { get; set; } = "";
         public string DNI { get; set; } = "";
-        public int Edad { get; set; }
+        public int? Edad { get; set; }
         public string Domicilio { get; set; } = "";
         public string Correo { get; set; } = "";
         public string Contrasenia { get; set; } = "";

@@ -1,27 +1,54 @@
-﻿<div class="nav-list">
-    <div class="nav-item">
-        <NavLink href="/listar-turnos-creados" class="nav-link" Match="NavLinkMatch.All">
-            <span class="bi bi-calendar-event me-2"></span> Turnos
-        </NavLink>
+﻿@inject Sesion UsuarioSesion
+
+@if (UsuarioSesion.EstaAutenticado() && !UsuarioSesion.esCliente())
+{
+    <div class="nav-list">
+        <div class="nav-item">
+            <NavLink href="/listar-turnos-creados" class="nav-link" Match="NavLinkMatch.All">
+                <span class="bi bi-calendar-event me-2"></span> Turnos
+            </NavLink>
+        </div>
+        <div class="nav-item">
+            <NavLink href="/Canchas" class="nav-link">
+                <span class="bi bi-grid-3x3 me-2"></span> Canchas
+            </NavLink>
+        </div>
+        <div class="nav-item">
+            <NavLink href="/Profesores" class="nav-link">
+                <span class="bi bi-person-badge me-2"></span> Profesores
+            </NavLink>
+        </div>
+        <div class="nav-item">
+            <NavLink href="/Actividades" class="nav-link">
+                <span class="bi bi-activity me-2"></span> Actividades
+            </NavLink>
+        </div>
+        <div class="nav-item">
+            <NavLink href="/Empleados" class="nav-link">
+                <span class="bi bi-people me-2"></span> Empleados
+            </NavLink>
+        </div>
     </div>
-    <div class="nav-item">
-        <NavLink href="/Canchas" class="nav-link">
-            <span class="bi bi-grid-3x3 me-2"></span> Canchas
-        </NavLink>
+}
+
+
+@if (UsuarioSesion.EstaAutenticado() && UsuarioSesion.esCliente())
+{
+    <div class="nav-list">
+        <div class="nav-item">
+            <NavLink href="/Turnos" class="nav-link" Match="NavLinkMatch.All">
+                <span class="bi bi-calendar-event me-2"></span> Turnos
+            </NavLink>
+        </div>
+        <div class="nav-item">
+            <NavLink href="/MiPerfil" class="nav-link">
+                <span class="bi bi-grid-3x3 me-2"></span> Mi Perfil
+            </NavLink>
+        </div>
+        <div class="nav-item">
+            <NavLink href="/MisReservas" class="nav-link">
+                <span class="bi bi-person-badge me-2"></span> Mis Reservas
+            </NavLink>
+        </div>
     </div>
-    <div class="nav-item">
-        <NavLink href="/Profesores" class="nav-link">
-            <span class="bi bi-person-badge me-2"></span> Profesores
-        </NavLink>
-    </div>
-    <div class="nav-item">
-        <NavLink href="/Actividades" class="nav-link">
-            <span class="bi bi-activity me-2"></span> Actividades
-        </NavLink>
-    </div>
-    <div class="nav-item">
-        <NavLink href="/Empleados" class="nav-link">
-            <span class="bi bi-people me-2"></span> Empleados
-        </NavLink>
-    </div>
-</div>
+}

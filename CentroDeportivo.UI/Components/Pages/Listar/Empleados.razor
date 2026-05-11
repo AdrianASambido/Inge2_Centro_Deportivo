@@ -11,7 +11,7 @@
 
 @if (!(UsuarioSesion.EstaAutenticado() && (UsuarioSesion.esAdministrador())))
 {
-    <div class="alert alert-warning">No tenés acceso. <NavLink href="/Login">Iniciar sesión</NavLink></div>
+    <div class="alert alert-warning">¡No tenés acceso a esta seccion!</div>
 }
 else
 {
