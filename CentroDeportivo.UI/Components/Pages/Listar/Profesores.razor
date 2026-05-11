@@ -9,9 +9,9 @@
 
 <PageTitle>Profesores</PageTitle>
 
-@if (!(UsuarioSesion.EstaAutenticado() && (UsuarioSesion.esAdministrador())))
+@if (!(UsuarioSesion.EstaAutenticado() && (UsuarioSesion.esAdministrador() || UsuarioSesion.esEmpleado())))
 {
-    <div class="alert alert-warning">No tenés acceso. <NavLink href="/Login">Iniciar sesión</NavLink></div>
+    <div class="alert alert-warning">¡No tenés acceso a esta seccion!</div>
 }
 else
 {
@@ -87,6 +87,13 @@ else
     </div>
 }
 
+@if (!string.IsNullOrEmpty(mensaje))
+{
+    <div class="alert alert-info mt-3">@mensaje</div>
+}
+
+
+
 @code {
     string mensaje = ""; bool mostrarDialog = false; int idAEliminar; bool quiereAgregar = false; Datos pro = new Datos();
     List<Profesor> profesor = new List<Profesor>();
@@ -104,7 +111,7 @@ else
         {
             await EliminarProfesorUseCase.ejecutar(idAEliminar);
             profesor = (await ListarProfesoresUseCase.ejecutar()).ToList();
-            mensaje = "";
+            mensaje = "Profesor eliminado correctamente";
             StateHasChanged();
         }
         catch (Exception ex) { mensaje = ex.Message; }

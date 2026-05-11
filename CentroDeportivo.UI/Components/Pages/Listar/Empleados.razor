@@ -11,7 +11,7 @@
 
 @if (!(UsuarioSesion.EstaAutenticado() && (UsuarioSesion.esAdministrador())))
 {
-    <div class="alert alert-warning">No tenés acceso. <NavLink href="/Login">Iniciar sesión</NavLink></div>
+    <div class="alert alert-warning">¡No tenés acceso a esta seccion!</div>
 }
 else
 {
@@ -100,18 +100,18 @@ else
     List<Usuario> empleado = new List<Usuario>();
 
     protected override async Task OnInitializedAsync() => empleado = (await ListarEmpleadosUseCase.ejecutar()).ToList();
-    
+
     void CerrarSesion() { UsuarioSesion.CerrarSesion(); Navegador.NavigateTo("/Login", true); }
-    
+
     void CrearEmpleado()
     {
-        emp = new Datos(); 
+        emp = new Datos();
         quiereAgregar = true;
         mensaje = "";
     }
-    
+
     public void Editar(int Id) => Navegador.NavigateTo($"/editar-empleado/{Id}");
-    
+
     void ConfirmarEliminacion(int Id) { idAEliminar = Id; mostrarDialog = true; }
 
     async Task Eliminar()
@@ -133,11 +133,11 @@ else
         {
 
             var emple = new Usuario(emp.nombre, emp.apellido, "a", emp.dni, "A123456789", emp.email, false, Rol.Empleado);
-            
+
             await CrearEmpleadoUseCase.ejecutar(emple);
-            
+
             empleado = (await ListarEmpleadosUseCase.ejecutar()).ToList();
-            
+
             mensaje = "Empleado creado exitosamente.";
             quiereAgregar = false;
             StateHasChanged();
