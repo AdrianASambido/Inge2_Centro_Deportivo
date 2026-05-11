@@ -1,8 +1,6 @@
-﻿@page "/editar-reserva/{Id:int}"
+@page "/editar-reserva/{Id:int}"
 @rendermode InteractiveServer
 @inject IReservaRepositorio RepositorioReserva
-@inject EditarReservaUseCase EditarReservaCase
-@inject Sesion SesionUsuario
 @inject NavigationManager Navegador
 
 <PageTitle>Editar Reserva</PageTitle>
@@ -11,18 +9,19 @@
 
 @if (reserva == null)
 {
-
+    <div class="alert alert-warning">No se encontro la reserva solicitada.</div>
 }
 else
 {
-    <input placeholder="ID de Persona" @bind="personaId" class="form-control">
-    <input placeholder="ID del Evento" @bind="eventoId" class="form-control">
-    <input placeholder="Estado" @bind="estado" class="form-control">
-    <p><strong>Fecha de alta:</strong> @fechaAlta.ToString("dd/MM/yyyy HH:mm")</p>
-
+    <div class="card p-3 mb-3">
+        <p><strong>Id:</strong> @reserva.Id</p>
+        <p><strong>Usuario:</strong> @reserva.Id_Usuario</p>
+        <p><strong>Turno:</strong> @reserva.Id_Turno</p>
+        <p><strong>Estado:</strong> @reserva.Estado</p>
+        <p><strong>Fecha de reserva:</strong> @reserva.FechaReserva</p>
+    </div>
 }
 
-<button class="btn btn-success" @onclick="GuardarDatos">Guardar datos</button>
 <button class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
 
 @if (!string.IsNullOrEmpty(mensaje))
@@ -32,58 +31,25 @@ else
 
 
 @code {
-    
+
     [Parameter]
     public int Id { get; set; }
-    public double precioPagado;
-    public int personaId;
-    public int eventoId;
-    public DateTime fechaReserva;
-    public EstadoReserva estado;
     public Reserva? reserva;
-    
+
     public string mensaje = "";
     protected override async Task OnInitializedAsync()
     {
         reserva = await RepositorioReserva.ObtenerPorIdAsync(Id);
-        if (reserva != null)
-        {
-            idReservaEditada = reserva.Id;
-            personaId = reserva.PersonaId;
-            eventoId = reserva.EventoDeportivoId;
-            fechaAlta = reserva.FechaAltaReserva;
-            estado = reserva.EstadoAsistencia;
-        }
     }
+
     void MostrarMensaje(string msj)
     {
         mensaje = msj;
     }
-    void GuardarDatos()
-    {
-        if (reserva == null)
-        {
-            return;
-        }
 
-        try
-        {
-            mensaje = "";
-            var reservaNueva = new Reserva(personaId, eventoId);
-            reservaNueva.AsignarEstadoAsistencia(estado);
-            EditarReservaCase.Ejecutar(reservaNueva, idReservaEditada, SesionUsuario.UsuarioActual!.Id);
-            Navegador.NavigateTo("/Reservas");
-        }
-        catch (Exception ex)
-        {
-            mensaje = ex.Message;
-            MostrarMensaje(mensaje);
-        }
-
-    }
     void Cancelar()
     {
-        Navegador.NavigateTo("/Reservas");
+        Navegador.NavigateTo("/reservas");
         mensaje = "";
     }
 }

@@ -10,20 +10,23 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.UsuarioUseCase
 {
     public class CambiarContraseniaUseCase(IUsuarioRepositorio repo, IHashServicio repoHash)
     {
-        public async Task ejecutar(string contraVieja, string contraNueva, int idUsuario) 
+        public async Task ejecutar(string contraVieja, string contraNueva, int idUsuario)
         {
             var usuario = await repo.ObtenerPorIdAsync(idUsuario);
 
-            if (usuario == null) {
+            if (usuario == null)
+            {
                 throw new Exception("Usuario inexistente");
             }
 
             var (esValido, mensaje) = UsuarioValidadorBase.ValidarFormatoPassword(contraNueva);
-            if (!esValido) {
+            if (!esValido)
+            {
                 throw new Exception(mensaje);
             }
 
-            if (!repoHash.Verificar(contraVieja, usuario.Password)){
+            if (!repoHash.Verificar(contraVieja, usuario.Password))
+            {
                 throw new Exception("La contraseña actual es incorrecta");
             }
 

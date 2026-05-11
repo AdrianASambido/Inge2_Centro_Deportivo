@@ -1,44 +1,27 @@
-﻿@using Microsoft.AspNetCore.Components.Routing
-<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href=""></a>
+﻿<div class="nav-list">
+    <div class="nav-item">
+        <NavLink href="/listar-turnos-creados" class="nav-link" Match="NavLinkMatch.All">
+            <span class="bi bi-calendar-event me-2"></span> Turnos
+        </NavLink>
     </div>
-</div>
-
-<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
-
-<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-    <nav class="flex-column">
-
-        <div class="nav-item px-3">
-           @* <NavLink class="nav-link" href="">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
-            </NavLink>*@
-        </div>
-
-        <div class="nav-item px-3">
-           @* <NavLink class="nav-link" href="">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Usuarios
-            </NavLink>*@
-        </div>
-
-        <div class="nav-item px-3">
-           @* <NavLink class="nav-link" href="">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Personas
-            </NavLink>*@ 
-        </div>
-
-        <div class="nav-item px-3">
-           @* <NavLink class="nav-link" href="">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Eventos
-            </NavLink> *@
-        </div>
-
-        <div class="nav-item px-3">
-          @*  <NavLink class="nav-link" href="">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Reservas
-            </NavLink> *@
-        </div>
-
-    </nav>
+    <div class="nav-item">
+        <NavLink href="/Canchas" class="nav-link">
+            <span class="bi bi-grid-3x3 me-2"></span> Canchas
+        </NavLink>
+    </div>
+    <div class="nav-item">
+        <NavLink href="/Profesores" class="nav-link">
+            <span class="bi bi-person-badge me-2"></span> Profesores
+        </NavLink>
+    </div>
+    <div class="nav-item">
+        <NavLink href="/Actividades" class="nav-link">
+            <span class="bi bi-activity me-2"></span> Actividades
+        </NavLink>
+    </div>
+    <div class="nav-item">
+        <NavLink href="/Empleados" class="nav-link">
+            <span class="bi bi-people me-2"></span> Empleados
+        </NavLink>
+    </div>
 </div>

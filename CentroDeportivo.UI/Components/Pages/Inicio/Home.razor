@@ -1,6 +1,8 @@
 ﻿@page "/"
+@layout PublicLayout
 @inject NavigationManager Navigation
 @rendermode InteractiveServer
+
 
 <PageTitle>Inicio - Centro Deportivo</PageTitle>
 
@@ -23,6 +25,7 @@
             <button class="btn btn-primary btn-lg px-4" @onclick="IrALogin"> Iniciar Sesión </button>
 
             <button class="btn btn-danger btn-lg px-4" @onclick="IrARegistrar"> Registrarme </button>
+
         </div>
 
     </div>
@@ -38,4 +41,5 @@
     private void IrALogin()    {
         Navigation.NavigateTo("login");
     }
+
 }

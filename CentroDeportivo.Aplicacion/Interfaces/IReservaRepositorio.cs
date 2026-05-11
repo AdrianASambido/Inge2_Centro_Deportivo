@@ -19,4 +19,3 @@ namespace CentroDeportivo.Aplicacion.Interfaces
         Task ActualizarAsync(Reserva reserva);
     }
 }
-

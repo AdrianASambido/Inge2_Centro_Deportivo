@@ -1,20 +1,25 @@
 ﻿@inherits LayoutComponentBase
-<header> <img src="images/logo.png" class="logo" /> </header>
+@inject Sesion UsuarioSesion
+
 <div class="page">
-   @* <div class="sidebar">
-        <NavMenu />
-    </div>
-    *@
-    <main>
-       
-        <article class="content px-4">
+    @if (UsuarioSesion.EstaAutenticado())
+    {
+        <aside class="sidebar">
+            <div class="logo-container">
+                <img src="/images/logo.png" class="logo" alt="Logo" />
+            </div>
+
+            <div class="sidebar-title">
+                Centro Deportivo
+            </div>
+
+            <NavMenu />
+        </aside>
+    }
+
+    <main class="main-content">
+        <article class="content">
             @Body
         </article>
     </main>
-</div>
-
-<div id="blazor-error-ui">
-    An unhandled error has occurred.
-    <a href="" class="reload">Reload</a>
-    <a class="dismiss">🗙</a>
 </div>

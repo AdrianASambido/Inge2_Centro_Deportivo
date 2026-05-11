@@ -75,14 +75,21 @@ builder.Services.AddScoped<ListarInscriptosUseCase>();
 builder.Services.AddScoped<ListarReservasUseCase>();
 builder.Services.AddScoped<CancelarReservaUseCase>();
 builder.Services.AddScoped<RegistrarAsistenciaQrUseCase>();
-builder.Services.AddScoped<ConsultarDisponibilidadUseCase>();
+builder.Services.AddScoped<GenerarQrUseCase>();
+builder.Services.AddScoped<ConfirmarPagoReservaUseCase>();
+
 builder.Services.AddScoped<CrearTurnoUseCase>();
 builder.Services.AddScoped<EditarTurnoUseCase>();
 builder.Services.AddScoped<EliminarTurnoUseCase>();
 builder.Services.AddScoped<ListarTurnosUseCase>();
 builder.Services.AddScoped<ListarTurnosCalendarioUseCase>();
+builder.Services.AddScoped<ConsultarDisponibilidadUseCase>();
 
-builder.Services.AddScoped<Sesion>();
+builder.Services.AddScoped<ConfirmarDevolucionUseCase>();
+builder.Services.AddScoped<ListarDevolucionesPendientesUseCase>();
+
+builder.Services.AddScoped<Sesion>(); 
+
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
@@ -102,7 +109,7 @@ using (var scope = app.Services.CreateScope())
     }
     catch (Exception ex)
     {
-        
+
         Console.WriteLine($"Error al inicializar la BD: {ex.Message}");
     }
 }

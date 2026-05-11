@@ -1,0 +1,25 @@
+﻿.sidebar {
+    width: 250px;
+    height: 100vh;
+    background-color: #1e293b;
+    padding: 20px;
+    position: fixed;
+}
+
+.logo {
+    color: white;
+    margin-bottom: 30px;
+}
+
+.menu-item {
+    display: block;
+    color: white;
+    padding: 12px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    text-decoration: none;
+}
+
+.menu-item:hover {
+    background-color: #334155;
+}

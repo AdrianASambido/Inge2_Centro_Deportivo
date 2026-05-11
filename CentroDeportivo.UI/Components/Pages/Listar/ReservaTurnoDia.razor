@@ -1,4 +1,4 @@
-﻿@page "/Turnos/dia"
+@page "/Turnos/dia"
 @rendermode InteractiveServer
 @using System.Globalization
 @inject Sesion UsuarioSesion
@@ -199,20 +199,26 @@
     }
 
     private async Task Reservar(int turnoId)
-    {
+    { //Al metodo crear reserva le tenes que mandar la reserva creada. La creas con Id de usuario,y Id de Turno. Luego el caso de uso le setea los demas valores.
+        
         procesando = true;
         mensajeError = mensajeExito = mensajeInfo = null;
         try
         {
             var uid = UsuarioSesion.UsuarioActual!.Id;
-            var (ok, msg, _, enLista) = await CrearReservaUseCase.ejecutar(uid, turnoId);
-            if (ok)
-                mensajeExito = "Reserva exitosa";
-            else if (enLista)
-                mensajeInfo = msg;
-            else
-                mensajeError = msg;
+            var nuevaReserva = new Reserva
+            {
+                Id_Usuario = uid,
+                Id_Turno = turnoId
+            };
 
+            
+            await CrearReservaUseCase.Ejecutar(nuevaReserva);
+
+            // si no tira excepcion el CU es porq salio bien (creo q iria aca el mensaje este)
+            mensajeExito = "Reserva exitosa";
+
+            
             await CargarTurnosYListas();
         }
         catch (Exception ex)

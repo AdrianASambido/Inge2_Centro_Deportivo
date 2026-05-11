@@ -62,7 +62,7 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Contexto
                         .WithMany()
                         .HasForeignKey(t => t.Id_Profesor);
 
-      
+
 
             modelBuilder.Entity<Devolucion>()
                 .HasOne(d => d.Usuario)

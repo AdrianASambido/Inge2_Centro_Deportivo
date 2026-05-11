@@ -21,7 +21,7 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
         public async Task AgregarAsync(Reserva reserva)
         {
             await contexto.Reservas.AddAsync(reserva);
-            await contexto.SaveChangesAsync();  
+            await contexto.SaveChangesAsync();
         }
 
         public async Task<bool> ExisteReservaActivaAsync(int usuarioId, int turnoId)
@@ -47,13 +47,13 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
                         .AsQueryable();
 
 
-                if (!string.IsNullOrWhiteSpace(dni))
-                       query = query.Where(r => r.Usuario!.Dni == dni);
+            if (!string.IsNullOrWhiteSpace(dni))
+                query = query.Where(r => r.Usuario!.Dni == dni);
 
-                return await query
-                            .OrderBy(r => r.Usuario!.Nombre)
-                            .AsNoTracking()
-                            .ToListAsync();
+            return await query
+                        .OrderBy(r => r.Usuario!.Nombre)
+                        .AsNoTracking()
+                        .ToListAsync();
         }
 
         public async Task<IEnumerable<Reserva>> ObtenerPorUsuarioAsync(int usuarioId, int? actividadId = null, EstadoReserva? estado = null, bool incluirPasadas = false)
