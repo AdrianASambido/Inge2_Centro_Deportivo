@@ -26,9 +26,9 @@ public static class DbInicializador
             context.SaveChanges();
         }
 
-        SeedCatalogoReservas(context);
+        // SeedCatalogoReservas(context);
     }
-
+    /*
     /// <summary>Cancha, profesor y actividades base si aún no existen (útil tras primera ejecución sólo con admin).</summary>
     private static void SeedCatalogoReservas(CentroDeportivoContext context)
     {
@@ -48,4 +48,5 @@ public static class DbInicializador
 
         context.SaveChanges();
     }
+    */
 }

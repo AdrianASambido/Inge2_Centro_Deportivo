@@ -9,220 +9,228 @@
 @inject ConsultarDisponibilidadUseCase ConsultarDisponibilidadUseCase
 @inject ListarActividadesUseCase ListarActividadesUseCase
 
-
 <PageTitle>Listado de Turnos</PageTitle>
 
 @if (!(UsuarioSesion.EstaAutenticado()) && (UsuarioSesion.esAdministrador() || UsuarioSesion.esEmpleado()))
 {
-    <p>No tenés acceso. <NavLink href="/Login">Iniciar sesión</NavLink></p>
+    <div class="alert alert-warning">
+        No tenés acceso. <NavLink href="/Login">Iniciar sesión</NavLink>
+    </div>
 }
 else
 {
-    <h2>Turnos creados</h2>
-    <p>Bienvenido, @UsuarioSesion.UsuarioActual!.Nombre</p>
-    <button class="btn btn-danger" @onclick="CerrarSesion">Cerrar sesión</button>
-    <button class="btn btn-success" @onclick="CrearTurno">Programar turno</button>
-    <table class="table">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Actividad</th>
-                <th>Profesor</th>
-                <th>Fecha</th>
-                <th>Hora inicio</th>
-                <th>Hora fin</th>
-                <th>Nro. cancha</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var t in turnos)
-            {
-                <tr>
-                    <td>@t.Id</td>
-                    <td>@t.Actividad.Nombre</td>
-                    <td>@t.Profesor.Nombre</td>
-                    <td>@t.Fecha</td>
-                    <td>@t.HoraInicio</td>
-                    <td>@t.HoraFin</td>
-                    <td>@t.Cancha.Numero</td>
-                    <td>
-                        <button class="btn btn-primary"
-                        @onclick="() => MostrarInscriptos(t.Id)">
-                            Consultar Inscriptos
-                        </button>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}
+    <div class="container-fluid p-0">
+        <h2 class="mb-1">Turnos creados</h2>
+        <p class="text-muted mb-4">Bienvenido, @UsuarioSesion.UsuarioActual!.Nombre</p>
 
-@if (quiereAgregar)
-{
-    <div class="container mt-4">
-        <h3>Datos sobre el turno</h3>
+        <div class="d-flex gap-2 mb-4">
+            <button class="btn btn-success" @onclick="CrearTurno">
+                <i class="bi bi-plus-circle"></i> Programar turno
+            </button>
+            <button class="btn btn-danger" @onclick="CerrarSesion">
+                Cerrar sesión
+            </button>
+        </div>
 
-        <label class="form-label">Fecha</label>
-
-        <input type="date" class="form-control mb-3" min="@DateTime.Today.ToString("yyyy-MM-dd")"  @bind="t.Fecha" />
-
-        <label class="form-label">Hora inicio</label>
-
-        <input type="time" class="form-control mb-3" @bind="t.HoraInicio" />
-
-        <button class="btn btn-primary" @onclick="BuscarPorDisponibilidad">Buscar disponibilidad</button>
-
-
-        @if (mostrarDisponibles)
+        @if (quiereAgregar)
         {
-            <div class="mt-3">
-            <label class="form-label">Cancha</label>
+            <div class="card shadow-sm mb-4 border-primary" style="max-width: 600px;">
+                <div class="card-body">
+                    <h4 class="card-title mb-3">Datos sobre el turno</h4>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Fecha</label>
+                            <input type="date" class="form-control" min="@DateTime.Today.ToString("yyyy-MM-dd")" @bind="t.Fecha" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Hora inicio</label>
+                            <input type="time" class="form-control" @bind="t.HoraInicio" />
+                        </div>
+                    </div>
 
-            <select @bind="t.Id_Cancha" class="form-select mb-3">
-                <option value="">Seleccione una cancha</option>
-                @foreach (var c in canchasDispo)
-                {
-                    <option value="@c.Id">Cancha @c.Numero </option>
-                }
-            </select>
+                    <button class="btn btn-primary w-100 mb-3" @onclick="BuscarPorDisponibilidad">Buscar disponibilidad</button>
+                    <button class="btn btn-secondary mb-3" @onclick="Cancelar">Cancelar</button>
 
-
-            <label class="form-label">Profesor</label>
-            <select @bind="t.Id_Profesor" class="form-select mb-3">
-                <option value="">Seleccione un profesor</option>
-                @foreach (var p in profesoresDispo)
-                {
-                    <option value="@p.Id"> @p.Nombre </option>
-                }
-            </select>
-
-            @if (canchaSeleccionada != null)
-            {
-                <label class="form-label">Cupo máximo</label>
-                <select @bind="t.CupoMaximo" class="form-select mb-3">
-                    @for (int i = 1; i <= canchaSeleccionada.Capacidad; i++)
+                    @if (mostrarDisponibles)
                     {
-                        <option value="@i">@i</option>
+                        <div class="fade-in">
+                            <div class="mb-3">
+                                <label class="form-label">Cancha</label>
+                                <select @bind="t.Id_Cancha" class="form-select">
+                                    <option value="">Seleccione una cancha</option>
+                                    @foreach (var c in canchasDispo)
+                                    {
+                                        <option value="@c.Id">Cancha @c.Numero </option>
+                                    }
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Profesor</label>
+                                <select @bind="t.Id_Profesor" class="form-select">
+                                    <option value="">Seleccione un profesor</option>
+                                    @foreach (var p in profesoresDispo)
+                                    {
+                                        <option value="@p.Id"> @p.Nombre </option>
+                                    }
+                                </select>
+                            </div>
+
+                            @if (canchaSeleccionada != null)
+                            {
+                                <div class="mb-3">
+                                    <label class="form-label">Cupo máximo (Capacidad: @canchaSeleccionada.Capacidad)</label>
+                                    <select @bind="t.CupoMaximo" class="form-select">
+                                        @for (int i = 1; i <= canchaSeleccionada.Capacidad; i++)
+                                        {
+                                            <option value="@i">@i</option>
+                                        }
+                                    </select>
+                                </div>
+                            }
+
+                            <div class="mb-3">
+                                <label class="form-label">Actividad</label>
+                                <select @bind="t.Id_Actividad" class="form-select">
+                                    <option value="">Seleccione una actividad</option>
+                                    @foreach (var a in actividades)
+                                    {
+                                        <option value="@a.Id">@a.Nombre</option>
+                                    }
+                                </select>
+                            </div>
+
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-primary flex-grow-1" @onclick="Aceptar">Confirmar Turno</button>
+                                <button class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
+                            </div>
+                        </div>
                     }
-                </select>
-            }
-
-            <label class="form-label">Actividad</label>
-            <select @bind="t.Id_Actividad" class="form-select mb-3">
-
-                <option value="">Seleccione una actividad</option>
-
-                @foreach (var a in actividades)
-                {
-                    <option value="@a.Id">
-                        @a.Nombre
-                    </option>
-                }
-            </select>
-
-
-            <button class="btn btn-primary" @onclick="Aceptar">Aceptar</button>
-            <button class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
-
+                </div>
             </div>
         }
+
+        <div class="table-responsive shadow-sm" style="background: white; border-radius: 8px;">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>ID</th>
+                        <th>Actividad</th>
+                        <th>Profesor</th>
+                        <th>Fecha</th>
+                        <th>Hora inicio</th>
+                        <th>Hora fin</th>
+                        <th>Cancha</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var t in turnos)
+                    {
+                        <tr>
+                            <td class="fw-bold">@t.Id</td>
+                            <td>@t.Actividad.Nombre</td>
+                            <td>@t.Profesor.Nombre</td>
+                            <td>@t.Fecha.ToString("dd/MM/yyyy")</td>
+                            <td>@t.HoraInicio</td>
+                            <td>@t.HoraFin</td>
+                            <td><span class="badge bg-info text-dark">N° @t.Cancha.Numero</span></td>
+                            <td class="text-center">
+                                <button class="btn btn-sm btn-outline-primary" @onclick="() => MostrarInscriptos(t.Id)">
+                                    Ver Inscriptos
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
     </div>
 }
 
 @if (!string.IsNullOrEmpty(mensaje))
 {
-    <div class="alert alert-danger">@mensaje</div>
+    <div class="alert alert-info mt-3 shadow-sm">@mensaje</div>
 }
 
 @code {
 
-            bool mostrarDisponibles = false;
-            bool quiereAgregar = false;
-            string mensaje = "";
-            bool mostrarDialog = false;
-            int idAEliminar;
-            Datos t = new Datos();
+    bool mostrarDisponibles = false;
+    bool quiereAgregar = false;
+    string mensaje = "";
+    bool mostrarDialog = false;
+    int idAEliminar;
+    Datos t = new Datos();
 
-            Cancha? canchaSeleccionada => canchasDispo.FirstOrDefault(c => c.Id == t.Id_Cancha);
+    Cancha? canchaSeleccionada => canchasDispo.FirstOrDefault(c => c.Id == t.Id_Cancha);
 
-            List<Profesor> profesoresDispo = new List<Profesor>();
-            List<Actividad> actividades = new List<Actividad>();
-            List<Cancha> canchasDispo = new List<Cancha>();
-            List<Turno> turnos = new List<Turno>();
+    List<Profesor> profesoresDispo = new List<Profesor>();
+    List<Actividad> actividades = new List<Actividad>();
+    List<Cancha> canchasDispo = new List<Cancha>();
+    List<Turno> turnos = new List<Turno>();
 
     protected override async Task OnInitializedAsync()
+    {
+        turnos = (await ListarTurnosUseCase.Ejecutar(null, null, null, null, null)).ToList();
+        actividades = (await ListarActividadesUseCase.ejecutar()).ToList();
+    }
+
+    void CerrarSesion()
+    {
+        UsuarioSesion.CerrarSesion();
+        Navegador.NavigateTo("/Login", true);
+    }
+
+    void CrearTurno()
+    {
+        quiereAgregar = true;
+    }
+
+    void MostrarInscriptos(int Id)
+    {
+        Navegador.NavigateTo($"/listar-inscriptos/{Id}");
+    }
+
+    async Task BuscarPorDisponibilidad()
+    {
+        try
         {
+            mensaje = "";
+            var (profesD, canchasD) = await ConsultarDisponibilidadUseCase.ejecutar(t.Fecha, t.HoraInicio);
+            profesoresDispo = profesD.ToList();
+            canchasDispo = canchasD.ToList();
+            mostrarDisponibles = true;
+        }
+        catch (Exception ex)
+        {
+            mensaje = ex.Message;
+            mostrarDisponibles = false;
+        }
+    }
+
+    async Task Aceptar()
+    {
+        try
+        {
+            var nuevoTurno = new Turno
+            {
+                Fecha = this.t.Fecha,
+                HoraInicio = this.t.HoraInicio,
+                HoraFin = this.t.HoraInicio.AddHours(1),
+                CupoMaximo = this.t.CupoMaximo,
+                Id_Actividad = this.t.Id_Actividad,
+                Id_Profesor = this.t.Id_Profesor,
+                Id_Cancha = this.t.Id_Cancha
+            };
+            await CrearTurnoUseCase.ejecutar(nuevoTurno);
             turnos = (await ListarTurnosUseCase.Ejecutar(null, null, null, null, null)).ToList();
-            actividades = (await ListarActividadesUseCase.ejecutar()).ToList();
-        }
-
-        void CerrarSesion()
-        {
-            UsuarioSesion.CerrarSesion();
-            Navegador.NavigateTo("/Login", true);
-        }
-
-        void CrearTurno()
-        {
-            quiereAgregar = true;
-        }
-
-        void Editar(int Id)
-        {
-            Navegador.NavigateTo($"/editar-turno/{Id}");
-        }
-
-        void MostrarMensaje(string msj)
-        {
-            mensaje = msj;
-        }
-
-        void ConfirmarEliminacion(int Id)
-        {
-            idAEliminar = Id;
-            mostrarDialog = true;
-        }
-
-        async Task BuscarPorDisponibilidad()
-        {
-            try
-            {
-                mensaje = "";
-                var (profesD, canchasD) = await ConsultarDisponibilidadUseCase.ejecutar(t.Fecha, t.HoraInicio);
-                profesoresDispo = profesD.ToList();
-                canchasDispo = canchasD.ToList();
-                mostrarDisponibles = true;
-            }
-            catch (Exception ex)
-            {
-                MostrarMensaje(ex.Message);
-                mostrarDisponibles = false;
-            }
-        }
-
-        async Task Aceptar()
-        {
-            try
-            {
-                var t = new Turno
-                {
-                    Fecha = this.t.Fecha,
-                    HoraInicio = this.t.HoraInicio,
-                    HoraFin = this.t.HoraInicio.AddHours(1),
-                    CupoMaximo = this.t.CupoMaximo,
-                    Id_Actividad = this.t.Id_Actividad,
-                    Id_Profesor = this.t.Id_Profesor,
-                    Id_Cancha = this.t.Id_Cancha
-                };
-            await CrearTurnoUseCase.ejecutar(t);
-            turnos = (await ListarTurnosUseCase.Ejecutar(null, null, null, null, null)).ToList();
+            mensaje = "Turno creado correctamente.";
             quiereAgregar = false;
             StateHasChanged();
         }
         catch (Exception ex)
         {
-            MostrarMensaje(ex.Message);
+            mensaje = ex.Message;
         }
     }
 
@@ -233,25 +241,14 @@ else
         t = new Datos();
     }
 
-    void MostrarInscriptos(int Id)
-    {
-        Navegador.NavigateTo($"/listar-inscriptos/{Id}");
-    }
-
-
     public class Datos
     {
-        public int Id { get; private set; }
-        public DateOnly Fecha { get; set; } =
-        DateOnly.FromDateTime(DateTime.Today);
+        public int Id { get; set; }
+        public DateOnly Fecha { get; set; } = DateOnly.FromDateTime(DateTime.Today);
         public TimeOnly HoraInicio { get; set; } = TimeOnly.FromDateTime(DateTime.Now);
-        public TimeOnly HoraFin { get; set; }
         public int CupoMaximo { get; set; }
         public int Id_Actividad { get; set; }
         public int Id_Profesor { get; set; }
         public int Id_Cancha { get; set; }
-        public Actividad Actividad { get; set; } = null!;
-        public Cancha Cancha { get; set; } = null!;
-        public Profesor Profesor { get; set; } = null!;
     }
 }
