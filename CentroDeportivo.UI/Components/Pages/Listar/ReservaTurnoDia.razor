@@ -3,7 +3,7 @@
 @using System.Globalization
 @inject Sesion UsuarioSesion
 @inject NavigationManager Navegador
-@inject ListarTurnosCalendarioUseCase ListarTurnosCalendarioUseCase
+@inject ListarTurnosUseCase ListarTurnosUseCase 
 @inject IActividadRepositorio ActividadRepositorio
 @inject CrearReservaUseCase CrearReservaUseCase
 
@@ -152,7 +152,7 @@
         if (!parametrosOk || fechaElegida is null || ActividadId is null || UsuarioSesion.UsuarioActual is null)
             return;
 
-        turnos = await ListarTurnosCalendarioUseCase.ejecutar(ActividadId.Value, fechaElegida.Value);
+        turnos = (await ListarTurnosUseCase.Ejecutar(fechaElegida.Value, ActividadId.Value, null, null, null)).ToList();
     }
 
     private async Task Reservar(int turnoId)
