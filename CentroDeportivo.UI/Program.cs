@@ -58,6 +58,7 @@ builder.Services.AddScoped<ListarEmpleadosUseCase>();
 builder.Services.AddScoped<CrearActividadUseCase>();
 builder.Services.AddScoped<ListarActividadesUseCase>();
 builder.Services.AddScoped<EliminarActividadUseCase>();
+builder.Services.AddScoped<ObtenerActividadPorId>();
 
 builder.Services.AddScoped<EliminarCanchaUseCase>();
 builder.Services.AddScoped<CrearCanchaUseCase>();
