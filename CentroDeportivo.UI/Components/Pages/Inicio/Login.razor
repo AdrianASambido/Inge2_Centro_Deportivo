@@ -1,45 +1,44 @@
 @page "/Login"
+@layout PublicLayout
 @inject IniciarSesionUseCase IniciarSesionUseCase
 @inject Sesion UsuarioSesion
 @inject NavigationManager Navegador
 @inject IUsuarioRepositorio UsuarioRepositorio
 @rendermode InteractiveServer
 
-<div class="container mt-5">
+<PageTitle>Iniciar Sesión</PageTitle>
 
-    <div class="row justify-content-center">
-
-        <div class="col-md-6 col-lg-5">
-
-            <div class="card shadow p-4">
-
-                <h2 class="mb-3">Iniciar sesion</h2>
+<div class="d-flex justify-content-center align-items-center vh-100">
+    <div class="card shadow p-4" style="width: 100%; max-width: 400px;">
+        <h2 class="text-center mb-4">Iniciar Sesión</h2>
      
-                    <div class="mb-3">
-                        <input placeholder="Correo" @bind="datos.Correo" class="form-control mb-3" />
-                    </div>
-
-                    <div class="mb-3">
-                        <input placeholder="Contraseña" @bind="datos.Password" class="form-control mb-3" type="password" />
-                    </div>
-
-                    <div class="d-flex gap-2">
-                        <button class="btn btn-primary" @onclick="IniciarSesion">Confirmar</button>
-                        <button class="btn btn-danger" @onclick="Registrarse">Registrarme</button>
-                        <NavLink href="/olvide-contrasenia" class="text-primary">
-                            ¿Olvidaste tu contraseña?
-                        </NavLink>
-                    </div>
-
-                    @if (!string.IsNullOrEmpty(error))
-                    {
-                        <div class="alert alert-danger">@error</div>
-                    }
-                </div>
-            </div>
+        <div class="mb-3">
+            <label class="form-label">Correo Electrónico</label>
+            <input placeholder="ejemplo@correo.com" @bind="datos.Correo" class="form-control" />
         </div>
-    </div>
 
+        <div class="mb-3">
+            <label class="form-label">Contraseña</label>
+            <input placeholder="••••••••" @bind="datos.Password" class="form-control" type="password" />
+        </div>
+
+        <div class="d-grid gap-2 mb-3">
+            <button class="btn btn-primary" @onclick="IniciarSesion">Confirmar</button>
+            <button class="btn btn-outline-primary" @onclick="Registrarse">Registrarme</button>
+        </div>
+
+        <div class="text-center">
+            <NavLink href="/olvide-contrasenia" class="text-decoration-none">
+                ¿Olvidaste tu contraseña?
+            </NavLink>
+        </div>
+
+        @if (!string.IsNullOrEmpty(error))
+        {
+            <div class="alert alert-danger mt-3 text-center">@error</div>
+        }
+    </div>
+</div>
 
 @code {
     public DatosLogin datos = new();
@@ -48,14 +47,19 @@
     public async Task IniciarSesion()
     {
         error = "";
-
         try
         {
             var usuario = await IniciarSesionUseCase.ejecutar(datos.Correo, datos.Password);
-
             UsuarioSesion.IniciarSesion(usuario);
 
-            Navegador.NavigateTo("/listar-turnos-creados");
+            if (UsuarioSesion.esAdministrador() || UsuarioSesion.esEmpleado())
+            {
+                Navegador.NavigateTo("/listar-turnos-creados");
+            }
+            else
+            {
+                Navegador.NavigateTo("/Turnos");
+            }
         }
         catch (Exception ex)
         {
@@ -63,10 +67,7 @@
         }
     }
 
-    void Registrarse()
-    {
-        Navegador.NavigateTo("/registrar");
-    }
+    void Registrarse() => Navegador.NavigateTo("/registrar");
 
     public class DatosLogin
     {

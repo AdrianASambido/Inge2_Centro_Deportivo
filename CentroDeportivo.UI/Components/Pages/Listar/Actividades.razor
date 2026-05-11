@@ -11,76 +11,76 @@
 
 @if (!(UsuarioSesion.EstaAutenticado() && (UsuarioSesion.esAdministrador() || UsuarioSesion.esEmpleado())))
 {
-    <p>No tenés acceso. <NavLink href="/Login">Iniciar sesión</NavLink></p>
+    <div class="alert alert-warning">No tenés acceso. <NavLink href="/Login">Iniciar sesión</NavLink></div>
 }
 else
 {
-    <h2>Actividades</h2>
+    <div class="container-fluid p-0">
+        <h2 class="mb-1">Actividades</h2>
+        <p class="text-muted mb-4">Bienvenido, @UsuarioSesion.UsuarioActual!.Nombre</p>
 
-    <p>Bienvenido, @UsuarioSesion.UsuarioActual!.Nombre</p>
-    <button class="btn btn-danger" @onclick="CerrarSesion">Cerrar sesión</button>
-    <button class="btn btn-success" @onclick="CrearActividad">Crear actividad</button>
+        <div class="d-flex gap-2 mb-4">
+            <button class="btn btn-success" @onclick="CrearActividad">Crear actividad</button>
+            <button class="btn btn-danger" @onclick="CerrarSesion">Cerrar sesión</button>
+        </div>
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Nombre</th>
-                <th>Descripcion</th>
-                <th>Precio</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var a in actividad)
-            {
-                <tr>
-                    <td>@a.Id</td>
-                    <td>@a.Nombre</td>
-                    <td>@a.Descripcion</td>
-                    <td>@a.Precio</td>
-                    <td>
-                        <button class="btn btn-primary"
-                                @onclick="() => Editar(a.Id)">
-                            Editar
-                        </button>
+        @if (quiereAgregar)
+        {
+            <div class="card shadow-sm mb-4" style="max-width: 500px;">
+                <div class="card-body">
+                    <h4 class="card-title mb-3">Datos de la actividad</h4>
+                    <input placeholder="Nombre de actividad" @bind="act.nombre" class="form-control mb-2" />
+                    <input placeholder="Descripción" @bind="act.descripcion" class="form-control mb-2" />
+                    <input placeholder="Precio" @bind="act.precio" class="form-control mb-3" />
+                    
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-primary flex-grow-1" @onclick="Aceptar">Aceptar</button>
+                        <button class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
+                    </div>
+                </div>
+            </div>
+        }
 
-                        <button class="btn btn-danger"
-                                @onclick="() => ConfirmarEliminacion(a.Id)">
-                            Eliminar
-                        </button>
-                    </td>
-                </tr>
-            }
-        </tbody>
-
-    </table>
-
-   
-}
-
-@if (quiereAgregar)
-{
-    <h3>Datos de la actividad</h3>
-
-    <input placeholder="Nombre de actividad" @bind="act.nombre" class="form-control" />
-    <input placeholder="Descripcion" @bind="act.descripcion" class="form-control" />
-    <input placeholder="Precio" @bind="act.precio" class="form-control" />
-
-    <button class="btn btn-primary" @onclick="Aceptar">Aceptar</button>
-    <button class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
-
+        <div class="table-responsive shadow-sm" style="background: white; border-radius: 8px;">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Descripción</th>
+                        <th>Precio</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var a in actividad)
+                    {
+                        <tr>
+                            <td>@a.Id</td>
+                            <td class="fw-bold">@a.Nombre</td>
+                            <td>@a.Descripcion</td>
+                            <td>$@a.Precio</td>
+                            <td class="text-center">
+                                <button class="btn btn-sm btn-primary" @onclick="() => Editar(a.Id)">Editar</button>
+                                <button class="btn btn-sm btn-danger" @onclick="() => ConfirmarEliminacion(a.Id)">Eliminar</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
 }
 
 @if (!string.IsNullOrEmpty(mensaje))
 {
-    <div class="alert alert-danger">@mensaje</div>
+    <div class="alert alert-info mt-3">@mensaje</div>
 }
 
 @if (mostrarDialog)
 {
-    <div class="modal show d-block" tabindex="-1">
-        <div class="modal-dialog">
+    <div class="modal show d-block shadow" tabindex="-1" style="background: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Confirmar eliminación</h5>
@@ -97,66 +97,31 @@ else
     </div>
 }
 
-    
 @code {
-
     string mensaje = "";
     bool mostrarDialog = false;
     int idAEliminar;
     bool quiereAgregar = false;
     Datos act = new Datos();
 
-    void MostrarMensaje(string msj)
-    {
-        mensaje = msj;
-    }
-
-
     List<Actividad> actividad = new List<Actividad>();
 
-    protected override async Task OnInitializedAsync()
-    {
-        actividad = (await ListarActividadesUseCase.ejecutar()).ToList();
-    }
-
-    void CerrarSesion()
-    {
-        UsuarioSesion.CerrarSesion();
-        Navegador.NavigateTo("/Login", true);
-    }
-
-    void CrearActividad()
-    {
-        quiereAgregar = true;
-    }
-
-    public void Editar(int Id)
-    {
-        Navegador.NavigateTo($"/editar-actividad/{Id}");
-    }
-
-    void ConfirmarEliminacion(int Id)
-    {
-        idAEliminar = Id;
-        mostrarDialog = true;
-    }
-
+    protected override async Task OnInitializedAsync() => actividad = (await ListarActividadesUseCase.ejecutar()).ToList();
+    void CerrarSesion() { UsuarioSesion.CerrarSesion(); Navegador.NavigateTo("/Login", true); }
+    void CrearActividad() => quiereAgregar = true;
+    public void Editar(int Id) => Navegador.NavigateTo($"/editar-actividad/{Id}");
+    void ConfirmarEliminacion(int Id) { idAEliminar = Id; mostrarDialog = true; }
+    
     async Task Eliminar()
     {
-        @*
         mostrarDialog = false;
         try
         {
-            EliminarActividadUseCase.ejecutar(idAEliminar);
+            await EliminarActividadUseCase.Ejecutar(idAEliminar);
             actividad = (await ListarActividadesUseCase.ejecutar()).ToList();
-            MostrarMensaje("Actividad eliminada correctamente.");
-            StateHasChanged();
+            mensaje = "Actividad eliminada.";
         }
-        catch (Exception ex)
-        {
-            MostrarMensaje(ex.Message);
-        }
-        *@
+        catch (Exception ex) { mensaje = ex.Message; }
     }
 
     async Task Aceptar()
@@ -164,23 +129,15 @@ else
         try
         {
             var acti = new Actividad(act.nombre, act.descripcion, act.precio);
-            CrearActividadUseCase.ejecutar(acti);
+            await CrearActividadUseCase.ejecutar(acti);
             actividad = (await ListarActividadesUseCase.ejecutar()).ToList();
-            MostrarMensaje("Actividad creada correctamente.");
             quiereAgregar = false;
-            StateHasChanged();
+            mensaje = "";
         }
-        catch (Exception ex)
-        {
-            MostrarMensaje(ex.Message);
-        }
+        catch (Exception ex) { mensaje = ex.Message; }
     }
 
-    void Cancelar()
-    {
-        quiereAgregar = false;
-        mensaje = "";
-    }
+    void Cancelar() { quiereAgregar = false; mensaje = ""; }
 
     public class Datos
     {

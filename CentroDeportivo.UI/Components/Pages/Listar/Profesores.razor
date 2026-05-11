@@ -3,159 +3,111 @@
 @inject CrearProfesorUseCase CrearProfesorUseCase
 @inject ListarProfesoresUseCase ListarProfesoresUseCase
 @inject EliminarProfesorUseCase EliminarProfesorUseCase
-@inject IProfesorRepositorio RepositorioProfesor
+@inject IUsuarioRepositorio RepositorioUsuario
 @inject Sesion UsuarioSesion
 @inject NavigationManager Navegador
 
 <PageTitle>Profesores</PageTitle>
 
-@if (!(UsuarioSesion.EstaAutenticado() && (UsuarioSesion.esAdministrador() || UsuarioSesion.esEmpleado())))
+@if (!(UsuarioSesion.EstaAutenticado() && (UsuarioSesion.esAdministrador())))
 {
-    <p>No tenés acceso. <NavLink href="/Login">Iniciar sesión</NavLink></p>
+    <div class="alert alert-warning">No tenés acceso. <NavLink href="/Login">Iniciar sesión</NavLink></div>
 }
 else
 {
-    <h2>Profesores</h2>
+    <div class="container-fluid p-0">
+        <h2 class="mb-1">Gestión de Profesores</h2>
+        <p class="text-muted mb-4">Bienvenido, @UsuarioSesion.UsuarioActual!.Nombre</p>
 
-    <p>Bienvenido, @UsuarioSesion.UsuarioActual!.Nombre</p>
-    <button class="btn btn-danger" @onclick="CerrarSesion">Cerrar sesión</button>
-    <button class="btn btn-success" @onclick="CrearProfesor">Registrar profesor</button>
+        <div class="d-flex gap-2 mb-4">
+            <button class="btn btn-success" @onclick="CrearProfesor">Registrar profesor</button>
+            <button class="btn btn-danger" @onclick="CerrarSesion">Cerrar sesión</button>
+        </div>
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Nombre</th>
-                <th>Apellido</th>
-                <th>DNI</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var p in profesor)
-            {
-                <tr>
-                    <td>@p.Id</td>
-                    <td>@p.Nombre</td>
-                    <td>@p.Apellido</td>
-                    <td>@p.Dni</td>
-                    <td>
-                        <button class="btn btn-primary"
-                                @onclick="() => Editar(p.Id)">
-                            Editar
-                        </button>
+        @if (quiereAgregar)
+        {
+            <div class="card shadow-sm mb-4" style="max-width: 500px;">
+                <div class="card-body">
+                    <h4 class="card-title mb-3">Datos del profesor</h4>
+                    <input placeholder="Nombre" @bind="pro.nombre" class="form-control mb-2" />
+                    <input placeholder="Apellido" @bind="pro.apellido" class="form-control mb-2" />
+                    <input placeholder="DNI" @bind="pro.dni" class="form-control mb-3" />
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-primary flex-grow-1" @onclick="Aceptar">Guardar</button>
+                        <button class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
+                    </div>
+                </div>
+            </div>
+        }
 
-                        <button class="btn btn-danger"
-                                @onclick="() => ConfirmarEliminacion(p.Id)">
-                            Eliminar
-                        </button>
-                    </td>
-                </tr>
-            }
-        </tbody>
-
-    </table>
-
-   
-}
-
-@if (quiereAgregar)
-{
-    <h3>Datos del profesor</h3>
-
-    <input placeholder="Nombre" @bind="pro.nombre" class="form-control" />
-    <input placeholder="apellido" @bind="pro.apellido" class="form-control" />
-    <input placeholder="DNI" @bind="pro.dni" class="form-control" />
-
-    <button class="btn btn-primary" @onclick="Aceptar">Aceptar</button>
-    <button class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
-
-}
-
-@if (!string.IsNullOrEmpty(mensaje))
-{
-    <div class="alert alert-danger">@mensaje</div>
+        <div class="table-responsive shadow-sm" style="background: white; border-radius: 8px;">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Apellido</th>
+                        <th>DNI</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var p in profesor)
+                    {
+                        <tr>
+                            <td>@p.Id</td>
+                            <td>@p.Nombre</td>
+                            <td>@p.Apellido</td>
+                            <td>@p.Dni</td>
+                            <td class="text-center">
+                                <button class="btn btn-sm btn-primary" @onclick="() => Editar(p.Id)">Editar</button>
+                                <button class="btn btn-sm btn-danger" @onclick="() => ConfirmarEliminacion(p.Id)">Eliminar</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
 }
 
 @if (mostrarDialog)
 {
-    <div class="modal show d-block" tabindex="-1">
-        <div class="modal-dialog">
+    <div class="modal show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Confirmar eliminación</h5>
-                </div>
-                <div class="modal-body">
-                    <p>¿Estás seguro de que querés eliminar este profesor?</p>
-                </div>
+                <div class="modal-header bg-dark text-white"><h5>Confirmar</h5></div>
+                <div class="modal-body"><p>¿Eliminar profesor definitivamente?</p></div>
                 <div class="modal-footer">
-                    <button class="btn btn-secondary" @onclick="() => mostrarDialog = false">Cancelar</button>
-                    <button class="btn btn-danger" @onclick="Eliminar">Confirmar</button>
+                    <button class="btn btn-secondary" @onclick="() => mostrarDialog = false">No</button>
+                    <button class="btn btn-danger" @onclick="Eliminar">Sí, eliminar</button>
                 </div>
             </div>
         </div>
     </div>
 }
 
-    
 @code {
-
-    string mensaje = "";
-    bool mostrarDialog = false;
-    int idAEliminar;
-    bool quiereAgregar = false;
-    Datos pro = new Datos();
-
-    void MostrarMensaje(string msj)
-    {
-        mensaje = msj;
-    }
-
-
+    string mensaje = ""; bool mostrarDialog = false; int idAEliminar; bool quiereAgregar = false; Datos pro = new Datos();
     List<Profesor> profesor = new List<Profesor>();
 
-    protected override async Task OnInitializedAsync()
-    {
-        profesor = (await ListarProfesoresUseCase.ejecutar()).ToList();
-    }
-
-    void CerrarSesion()
-    {
-        UsuarioSesion.CerrarSesion();
-        Navegador.NavigateTo("/Login", true);
-    }
-
-    void CrearProfesor()
-    {
-        quiereAgregar = true;
-    }
-
-    public void Editar(int Id)
-    {
-        Navegador.NavigateTo($"/editar-profesor/{Id}");
-    }
-
-    void ConfirmarEliminacion(int Id)
-    {
-        idAEliminar = Id;
-        mostrarDialog = true;
-    }
+    protected override async Task OnInitializedAsync() => profesor = (await ListarProfesoresUseCase.ejecutar()).ToList();
+    void CerrarSesion() { UsuarioSesion.CerrarSesion(); Navegador.NavigateTo("/Login", true); }
+    void CrearProfesor() => quiereAgregar = true;
+    public void Editar(int Id) => Navegador.NavigateTo($"/editar-profesor/{Id}");
+    void ConfirmarEliminacion(int Id) { idAEliminar = Id; mostrarDialog = true; }
 
     async Task Eliminar()
     {
         mostrarDialog = false;
         try
         {
-            EliminarProfesorUseCase.ejecutar(idAEliminar);
+            await EliminarProfesorUseCase.ejecutar(idAEliminar);
             profesor = (await ListarProfesoresUseCase.ejecutar()).ToList();
-            MostrarMensaje("Profesor eliminado correctamente.");
+            mensaje = "";
             StateHasChanged();
         }
-        catch (Exception ex)
-        {
-            MostrarMensaje(ex.Message);
-        }
-
+        catch (Exception ex) { mensaje = ex.Message; }
     }
 
     async Task Aceptar()
@@ -163,28 +115,14 @@ else
         try
         {
             var profe = new Profesor(pro.nombre, pro.apellido, pro.dni);
-            CrearProfesorUseCase.ejecutar(profe);
+            await CrearProfesorUseCase.ejecutar(profe);
             profesor = (await ListarProfesoresUseCase.ejecutar()).ToList();
-            MostrarMensaje("Profesor creado correctamente.");
             quiereAgregar = false;
             StateHasChanged();
         }
-        catch (Exception ex)
-        {
-            MostrarMensaje(ex.Message);
-        }
+        catch (Exception ex) { mensaje = ex.Message; }
     }
 
-    void Cancelar()
-    {
-        quiereAgregar = false;
-        mensaje = "";
-    }
-
-    public class Datos
-    {
-        public string nombre { get; set; } = "";
-        public string apellido { get; set; } = "";
-        public string dni { get; set; }
-    }
+    void Cancelar() { quiereAgregar = false; }
+    public class Datos { public string nombre { get; set; } = ""; public string apellido { get; set; } = ""; public string dni { get; set; } }
 }

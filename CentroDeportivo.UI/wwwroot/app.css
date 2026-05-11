@@ -3,52 +3,176 @@
     --font-datos: 'Inter', sans-serif;
 }
 
-body {
+/* ===== GENERAL ===== */
+
+html, body {
+    margin: 0;
+    padding: 0;
     font-family: var(--font-datos);
+    background-color: #f4f4f4;
+    overflow-x: hidden;
+}
+
+body {
+    min-height: 100vh;
 }
 
 h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-titulos);
 }
 
-header {
-    display: flex;
-    align-items: center;
-    height: 200px;
-}
-
-.logo {
-    height: 150px;
-    width: 150px;
-}
-
-.sidebar {
-    width: 250px;
-    background-color: #343a40;
-    color: white;
+/* ===== ESTRUCTURA GLOBAL (REEMPLAZAR) ===== */
+.page {
+    display: flex; /* Esto pone el sidebar y el contenido uno al lado del otro */
     min-height: 100vh;
 }
 
-.top-row {
-    background-color: #f5f5f5;
-    border-bottom: 1px solid #ddd;
-    height: 50px;
+/* ===== SIDEBAR (REEMPLAZAR) ===== */
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 250px; /* Un poco más ancho para que respire el texto */
+    height: 100vh;
+    background-color: #1a1a2e;
+    color: white;
+    padding: 1.5rem 1rem;
+    z-index: 1000;
     display: flex;
+    flex-direction: column;
+    box-shadow: 4px 0 10px rgba(0,0,0,0.1);
+}
+
+.logo-container {
+    text-align: center;
+    margin-bottom: 0.5rem;
+}
+
+.logo {
+    width: 110px; /* Tamaño corregido */
+    height: auto;
+    display: block;
+    margin: 0 auto;
+}
+
+.sidebar-title {
+    text-align: center;
+    font-size: 1.1rem;
+    font-weight: bold;
+    margin-bottom: 2rem;
+    color: #ffffff;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    padding-bottom: 1rem;
+}
+
+.main-content {
+    flex: 1;
+    margin-left: 250px !important; /* El ancho exacto del sidebar */
+    padding: 2rem !important; /* Espaciado interno */
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; /* <--- ESTO obliga a que el contenido pegue a la izquierda */
+    width: calc(100% - 250px); /* Resta el sidebar del ancho total */
+    background-color: #f8f9fa;
+}
+
+/* ===== NAVMENU (REEMPLAZAR) ===== */
+.nav-item {
+    margin-bottom: 5px;
+}
+
+.nav-link {
+    color: rgba(255,255,255,0.8) !important;
+    padding: 12px 15px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.nav-link:hover {
+    background-color: #243b55;
+    color: white !important;
+    padding-left: 20px; /* Efecto sutil al pasar el mouse */
+}
+
+    /* Para que se note cuál sección está abierta */
+.nav-link.active {
+    background-color: #3b5bdb;
+    color: white !important;
+    font-weight: bold;
+}
+
+/* ===== TITULOS ===== */
+
+h2 {
+    margin-bottom: 20px;
+}
+
+/* ===== CARDS ===== */
+
+.card {
+    border-radius: 18px;
+    border: none;
+}
+
+/* ===== LOGIN ===== */
+
+.login-container {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
     align-items: center;
 }
 
-table {
-    font-family: var(--font-datos);
+.sidebar-title {
+    text-align: center;
+    font-size: 1rem;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: white;
 }
 
-button {
-    font-family: var(--font-datos);
+.content {
+    width: 100% !important;
+    margin: 0 !important; /* Quita márgenes automáticos que centran el contenido */
+    text-align: left !important;
 }
 
-.card {
-    border-radius: 12px;
-}
-
-.btn {
+.table-responsive {
+    overflow-x: auto; /* Permite scroll solo en la tabla si no entra, no en toda la página */
+    background-color: white;
     border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    margin-top: 1rem;
+}
+
+table {
+    width: 100% !important;
+    margin-bottom: 0;
+    border-collapse: collapse;
+    white-space: nowrap; /* Evita que los textos de las celdas se amontonen en varias filas */
+}
+
+thead {
+    background-color: #f1f3f5;
+}
+
+th {
+    padding: 12px 15px !important;
+    font-family: var(--font-titulos);
+    font-weight: 600;
+    border-bottom: 2px solid #dee2e6;
+}
+
+td {
+    padding: 12px 15px !important;
+    vertical-align: middle;
+}
+
+/* Para que los títulos no tengan margen izquierdo extra */
+h2, h3, .btn-group, .table-responsive {
+    margin-left: 0 !important;
+    width: 100%;
 }

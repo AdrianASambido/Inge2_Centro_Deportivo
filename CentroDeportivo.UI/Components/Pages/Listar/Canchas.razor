@@ -11,84 +11,88 @@
 
 @if (!(UsuarioSesion.EstaAutenticado() && (UsuarioSesion.esAdministrador() || UsuarioSesion.esEmpleado())))
 {
-    <p>No tenés acceso. <NavLink href="/Login">Iniciar sesión</NavLink></p>
+    <div class="alert alert-warning">No tenés acceso. <NavLink href="/Login">Iniciar sesión</NavLink></div>
 }
 else
 {
-    <h2>Canchas</h2>
+    <div class="container-fluid p-0">
+        <h2 class="mb-1">Canchas</h2>
+        <p class="text-muted mb-4">Bienvenido, @UsuarioSesion.UsuarioActual!.Nombre</p>
 
-    <p>Bienvenido, @UsuarioSesion.UsuarioActual!.Nombre</p>
-    <button class="btn btn-danger" @onclick="CerrarSesion">Cerrar sesión</button>
-    <button class="btn btn-success" @onclick="CrearCancha">Crear cancha</button>
-    <input type="text" class="form-control mb-3" placeholder="Buscar por número de cancha" @bind="numeroBusquedaTexto" @bind:event="oninput"/>
+        <div class="row mb-4 align-items-center">
+            <div class="col-auto">
+                <button class="btn btn-success" @onclick="CrearCancha">Crear cancha</button>
+            </div>
+            <div class="col-md-4">
+                <input type="text" class="form-control" placeholder="🔍 Buscar por número..." @bind="numeroBusquedaTexto" @bind:event="oninput" />
+            </div>
+            <div class="col-auto ms-auto">
+                <button class="btn btn-danger" @onclick="CerrarSesion">Cerrar sesión</button>
+            </div>
+        </div>
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Numero</th>
-                <th>Capacidad</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var c in canchasFiltradas)
-            {
-                <tr>
-                    <td>@c.Id</td>
-                    <td>@c.Numero</td>
-                    <td>@c.Capacidad</td>
-                    <td>
-                        <button class="btn btn-primary"
-                                @onclick="() => Editar(c.Id)">
-                            Editar
-                        </button>
+        @if (quiereAgregar)
+        {
+            <div class="card shadow-sm mb-4 border-success" style="max-width: 400px;">
+                <div class="card-body">
+                    <h4 class="card-title mb-3">Nueva Cancha</h4>
+                    <input placeholder="Número de cancha" @bind="can.numero" class="form-control mb-2" />
+                    <input placeholder="Capacidad" @bind="can.capacidad" class="form-control mb-3" />
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-primary flex-grow-1" @onclick="Aceptar">Guardar</button>
+                        <button class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
+                    </div>
+                </div>
+            </div>
+        }
 
-                        <button class="btn btn-danger"
-                                @onclick="() => ConfirmarEliminacion(c.Id)">
-                            Eliminar
-                        </button>
-                    </td>
-                </tr>
-            }
-        </tbody>
-
-    </table>
-
-   
-}
-
-
-@if (quiereAgregar)
-{
-    <h3>Datos de la cancha</h3>
-
-    <input placeholder="Numero de cancha" @bind="can.numero" class="form-control" />
-    <input placeholder="Capacidad" @bind="can.capacidad" class="form-control" />
-
-    <button class="btn btn-primary" @onclick="Aceptar">Aceptar</button>
-    <button class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
-
+        <div class="table-responsive shadow-sm" style="background: white; border-radius: 8px;">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>ID</th>
+                        <th>Número</th>
+                        <th>Capacidad</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var c in canchasFiltradas)
+                    {
+                        <tr>
+                            <td>@c.Id</td>
+                            <td class="fw-bold text-primary">Cancha @c.Numero</td>
+                            <td>@c.Capacidad Personas</td>
+                            <td class="text-center">
+                                <button class="btn btn-sm btn-primary" @onclick="() => Editar(c.Id)">Editar</button>
+                                <button class="btn btn-sm btn-danger" @onclick="() => ConfirmarEliminacion(c.Id)">Eliminar</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
 }
 
 @if (!string.IsNullOrEmpty(mensaje))
 {
-    <div class="alert alert-danger">@mensaje</div>
+    <div class="alert alert-info mt-3">@mensaje</div>
 }
 
 @if (mostrarDialog)
 {
-    <div class="modal show d-block" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Confirmar eliminación</h5>
+    <div class="modal show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content shadow border-0">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">¿Eliminar cancha?</h5>
                 </div>
-                <div class="modal-body">
-                    <p>¿Estás seguro de que querés eliminar esta cancha?</p>
+                <div class="modal-body py-4">
+                    <p class="mb-0">Esta acción no se puede deshacer.</p>
                 </div>
                 <div class="modal-footer">
-                    <button class="btn btn-secondary" @onclick="() => mostrarDialog = false">Cancelar</button>
+                    <button class="btn btn-light" @onclick="() => mostrarDialog = false">Cancelar</button>
                     <button class="btn btn-danger" @onclick="Eliminar">Confirmar</button>
                 </div>
             </div>
@@ -97,93 +101,46 @@ else
 }
 
 @code {
-
     public Datos can = new Datos();
     string numeroBusquedaTexto = "";
-
     IEnumerable<Cancha> canchasFiltradas => string.IsNullOrWhiteSpace(numeroBusquedaTexto) ? cancha : cancha.Where(c => c.Numero.ToString().Contains(numeroBusquedaTexto));
-
     public bool quiereAgregar;
     string mensaje = "";
     bool mostrarDialog = false;
     int idAEliminar;
-    void MostrarMensaje(string msj)
-    {
-        mensaje = msj;
-    }
-
-
     List<Cancha> cancha = new List<Cancha>();
 
-    protected override async Task OnInitializedAsync()
-    {
-        cancha = (await ListarCanchasUseCase.ejecutar()).ToList() ;
-    }
-    void CerrarSesion()
-    {
-        UsuarioSesion.CerrarSesion();
-        Navegador.NavigateTo("/Login", true);
-    }
-
-    public void Editar(int Id)
-    {
-        Navegador.NavigateTo($"/editar-cancha/{Id}");
-    }
-
-    void ConfirmarEliminacion(int Id)
-    {
-        idAEliminar = Id;
-        mostrarDialog = true;
-    }
+    protected override async Task OnInitializedAsync() => cancha = (await ListarCanchasUseCase.ejecutar()).ToList();
+    void CerrarSesion() { UsuarioSesion.CerrarSesion(); Navegador.NavigateTo("/Login", true); }
+    public void Editar(int Id) => Navegador.NavigateTo($"/editar-cancha/{Id}");
+    void ConfirmarEliminacion(int Id) { idAEliminar = Id; mostrarDialog = true; }
+    void CrearCancha() => quiereAgregar = true;
 
     async Task Eliminar()
     {
         mostrarDialog = false;
         try
         {
-            EliminarCanchaUseCase.ejecutar(idAEliminar);
+            await EliminarCanchaUseCase.ejecutar(idAEliminar);
             cancha = (await ListarCanchasUseCase.ejecutar()).ToList();
-            MostrarMensaje("Cancha eliminada correctamente.");
-            StateHasChanged();
+            mensaje = "Cancha eliminada.";
         }
-        catch (Exception ex)
-        {
-            MostrarMensaje(ex.Message);
-        }
-
-    }
-
-    void CrearCancha()
-    {
-        quiereAgregar = true;
+        catch (Exception ex) { mensaje = ex.Message; }
     }
 
     async Task Aceptar()
     {
         try
         {
-            mensaje = "";
             var c = new Cancha(can.numero, can.capacidad);
-            CrearCanchaUseCase.ejecutar(c);
+            await CrearCanchaUseCase.ejecutar(c);
             cancha = (await ListarCanchasUseCase.ejecutar()).ToList();
             quiereAgregar = false;
-            StateHasChanged();
+            mensaje = "";
         }
-        catch (Exception ex)
-        {
-            mensaje = ex.Message;
-        }
+        catch (Exception ex) { mensaje = ex.Message; }
     }
 
-    void Cancelar()
-    {
-        quiereAgregar = false;
-        mensaje = "";
-    }
-
-public class Datos
-    {
-        public int numero { get; set; }
-        public int capacidad { get; set; }
-    }
+    void Cancelar() { quiereAgregar = false; mensaje = ""; }
+    public class Datos { public int numero { get; set; } public int capacidad { get; set; } }
 }
