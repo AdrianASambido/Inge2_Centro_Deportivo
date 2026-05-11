@@ -12,6 +12,7 @@ using CentroDeportivo.Aplicacion.Casos_de_uso.DevolucionUseCase;
 using CentroDeportivo.Aplicacion.Casos_de_uso.TurnoUseCase;
 using CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase;
 using CentroDeportivo.Infraestructura.Servicios;
+
 using CentroDeportivo.Infraestructura.Persistencia.Repositorios;
 using CentroDeportivo.UI.Servicios;
 
@@ -54,6 +55,8 @@ builder.Services.AddScoped<CambiarContraseniaUseCase>();
 builder.Services.AddScoped<EliminarEmpleadoUseCase>();
 builder.Services.AddScoped<RecuperarContraseniaUseCase>();
 builder.Services.AddScoped<ListarEmpleadosUseCase>();
+builder.Services.AddScoped<EditarUsuarioUseCase>();
+
 
 builder.Services.AddScoped<CrearActividadUseCase>();
 builder.Services.AddScoped<ListarActividadesUseCase>();

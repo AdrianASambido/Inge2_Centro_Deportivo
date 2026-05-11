@@ -6,7 +6,7 @@
 
 <PageTitle>Mi Perfil</PageTitle>
 
-<h1>Mi Perfil</h1>
+<h1 class="mb-4">MI PERFIL</h1>
 
 @if (UsuarioSesion.UsuarioActual == null)
 {
@@ -19,34 +19,28 @@
 }
 else
 {
-    <div class="card p-3">
+    <div class="text-center card shadow-sm border-0 p-4 rounded-4">
 
-        <h3>Datos del usuario</h3>
+    <h6 class="mb-3 text-dark">Datos personales</h6>
 
-        <p><b>Nombre:</b> @UsuarioSesion.UsuarioActual.Nombre</p>
-        <p><b>Apellido:</b> @UsuarioSesion.UsuarioActual.Apellido</p>
-        <p><b>Email:</b> @UsuarioSesion.UsuarioActual.Email</p>
+    <p class="mb-1"><strong>Nombre:</strong> @UsuarioSesion.UsuarioActual.Nombre</p>
+    <p class="mb-1"><strong>Apellido:</strong> @UsuarioSesion.UsuarioActual.Apellido</p>
+    <p class="mb-3"><strong>Email:</strong> @UsuarioSesion.UsuarioActual.Email</p>
 
-        <hr />
+    <div class="d-flex gap-5 justify-content-center mt-3">
 
-        <div class="d-flex gap-3 justify-content-center">
-            <NavLink class="btn btn-warning"
+        <NavLink class="btn btn-outline-primary"
                  href="@($"/editar-usr/{UsuarioSesion.UsuarioActual.Id}")">
-                Editar usuario
-            </NavLink>
-    
-            <button class="btn btn-danger ms-2"
-                    @onclick="CerrarSesion">
-                Cerrar sesión
-            </button>
+            Editar usuario
+        </NavLink>
 
-            <button class="btn btn-warning ms-2"
-                    @onclick="CambiarContraseña">
-                Cambiar contraseña
-            </button>
+        <button class="btn btn-outline-danger"
+                @onclick="CerrarSesion">
+            Cerrar sesión
+        </button>
 
-        </div>
     </div>
+</div>
 }
 
 @code {
@@ -62,9 +56,5 @@ else
         Navegador.NavigateTo("/Login", true);
     }
 
-    void CambiarContraseña()
-    {
-        Navegador.NavigateTo("/CambiarContraseña", true);
-    }
 
 }
