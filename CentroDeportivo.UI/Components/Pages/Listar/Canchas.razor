@@ -133,8 +133,7 @@ else
     {
         try
         {
-            Console.WriteLine("Intentando guardar...");
-            var c = new Cancha(can.numero, can.capacidad);
+            var c = new Cancha(can.numero ?? 0, can.capacidad ?? 0);
             await CrearCanchaUseCase.ejecutar(c);
 
             // Si llega aquí, es porque se guardó con éxito
@@ -156,5 +155,5 @@ else
         Console.WriteLine("👉 EDITAR PROFESOR CARGADO");
     }
     void Cancelar() { quiereAgregar = false; mensaje = ""; }
-    public class Datos { public int numero { get; set; } public int capacidad { get; set; } }
+    public class Datos { public int? numero { get; set; } public int? capacidad { get; set; } }
 }
