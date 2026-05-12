@@ -1,4 +1,5 @@
 ﻿@page "/listar-turnos-creados"
+@using BlazorBarcodeScanner.ZXing.JS
 @inject Sesion UsuarioSesion
 @inject ListarTurnosUseCase ListarTurnosUseCase
 @rendermode InteractiveServer
@@ -10,6 +11,8 @@
 @inject ListarActividadesUseCase ListarActividadesUseCase
 @inject ListarInscriptosUseCase ListarInscriptosUseCase
 @inject RegistrarAsistenciaManualUseCase RegistrarAsistenciaManualUseCase
+@inject ConfirmarPagoReservaUseCase ConfirmarPagoReservaUseCase
+@inject RegistrarAsistenciaQrUseCase RegistrarAsistenciaQrUseCase
 
 <PageTitle>Listado de Turnos</PageTitle>
 
@@ -36,6 +39,11 @@ else
 
         @if (quiereAgregar)
         {
+            @if (!string.IsNullOrEmpty(mensaje))
+            {
+                <div class="alert alert-info mt-3 shadow-sm">@mensaje</div>
+            }
+
             <div class="card shadow-sm mb-4 border-primary" style="max-width: 600px;">
                 <div class="card-body">
                     <h4 class="card-title mb-3">Datos sobre el turno</h4>
@@ -179,11 +187,13 @@ else
                                     <tr>
                                         <td>@r.Usuario.Nombre</td>
                                         <td>@r.Usuario.Apellido</td>
+                                        <td>@r.Usuario.Dni</td>
                                         <td>@t.Fecha.ToString("dd/MM/yyyy")</td>
                                         <td class="text-center">
                                             <button class="btn btn-sm btn-outline-primary" @onclick="() => RegistrarAsistencia(r.Id)">
                                                 Registrar asistencia
                                             </button>
+                                            <button class="btn btn-sm btn-outline-secondary" @onclick="() => RegistrarPago(r.Id)">Confirmar pago</button>
                                         </td>
                                     </tr>
                                 }
@@ -192,6 +202,10 @@ else
                     </div>
                 </div>
                 <div class="modal-footer">
+                    @if (!string.IsNullOrEmpty(mensaje))
+                    {
+                        <div class="alert alert-info mt-3 shadow-sm">@mensaje</div>
+                    }
                     <button class="btn btn-secondary" @onclick="() => mostrarInscriptos = false">Cerrar</button>
                 </div>
             </div>
@@ -199,7 +213,27 @@ else
     </div>
 }
 
+
+<div class="mb-3">
+    <button class="btn btn-warning w-50 mb-3" @onclick=" () => mostrarEscanner = true"><i class="bi bi-qr-code-scan"></i> Escanear QR</button>
+</div>
+@if (mostrarEscanner)
+{
+    <div class="card shadow-sm mb-4 border-info" style="max-width: 300px;">
+        <div class="card-body text-center">
+            <h5 class="card-title">Escaneando QR...</h5>
+            <div class="bg-dark rounded p-2  mb-3">
+                <BlazorBarcodeScanner.ZXing.JS.BarcodeReader OnBarcodeReceived="ProcesarQR" @ref="lector"/>
+            </div>
+
+            <button class="btn btn-secondary btn-sm" @onclick="() => mostrarEscanner = false">Cancelar escaneo</button>
+        </div>
+    </div>
+}
+
+
 @code {
+    bool mostrarEscanner = false;
     List<Reserva>? reservas = new List<Reserva>();
     bool mostrarInscriptos = false;
     bool mostrarDisponibles = false;
@@ -233,6 +267,20 @@ else
         quiereAgregar = true;
     }
 
+    async Task RegistrarPago(int idReserva)
+    {
+        try
+        {
+            mensaje = "";
+            await ConfirmarPagoReservaUseCase.Ejecutar(idReserva);
+            mensaje = "Pago confirmado correctamente.";
+            mensaje = "";
+        }
+        catch (Exception ex)
+        {
+            mensaje = ex.Message;
+        }
+    }
     async Task MostrarInscriptos(int Id)
     {
         try
@@ -252,8 +300,8 @@ else
     {
         try
         {
-            await RegistrarAsistenciaManualUseCase.Ejecutar(idReserva);
             mensaje = "";
+            await RegistrarAsistenciaManualUseCase.Ejecutar(idReserva);
         }
         catch (Exception ex)
         {
@@ -282,6 +330,7 @@ else
     {
         try
         {
+            mensaje = "";
             var nuevoTurno = new Turno
             {
                 Fecha = this.t.Fecha,
@@ -302,6 +351,23 @@ else
         {
             mensaje = ex.Message;
         }
+    }
+
+    private BlazorBarcodeScanner.ZXing.JS.BarcodeReader lector;
+    private async Task ProcesarQR(string codigo)
+    {
+        try
+        {
+            mensaje = "";
+            await RegistrarAsistenciaQrUseCase.Ejecutar(codigo);
+            mensaje = "Asistencia registrada correctamente.";
+            mostrarEscanner = false;
+        }
+        catch (Exception ex)
+        {
+            mensaje = ex.Message;
+        }
+        
     }
 
     void Cancelar()
