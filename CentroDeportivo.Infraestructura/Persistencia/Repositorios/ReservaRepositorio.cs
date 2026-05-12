@@ -65,6 +65,8 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
                     .ThenInclude(t => t!.Actividad)
                 .Include(r => r.Turno)
                     .ThenInclude(t => t!.Profesor)
+                .Include(r => r.Turno)
+                    .ThenInclude(t => t!.Cancha)
                 .Where(r => r.Id_Usuario == usuarioId)
                 .AsQueryable();
 
