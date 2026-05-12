@@ -17,7 +17,7 @@ else
 {
     <div class="container-fluid p-0">
         <h2 class="mb-1">Canchas</h2>
-        <p class="text-muted mb-4">Bienvenido, @UsuarioSesion.UsuarioActual!.Nombre</p>
+        <p class="text-muted mb-4">Bienvenido, @UsuarioSesion.UsuarioActual?.Nombre</p>
 
         <div class="row mb-4 align-items-center">
             <div class="col-auto">
@@ -133,15 +133,28 @@ else
     {
         try
         {
+            Console.WriteLine("Intentando guardar...");
             var c = new Cancha(can.numero, can.capacidad);
             await CrearCanchaUseCase.ejecutar(c);
+
+            // Si llega aquí, es porque se guardó con éxito
             cancha = (await ListarCanchasUseCase.ejecutar()).ToList();
             quiereAgregar = false;
-            mensaje = "";
+            mensaje = "¡Cancha guardada con éxito!";
+            can = new Datos(); // Limpiar campos
         }
-        catch (Exception ex) { mensaje = ex.Message; }
+        catch (Exception ex)
+        {
+            // Esto te mostrará el error real en la pantalla
+            mensaje = "Error: " + ex.Message;
+            Console.WriteLine("ERROR EN USE CASE: " + ex.Message);
+        }
+        StateHasChanged(); // ¡FUNDAMENTAL para que el mensaje se vea!
     }
-
+    protected override void OnInitialized()
+    {
+        Console.WriteLine("👉 EDITAR PROFESOR CARGADO");
+    }
     void Cancelar() { quiereAgregar = false; mensaje = ""; }
     public class Datos { public int numero { get; set; } public int capacidad { get; set; } }
 }

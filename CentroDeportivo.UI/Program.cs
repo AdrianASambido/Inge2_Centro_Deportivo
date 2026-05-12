@@ -1,20 +1,20 @@
-using CentroDeportivo.Infraestructura.Persistencia.Contexto;
-using CentroDeportivo.UI.Components;
-using Microsoft.EntityFrameworkCore; // Necesario para .UseSqlite
+using CentroDeportivo.Aplicacion.Casos_de_uso.ActividadUseCase;
+using CentroDeportivo.Aplicacion.Casos_de_uso.CanchaUseCase;
+using CentroDeportivo.Aplicacion.Casos_de_uso.DevolucionUseCase;
+using CentroDeportivo.Aplicacion.Casos_de_uso.ProfesorUseCase;
+using CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase;
+using CentroDeportivo.Aplicacion.Casos_de_uso.TurnoUseCase;
+using CentroDeportivo.Aplicacion.Casos_de_uso.UsuarioUseCase;
 // Usings de las capas de Aplicación e Infraestructura
 using CentroDeportivo.Aplicacion.Interfaces;
+// using CentroDeportivo.Aplicacion.UseCases;
 using CentroDeportivo.Aplicacion.Validadores;
-using CentroDeportivo.Aplicacion.Casos_de_uso.UsuarioUseCase;
-using CentroDeportivo.Aplicacion.Casos_de_uso.CanchaUseCase;
-using CentroDeportivo.Aplicacion.Casos_de_uso.ProfesorUseCase;
-using CentroDeportivo.Aplicacion.Casos_de_uso.ActividadUseCase;
-using CentroDeportivo.Aplicacion.Casos_de_uso.DevolucionUseCase;
-using CentroDeportivo.Aplicacion.Casos_de_uso.TurnoUseCase;
-using CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase;
-using CentroDeportivo.Infraestructura.Servicios;
-
+using CentroDeportivo.Infraestructura.Persistencia.Contexto;
 using CentroDeportivo.Infraestructura.Persistencia.Repositorios;
+using CentroDeportivo.Infraestructura.Servicios;
+using CentroDeportivo.UI.Components;
 using CentroDeportivo.UI.Servicios;
+using Microsoft.EntityFrameworkCore; // Necesario para .UseSqlite
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -62,6 +62,7 @@ builder.Services.AddScoped<RegistrarAsistenciaManualUseCase>();
 builder.Services.AddScoped<CrearActividadUseCase>();
 builder.Services.AddScoped<ListarActividadesUseCase>();
 builder.Services.AddScoped<EliminarActividadUseCase>();
+builder.Services.AddScoped<EditarActividadUseCase>();
 
 builder.Services.AddScoped<EliminarCanchaUseCase>();
 builder.Services.AddScoped<CrearCanchaUseCase>();
