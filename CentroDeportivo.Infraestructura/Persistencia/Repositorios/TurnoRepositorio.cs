@@ -20,7 +20,7 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
 
         public async Task AgregarAsync(Turno turno)
         {
-            await contexto.AddAsync(turno);
+            await contexto.Turnos.AddAsync(turno);
             await contexto.SaveChangesAsync();
         }
 
@@ -35,7 +35,7 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
         }
 
         //para el empleado 
-        public async Task<IEnumerable<Turno>> BuscarTurnosAsync(DateOnly? fecha, int? actividadId, int? profeId, int? canchaId,EstadoTurno? estado)
+        public async Task<IEnumerable<Turno>> BuscarTurnosAsync(DateOnly? fecha, int? actividadId, int? profeId, int? canchaId, EstadoTurno? estado)
         {
             var query = contexto.Turnos
                 .Include(t => t.Actividad)
@@ -53,7 +53,8 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
             if (profeId.HasValue)
                 query = query.Where(t => t.Id_Profesor == profeId.Value);
 
-            if (canchaId.HasValue) { 
+            if (canchaId.HasValue)
+            {
                 query = query.Where(t => t.Id_Cancha == canchaId.Value);
             }
 
@@ -67,6 +68,28 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
                 .ToListAsync();
         }
 
+        public async Task<IEnumerable<Turno>> ObtenerDisponiblesAsync()
+        {
+            return await contexto.Turnos
+                .AsNoTracking()
+                .Include(t => t.Actividad)
+                .Include(t => t.Cancha)
+                .Include(t => t.Profesor)
+                .Where(t => t.Estado == EstadoTurno.Disponible && t.CupoDisponible > 0)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Turno>> ObtenerPorActividadAsync(int actividadId)
+        {
+            return await contexto.Turnos
+                .AsNoTracking()
+                .Include(t => t.Actividad)
+                .Include(t => t.Cancha)
+                .Include(t => t.Profesor)
+                .Where(t => t.Id_Actividad == actividadId)
+                .ToListAsync();
+        }
+
         public async Task<Turno?> ObtenerPorIdAsync(int id)
         {
             return await contexto.Turnos
@@ -76,10 +99,26 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
                 .FirstOrDefaultAsync(t => t.Id == id);
         }
 
-        public async Task<bool> TieneInscriptosAsync(int turnoId)
+        public async Task<IEnumerable<Turno>> ObtenerPorCanchaAsync(int canchaId)
         {
             return await contexto.Turnos
-                .AnyAsync(t => t.Id == turnoId && t.Reservas.Any());
+                .AsNoTracking()
+                .Include(t => t.Actividad)
+                .Include(t => t.Cancha)
+                .Include(t => t.Profesor)
+                .Where(t => t.Id_Cancha == canchaId)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Turno>> ObtenerPorFechaAsync(DateOnly fecha)
+        {
+            return await contexto.Turnos
+                .AsNoTracking()
+                .Include(t => t.Actividad)
+                .Include(t => t.Cancha)
+                .Include(t => t.Profesor)
+                .Where(t => t.Fecha == fecha)
+                .ToListAsync();
         }
 
         public async Task<IEnumerable<Turno>> ObtenerParaCalendarioAsync(int usuarioId, int? actividadId = null)
@@ -90,7 +129,7 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
             var horariosOcupados = await contexto.Reservas
                 .Where(r => r.Id_Usuario == usuarioId &&
                            (r.Estado == EstadoReserva.Confirmado || r.Estado == EstadoReserva.PendienteDePago))
-                .Select(r => new {r.Turno.Fecha, r.Turno.HoraInicio })
+                .Select(r => new { Fecha = r.Turno!.Fecha, HoraInicio = r.Turno!.HoraInicio })
                 .ToListAsync();
 
             //  Query principal
@@ -112,6 +151,30 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
                 filtrados = filtrados.Where(t => t.Id_Actividad == actividadId.Value);
 
             return filtrados.OrderBy(t => t.Fecha).ThenBy(t => t.HoraInicio);
+        }
+
+        public async Task<IReadOnlyList<Turno>> ObtenerPorActividadYFechaAsync(int actividadId, DateOnly fecha)
+        {
+            return await contexto.Turnos
+                .AsNoTracking()
+                .Include(t => t.Actividad)
+                .Include(t => t.Cancha)
+                .Include(t => t.Profesor)
+                .Where(t => t.Id_Actividad == actividadId && t.Fecha == fecha)
+                .OrderBy(t => t.HoraInicio)
+                .ToListAsync();
+        }
+
+        public async Task<Turno?> ObtenerPorActividadFechaYHoraAsync(int actividadId, DateOnly fecha, TimeOnly horaInicio)
+        {
+            return await contexto.Turnos
+                .Include(t => t.Actividad)
+                .Include(t => t.Cancha)
+                .Include(t => t.Profesor)
+                .FirstOrDefaultAsync(t =>
+                    t.Id_Actividad == actividadId &&
+                    t.Fecha == fecha &&
+                    t.HoraInicio == horaInicio);
         }
 
         public async Task FinalizarTurnosVencidosAsync()
@@ -138,6 +201,32 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
             await contexto.SaveChangesAsync();
         }
 
-        
+        public async Task<IEnumerable<Turno>> ObtenerPorProfesorAsync(int profesorId)
+        {
+            return await contexto.Turnos
+                .AsNoTracking()
+                .Include(t => t.Actividad)
+                .Include(t => t.Cancha)
+                .Include(t => t.Profesor)
+                .Where(t => t.Id_Profesor == profesorId)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Turno>> ObtenerTodosAsync()
+        {
+            return await contexto.Turnos
+                .AsNoTracking()
+                .Include(t => t.Actividad)
+                .Include(t => t.Cancha)
+                .Include(t => t.Profesor)
+                .ToListAsync();
+        }
+
+        public async Task<bool> TieneInscriptosAsync(int turnoId)
+        {
+            return await contexto.Reservas.AnyAsync(r =>
+                r.Id_Turno == turnoId &&
+                r.Estado != EstadoReserva.Cancelado);
+        }
     }
 }

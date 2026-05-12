@@ -3,8 +3,8 @@
 @using System.Globalization
 @inject Sesion UsuarioSesion
 @inject NavigationManager Navegador
-@inject ListarTurnosUseCase ListarTurnosUseCase
-@inject ObtenerActividadPorId ObtenerActividadPorId
+@inject ListarTurnosUseCase ListarTurnosUseCase 
+@inject IActividadRepositorio ActividadRepositorio
 @inject CrearReservaUseCase CrearReservaUseCase
 
 <PageTitle>Horarios del día</PageTitle>
@@ -28,18 +28,17 @@ else
             Día: @fechaFormateada
         </p>
 
-        @if (!string.IsNullOrEmpty(mensajeExito))
-        {
-            <div class="alert alert-success shadow-sm">@mensajeExito</div>
-        }
-        @if (!string.IsNullOrEmpty(mensajeError))
-        {
-            <div class="alert alert-danger shadow-sm">@mensajeError</div>
-        }
-
-        <p class="small text-muted mb-3">
-            Horarios de 16:00 a 22:00. Verde: hay cupo libre. Gris: cupo completo.
-        </p>
+                @if (!string.IsNullOrEmpty(mensajeExito))
+                {
+                    <div class="alert alert-success">@mensajeExito</div>
+                }
+                @if (!string.IsNullOrEmpty(mensajeError))
+                {
+                    <div class="alert alert-danger">@mensajeError</div>
+                }
+                <p class="small text-muted mb-3">
+                    Horarios de 16:00 a 22:00. Verde: hay cupo libre. Gris: cupo completo.
+                </p>
 
         <div class="row">
             <div class="col-md-6 mb-4">
@@ -109,16 +108,43 @@ else
     private DateOnly? fechaElegida;
     private string fechaFormateada = "";
     private string actividadNombre = "";
+    private IReadOnlyList<Turno> turnos = [];
     private bool procesando;
     private string? mensajeExito;
     private string? mensajeError;
 
-    private List<Turno> turnosTarde = new();
-    private List<Turno> turnosNoche = new();
+    private RenderFragment FilaTurno(Turno t) => __builder =>
+    {
+        var hayCupo = t.CupoDisponible > 0 && t.Estado != EstadoTurno.Cancelado;
+        __builder.OpenElement(0, "li");
+        __builder.AddAttribute(1, "class", "list-group-item " + (hayCupo ? "list-group-item-success" : "list-group-item-secondary"));
+
+        __builder.OpenElement(2, "div");
+        __builder.AddAttribute(3, "class", "d-flex justify-content-between align-items-center");
+        __builder.AddContent(4, $"{t.HoraInicio:HH:mm} – {t.HoraFin:HH:mm}");
+        __builder.OpenElement(5, "span");
+        __builder.AddAttribute(6, "class", "small");
+        __builder.AddContent(7, $"Cupos libres: {t.CupoDisponible} / {t.CupoMaximo}");
+        __builder.CloseElement();
+        __builder.CloseElement();
+
+        if (hayCupo)
+        {
+            var idCapt = t.Id;
+            __builder.OpenElement(8, "button");
+            __builder.AddAttribute(9, "type", "button");
+            __builder.AddAttribute(10, "class", "btn btn-sm btn-primary mt-2");
+            __builder.AddAttribute(11, "disabled", procesando);
+            __builder.AddAttribute(12, "onclick", EventCallback.Factory.Create(this, () => Reservar(idCapt)));
+            __builder.AddContent(13, "Seleccionar horario");
+            __builder.CloseElement();
+        }
+
+        __builder.CloseElement();
+    };
 
     protected override async Task OnParametersSetAsync()
     {
-        procesando = true;
         mensajeError = mensajeExito = null;
 
         if (UsuarioSesion.UsuarioActual is null) return;
@@ -132,32 +158,19 @@ else
 
         parametrosOk = true;
         fechaElegida = fp;
-        fechaFormateada = fechaElegida.Value.ToString("dddd d MMMM yyyy", new CultureInfo("es-AR"));
 
-        try 
-        {
-            var act = await ObtenerActividadPorId.Ejecutar(ActividadId.Value);
-            actividadNombre = act?.Nombre ?? "Actividad";
-            await CargarTurnos();
-        }
-        catch (Exception ex) 
-        {
-            mensajeError = "Error de carga: " + ex.Message;
-        }
-        finally
-        {
-            procesando = false;
-        }
+        var act = await ActividadRepositorio.ObtenerPorIdAsync(ActividadId!.Value);
+        actividadNombre = act?.Nombre ?? "Actividad";
+
+        await CargarTurnos();
     }
 
     private async Task CargarTurnos()
     {
-        if (!parametrosOk || fechaElegida is null || ActividadId is null) return;
+        if (!parametrosOk || fechaElegida is null || ActividadId is null || UsuarioSesion.UsuarioActual is null)
+            return;
 
-        var todos = (await ListarTurnosUseCase.Ejecutar(fechaElegida.Value, ActividadId.Value, null, null, null)).ToList();
-        
-        turnosTarde = todos.Where(x => x.HoraInicio.Hour < 20).ToList();
-        turnosNoche = todos.Where(x => x.HoraInicio.Hour >= 20).ToList();
+        turnos = (await ListarTurnosUseCase.Ejecutar(fechaElegida.Value, ActividadId.Value, null, null, null)).ToList();
     }
 
     private async Task Reservar(int turnoId)
@@ -166,15 +179,13 @@ else
         mensajeError = mensajeExito = null;
         try
         {
-            var nuevaReserva = new Reserva() 
-            { 
-                Id_Usuario = UsuarioSesion.UsuarioActual!.Id, 
-                Id_Turno = turnoId 
-            };
+            var uid = UsuarioSesion.UsuarioActual!.Id;
+            var (ok, msg, _) = await CrearReservaUseCase.ejecutar(uid, turnoId);
+            if (ok)
+                mensajeExito = "Reserva exitosa";
+            else
+                mensajeError = msg;
 
-            await CrearReservaUseCase.Ejecutar(nuevaReserva);
-            
-            mensajeExito = "Reserva realizada correctamente.";
             await CargarTurnos();
         }
         catch (Exception ex)
