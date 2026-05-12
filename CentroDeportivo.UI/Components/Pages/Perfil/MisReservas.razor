@@ -31,9 +31,9 @@ else
                 <th>Horario</th>
                 <th>Cancha</th>
                 <th>Estado</th>
+                <th>Acciones</th>
             </tr>
         </thead>
-
         <tbody>
             @foreach (var r in reservas)
             {
@@ -43,6 +43,18 @@ else
                     <td>@r.Turno?.HoraInicio</td>
                     <td>@r.Turno?.Cancha?.Numero</td>
                     <td>@r.Estado</td>
+
+                    <td>
+                        <button class="btn btn-primary btn-sm me-1"
+                                @onclick="() => GenerarQr(r.Id)">
+                            Generar QR
+                        </button>
+
+                        <button class="btn btn-danger btn-sm"
+                                @onclick="() => Cancelar(r.Id)">
+                            Cancelar reserva
+                        </button>
+                    </td>
                 </tr>
             }
         </tbody>
@@ -63,5 +75,14 @@ else
                 true // incluir pasadas si quieres historial
             )).ToList();
         }
+    }
+    async Task GenerarQr(int reservaId)
+    {
+        // Implementar
+    }
+
+    async Task Cancelar(int idReserva)
+    {
+
     }
 }
