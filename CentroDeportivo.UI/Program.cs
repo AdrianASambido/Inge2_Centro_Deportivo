@@ -35,7 +35,6 @@ builder.Services.AddScoped<IDevolucionRepositorio, DevolucionRepositorio>();
 builder.Services.AddScoped<IHashServicio, ServicioHash>();
 builder.Services.AddScoped<IEmailServicio, EmailServicio>();
 builder.Services.AddHostedService<TurnosBackgroundServicio>();
-builder.Services.AddScoped<Sesion>();
 
 // --- 3. REGISTRAR VALIDADORES (Lógica de Negocio) ---
 builder.Services.AddScoped<UsuarioClienteValidador>();
@@ -94,6 +93,9 @@ builder.Services.AddScoped<ConsultarDisponibilidadUseCase>();
 
 builder.Services.AddScoped<ConfirmarDevolucionUseCase>();
 builder.Services.AddScoped<ListarDevolucionesPendientesUseCase>();
+
+builder.Services.AddScoped<Sesion>(); 
+
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
