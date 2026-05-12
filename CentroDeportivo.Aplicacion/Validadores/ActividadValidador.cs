@@ -40,18 +40,49 @@ namespace CentroDeportivo.Aplicacion.Validadores
             return (string.IsNullOrEmpty(mensaje), mensaje);
         }
 
-        public async Task<(bool esValido, string mensaje)> validarEliminacion(int idActividad) { 
+        public async Task<(bool esValido, string mensaje)> validarEliminacion(int idActividad)
+        {
             var actividad = await repo.ObtenerPorIdAsync(idActividad);
 
-            if (actividad == null) {
+            if (actividad == null)
+            {
                 return (false, "Actividad inexistente.");
             }
 
-            if (await repo.TieneInscriptosAsync(idActividad)) {
+            if (await repo.TieneInscriptosAsync(idActividad))
+            {
                 return (false, "Error: la actividad posee turnos programados.");
             }
 
             return (true, "");
+        }
+        public async Task<(bool esValido, string mensaje)> ValidarEdicion(Actividad actividad, int idActividad)
+        {
+            string mensaje = "";
+
+            // Campos obligatorios
+            if (string.IsNullOrWhiteSpace(actividad.Nombre) ||
+                string.IsNullOrWhiteSpace(actividad.Descripcion))
+            {
+                mensaje += "Error: Debe completar todos los campos.\n";
+            }
+
+            // Precio válido
+            if (actividad.Precio < 0)
+            {
+                mensaje += "Error: El precio debe ser mayor a 0.\n";
+            }
+
+            // Validación de duplicado (correcta)
+            if (!string.IsNullOrWhiteSpace(actividad.Nombre))
+            {
+                if (await repo.YaExisteParaEditar(actividad.Nombre, idActividad))
+                {
+                    mensaje += "Error: Ya existe otra actividad con ese nombre.\n";
+                }
+            }
+
+            return (string.IsNullOrEmpty(mensaje), mensaje);
         }
     }
 }

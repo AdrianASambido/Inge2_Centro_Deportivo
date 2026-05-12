@@ -45,4 +45,4 @@ namespace CentroDeportivo.Aplicacion.Validadores
             return (true, "");
         }
     }
-}
+    }

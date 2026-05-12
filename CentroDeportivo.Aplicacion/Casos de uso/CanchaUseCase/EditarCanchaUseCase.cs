@@ -4,9 +4,67 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using CentroDeportivo.Aplicacion.Entidades;
+using CentroDeportivo.Aplicacion.Interfaces;
+
 namespace CentroDeportivo.Aplicacion.Casos_de_uso.CanchaUseCase
 {
     public class EditarCanchaUseCase
     {
+        private readonly ICanchaRepositorio repo;
+
+        public EditarCanchaUseCase(ICanchaRepositorio repo)
+        {
+            this.repo = repo;
+        }
+
+        public async Task Ejecutar(Cancha canchaEditada)
+        {
+            var canchaExistente = await repo.ObtenerPorIdAsync(canchaEditada.Id);
+
+            if (canchaExistente == null)
+            {
+                throw new Exception("La cancha no existe.");
+            }
+
+            // Regla de negocio:
+            // no se puede editar si tiene turnos asignados
+            if (await repo.TieneTurnosAsignadosAsync(canchaEditada.Id))
+            {
+                throw new Exception(
+                    "Edición fallida. Esta cancha tiene turnos agendados"
+                );
+            }
+
+            // Validar número repetido
+            if (await repo.YaExisteNumeroParaEditar(
+                    canchaEditada.Numero,
+                    canchaEditada.Id))
+            {
+                throw new Exception(
+                    "Edición fallida. El número de cancha ingresado ya existe"
+                );
+            }
+
+            // Validaciones básicas
+            if (canchaEditada.Numero <= 0)
+            {
+                throw new Exception(
+                    "Ingrese un número de cancha válido."
+                );
+            }
+
+            if (canchaEditada.Capacidad < 1)
+            {
+                throw new Exception(
+                    "Ingrese una capacidad válida."
+                );
+            }
+
+            canchaExistente.Numero = canchaEditada.Numero;
+            canchaExistente.Capacidad = canchaEditada.Capacidad;
+
+            await repo.ActualizarAsync(canchaExistente);
+        }
     }
 }

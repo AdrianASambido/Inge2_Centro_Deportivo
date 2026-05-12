@@ -19,7 +19,6 @@ namespace CentroDeportivo.Aplicacion.Entidades
             this.Descripcion = descripcion;
             this.Precio = precio;
         }
-
         public Actividad() { }
     }
 }
