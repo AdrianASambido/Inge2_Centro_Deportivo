@@ -1,17 +1,47 @@
 ﻿using CentroDeportivo.Aplicacion.Entidades;
+using CentroDeportivo.Aplicacion.Interfaces;
+using CentroDeportivo.Aplicacion.Validadores;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
+using CentroDeportivo.Aplicacion.Validadores;
 
 namespace CentroDeportivo.Aplicacion.Casos_de_uso.UsuarioUseCase
 {
     public class EditarUsuarioUseCase
     {
-        public void Ejecutar(Usuario usuario, int idEditor)
+        private readonly IUsuarioRepositorio _repo;
+        private readonly UsuarioClienteValidador _validador;
+
+        public EditarUsuarioUseCase(IUsuarioRepositorio repo)
         {
-            // TODO: implementar lógica real
+            _repo = repo;
+            _validador = new UsuarioClienteValidador(_repo);
+        }
+
+        public async Task Ejecutar(Usuario usuario, int idUsuario)
+        {
+            // 1. Verificar que el usuario existe
+            var existente = await _repo.ObtenerPorIdAsync(idUsuario);
+            if (existente == null)
+                throw new Exception("Usuario no encontrado");
+
+            // 2. Validar datos usando el método de edición del validador
+            var (esValido, mensaje) = await _validador.ValidarEdicion(usuario);
+            if (!esValido)
+                throw new Exception(mensaje);
+
+            // 3. Aplicar cambios solo con los atributos existentes
+            existente.Nombre = usuario.Nombre;
+            existente.Apellido = usuario.Apellido;
+            existente.Dni = usuario.Dni;
+            existente.Email = usuario.Email;
+            existente.Domicilio = usuario.Domicilio;
+            existente.Password = usuario.Password;
+            existente.DebeCambiarPassword = usuario.DebeCambiarPassword;
+            existente.Rol = usuario.Rol;
+
+            // 4. Guardar cambios
+            await _repo.ActualizarAsync(existente);
         }
     }
 }

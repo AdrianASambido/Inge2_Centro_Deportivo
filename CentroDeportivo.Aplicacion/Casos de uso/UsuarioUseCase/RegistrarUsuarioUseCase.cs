@@ -9,18 +9,33 @@ using CentroDeportivo.Aplicacion.Validadores;
 
 namespace CentroDeportivo.Aplicacion.Casos_de_uso.UsuarioUseCase;
 
-public class RegistrarUsuarioUseCase (IUsuarioRepositorio repo, UsuarioClienteValidador validador, IHashServicio repoHash)
+public class RegistrarUsuarioUseCase
 {
-    public async Task ejecutar(Usuario u) {
-        var (esValido, mensaje) = await validador.ValidarDatosComunes(u);
+    private readonly IUsuarioRepositorio _repo;
+    private readonly UsuarioClienteValidador _validador;
+    private readonly IHashServicio _repoHash;
 
-        if (!esValido) {
+    // Constructor
+    public RegistrarUsuarioUseCase(IUsuarioRepositorio repo, UsuarioClienteValidador validador, IHashServicio repoHash)
+    {
+        _repo = repo;
+        _validador = validador;
+        _repoHash = repoHash;
+    }
+
+    // Método principal
+    public async Task ejecutar(Usuario u)
+    {
+        var (esValido, mensaje) = await _validador.ValidarDatosComunes(u);
+
+        if (!esValido)
+        {
             throw new Exception(mensaje);
         }
 
-        u.Password = repoHash.Hashear(u.Password);
+        u.Password = _repoHash.Hashear(u.Password);
         u.Rol = Rol.Cliente;
 
-       await repo.AgregarAsync(u);
+        await _repo.AgregarAsync(u);
     }
 }

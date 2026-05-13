@@ -5,6 +5,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using CentroDeportivo.Aplicacion.Validadores;
+using CentroDeportivo.Aplicacion.Interfaces;
+using CentroDeportivo.Aplicacion.Entidades;
 
 namespace CentroDeportivo.Aplicacion.Validadores
 {

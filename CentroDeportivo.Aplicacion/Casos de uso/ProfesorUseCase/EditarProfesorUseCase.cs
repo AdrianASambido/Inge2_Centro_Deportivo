@@ -32,7 +32,7 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ProfesorUseCase
             if (await repo.YaExisteDniParaEditar(profesorEditado.Dni, idProfesor))
                 throw new Exception("El DNI ingresado ya pertenece a otro profesor registrado");
 
-            var (esValido, mensaje) = await validador.Validar(profesorEditado);
+            var (esValido, mensaje) = await validador.ValidarEdicion(profesorEditado);
 
             if (!esValido)
                 throw new Exception(mensaje);

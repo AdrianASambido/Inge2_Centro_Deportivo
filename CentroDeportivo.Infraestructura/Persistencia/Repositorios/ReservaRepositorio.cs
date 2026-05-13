@@ -31,7 +31,9 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
 
         public async Task<Reserva?> ObtenerPorIdAsync(int id)
         {
-            return await contexto.Reservas.FirstOrDefaultAsync(r => r.Id == id);
+            return await contexto.Reservas
+                .Include(r => r.Turno)
+                .FirstOrDefaultAsync(r => r.Id == id);
         }
 
         public async Task<Reserva?> ObtenerPorQrTokenAsync(string qrToken)
