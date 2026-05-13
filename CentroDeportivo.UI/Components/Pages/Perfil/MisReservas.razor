@@ -1,6 +1,6 @@
 ﻿@page "/MisReservas"
 @rendermode InteractiveServer
-
+@inject GenerarQrUseCase GenerarQRUseCase
 @inject IReservaRepositorio ReservaRepositorio
 @inject Sesion UsuarioSesion
 @inject CancelarReservaUseCase CancelarReservaCase
@@ -46,15 +46,18 @@ else
                     <td>@r.Estado</td>
 
                     <td>
-                        <button class="btn btn-primary btn-sm me-1"
-                                @onclick="() => GenerarQr(r.Id)">
-                            Generar QR
-                        </button>
+                        @if (r.Estado != EstadoReserva.Cancelado)
+                        {
+                            <button class="btn btn-danger btn-sm"
+                                    @onclick="() => Cancelar(r.Id)">
+                                Cancelar reserva
+                            </button>
+                            <button class="btn btn-primary btn-sm me-1"
+                                    @onclick="() => GenerarQr(r.Id)">
+                                Generar QR
+                            </button>
 
-                        <button class="btn btn-danger btn-sm"
-                                @onclick="() => Cancelar(r.Id)">
-                            Cancelar reserva
-                        </button>
+                        }
                     </td>
                 </tr>
             }
@@ -78,9 +81,20 @@ else
             )).ToList();
         }
     }
+
+    string error = "";
+    private byte[] qrCode = Array.Empty<byte>();
     async Task GenerarQr(int reservaId)
     {
-        // Implementar
+        error = "";
+        try
+        {
+            qrCode = await GenerarQRUseCase.Ejecutar(reservaId);
+        }
+        catch (Exception ex)
+        {
+            error = ex.Message;
+        }
     }
 
     async Task Cancelar(int idReserva)

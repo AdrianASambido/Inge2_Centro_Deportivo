@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace CentroDeportivo.Infraestructura.Servicios
 {
-    internal class QrServicio : IQrServicio
+    public class QrServicio : IQrServicio
     {
         public byte[] GenerarImagenQr(string token)
         {

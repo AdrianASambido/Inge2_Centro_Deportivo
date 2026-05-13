@@ -47,6 +47,14 @@ builder.Services.AddScoped<ProfesorValidador>();
 builder.Services.AddScoped<LoginValidador>();
 builder.Services.AddScoped<DevolucionValidador>();
 
+
+builder.Services.AddScoped<IQrServicio, QrServicio>();
+
+
+builder.Services.AddScoped<AsistenciaValidador>();
+
+
+builder.Services.AddScoped<GenerarQrUseCase>();
 // --- 4. REGISTRAR CASOS DE USO ---
 builder.Services.AddScoped<RegistrarUsuarioUseCase>();
 builder.Services.AddScoped<CrearEmpleadoUseCase>();
