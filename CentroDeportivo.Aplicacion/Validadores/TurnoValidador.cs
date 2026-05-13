@@ -9,9 +9,10 @@ using CentroDeportivo.Aplicacion.Interfaces;
 
 namespace CentroDeportivo.Aplicacion.Validadores
 {
-    public class TurnoValidador (IProfesorRepositorio repoProfe, ICanchaRepositorio repoCancha)
+    public class TurnoValidador(IProfesorRepositorio repoProfe, ICanchaRepositorio repoCancha)
     {
-        public async Task<(bool esValido, string mensaje)> validarTurno(Turno turno) {
+        public async Task<(bool esValido, string mensaje)> validarTurno(Turno turno)
+        {
 
             string mensaje = "";
 
@@ -30,7 +31,8 @@ namespace CentroDeportivo.Aplicacion.Validadores
                 mensaje += "Error: profesor inexistente.\n";
             }
 
-            if (!string.IsNullOrWhiteSpace(mensaje)) {
+            if (!string.IsNullOrWhiteSpace(mensaje))
+            {
                 return (false, mensaje);
             }
 
@@ -41,7 +43,8 @@ namespace CentroDeportivo.Aplicacion.Validadores
 
             TimeSpan duracion = turno.HoraFin - turno.HoraInicio;
 
-            if (duracion.TotalHours != 1) {
+            if (duracion.TotalHours != 1)
+            {
                 mensaje += "Error : los turnos deben durar 1 hora. \n";
             }
 
@@ -50,14 +53,15 @@ namespace CentroDeportivo.Aplicacion.Validadores
                 mensaje += "Error : el profesor seleccionado no esta disponible. \n";
             }
 
-            if (!await repoCancha.EstaDisponibleAsync(turno.Id_Cancha, turno.Fecha, turno.HoraInicio)){
+            if (!await repoCancha.EstaDisponibleAsync(turno.Id_Cancha, turno.Fecha, turno.HoraInicio))
+            {
 
                 mensaje += "Error : la cancha seleccionada no esta disponbile. \n";
             }
-            
+
             return (string.IsNullOrWhiteSpace(mensaje), mensaje);
         }
 
-       
+
     }
 }

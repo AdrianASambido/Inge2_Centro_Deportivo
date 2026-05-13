@@ -1,6 +1,7 @@
 @page "/Turnos/dia"
 @rendermode InteractiveServer
 @using System.Globalization
+@using CentroDeportivo.Aplicacion.Entidades
 @inject Sesion UsuarioSesion
 @inject NavigationManager Navegador
 @inject ListarTurnosUseCase ListarTurnosUseCase
@@ -37,59 +38,30 @@ else
             <div class="alert alert-danger shadow-sm">@mensajeError</div>
         }
 
-        <p class="small text-muted mb-3">
-            Horarios de 16:00 a 22:00. Verde: hay cupo libre. Gris: cupo completo.
-        </p>
-
         <div class="row">
-            <div class="col-md-6 mb-4">
+            <div class="col-12 mb-4">
                 <div class="card shadow-sm">
-                    <div class="card-header bg-light fw-bold">Bloques 16:00–19:00</div>
+                    <div class="card-header bg-primary text-white fw-bold">Turnos Disponibles</div>
                     <ul class="list-group list-group-flush">
-                        @foreach (var t in turnosTarde)
+                        @if (turnosFiltrados.Any())
                         {
-                            <li class="list-group-item d-flex justify-content-between align-items-center @(t.CupoDisponible > 0 ? "" : "bg-light text-muted")">
-                                <div>
-                                    @t.HoraInicio.ToString("HH:mm") – @t.HoraFin.ToString("HH:mm")
-                                    <div class="small d-block text-muted">Libres: @t.CupoDisponible / @t.CupoMaximo</div>
-                                </div>
-                                @if (t.CupoDisponible > 0 && t.Estado != EstadoTurno.Cancelado)
-                                {
+                            @foreach (var t in turnosFiltrados)
+                            {
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <span class="fw-bold">@t.HoraInicio.ToString("HH:mm") – @t.HoraFin.ToString("HH:mm")</span>
+                                        <div class="small d-block text-muted">Libres: @t.CupoDisponible / @t.CupoMaximo</div>
+                                    </div>
                                     <button type="button" class="btn btn-sm btn-success" disabled="@procesando" @onclick="() => Reservar(t.Id)">
                                         Reservar
                                     </button>
-                                }
-                                else
-                                {
-                                    <span class="badge bg-secondary">Completo</span>
-                                }
-                            </li>
+                                </li>
+                            }
                         }
-                    </ul>
-                </div>
-            </div>
-
-            <div class="col-md-6 mb-4">
-                <div class="card shadow-sm">
-                    <div class="card-header bg-light fw-bold">Bloques 20:00–22:00</div>
-                    <ul class="list-group list-group-flush">
-                        @foreach (var t in turnosNoche)
+                        else
                         {
-                            <li class="list-group-item d-flex justify-content-between align-items-center @(t.CupoDisponible > 0 ? "" : "bg-light text-muted")">
-                                <div>
-                                    @t.HoraInicio.ToString("HH:mm") – @t.HoraFin.ToString("HH:mm")
-                                    <div class="small d-block text-muted">Libres: @t.CupoDisponible / @t.CupoMaximo</div>
-                                </div>
-                                @if (t.CupoDisponible > 0 && t.Estado != EstadoTurno.Cancelado)
-                                {
-                                    <button type="button" class="btn btn-sm btn-success" disabled="@procesando" @onclick="() => Reservar(t.Id)">
-                                        Reservar
-                                    </button>
-                                }
-                                else
-                                {
-                                    <span class="badge bg-secondary">Completo</span>
-                                }
+                            <li class="list-group-item text-center py-4 text-muted">
+                                No hay turnos disponibles para reservar en esta fecha.
                             </li>
                         }
                     </ul>
@@ -113,8 +85,7 @@ else
     private string? mensajeExito;
     private string? mensajeError;
 
-    private List<Turno> turnosTarde = new();
-    private List<Turno> turnosNoche = new();
+    private List<Turno> turnosFiltrados = new();
 
     protected override async Task OnParametersSetAsync()
     {
@@ -134,13 +105,13 @@ else
         fechaElegida = fp;
         fechaFormateada = fechaElegida.Value.ToString("dddd d MMMM yyyy", new CultureInfo("es-AR"));
 
-        try 
+        try
         {
             var act = await ObtenerActividadPorId.Ejecutar(ActividadId.Value);
             actividadNombre = act?.Nombre ?? "Actividad";
             await CargarTurnos();
         }
-        catch (Exception ex) 
+        catch (Exception ex)
         {
             mensajeError = "Error de carga: " + ex.Message;
         }
@@ -154,10 +125,16 @@ else
     {
         if (!parametrosOk || fechaElegida is null || ActividadId is null) return;
 
-        var todos = (await ListarTurnosUseCase.Ejecutar(fechaElegida.Value, ActividadId.Value, null, null, null)).ToList();
+        var idUsuario = UsuarioSesion.UsuarioActual!.Id;
         
-        turnosTarde = todos.Where(x => x.HoraInicio.Hour < 20).ToList();
-        turnosNoche = todos.Where(x => x.HoraInicio.Hour >= 20).ToList();
+        var todos = await ListarTurnosUseCase.Ejecutar(fechaElegida.Value, ActividadId.Value, null, null, null);
+        var ahora = DateTime.Now;
+        var horaActual = TimeOnly.FromDateTime(ahora);
+
+        turnosFiltrados = todos
+            .Where(t => t.CupoDisponible > 0 && t.Estado != EstadoTurno.Cancelado && !t.Reservas.Any(r => r.Id_Usuario == idUsuario) && t.HoraInicio > horaActual)
+            .OrderBy(t => t.HoraInicio)
+            .ToList();
     }
 
     private async Task Reservar(int turnoId)
@@ -166,14 +143,14 @@ else
         mensajeError = mensajeExito = null;
         try
         {
-            var nuevaReserva = new Reserva() 
-            { 
-                Id_Usuario = UsuarioSesion.UsuarioActual!.Id, 
-                Id_Turno = turnoId 
+            var nuevaReserva = new Reserva()
+            {
+                Id_Usuario = UsuarioSesion.UsuarioActual!.Id,
+                Id_Turno = turnoId
             };
 
             await CrearReservaUseCase.Ejecutar(nuevaReserva);
-            
+
             mensajeExito = "Reserva realizada correctamente.";
             await CargarTurnos();
         }

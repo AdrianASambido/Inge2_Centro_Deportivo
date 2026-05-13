@@ -1,5 +1,6 @@
 ﻿@page "/listar-turnos-creados"
 @using BlazorBarcodeScanner.ZXing.JS
+@using System.Globalization
 @inject Sesion UsuarioSesion
 @inject ListarTurnosUseCase ListarTurnosUseCase
 @rendermode InteractiveServer
@@ -13,14 +14,14 @@
 @inject RegistrarAsistenciaManualUseCase RegistrarAsistenciaManualUseCase
 @inject ConfirmarPagoReservaUseCase ConfirmarPagoReservaUseCase
 @inject RegistrarAsistenciaQrUseCase RegistrarAsistenciaQrUseCase
+@inject ListarProfesoresUseCase ListarProfesoresUseCase
+@inject ListarCanchasUseCase ListarCanchasUseCase
 
 <PageTitle>Listado de Turnos</PageTitle>
 
 @if (!(UsuarioSesion.EstaAutenticado()) && (UsuarioSesion.esAdministrador() || UsuarioSesion.esEmpleado()))
 {
-    <div class="alert alert-warning">
-        ¡No tenés acceso a esta seccion!
-    </div>
+    <div class="alert alert-warning">¡No tenés acceso a esta seccion!</div>
 }
 else
 {
@@ -120,6 +121,51 @@ else
             </div>
         }
 
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-2">
+                        <label class="form-label small fw-bold">Actividad</label>
+                        <select class="form-select" @bind="filtroActividadId">
+                            <option value="0">Todas</option>
+                            @foreach (var a in actividades)
+                            {
+                                <option value="@a.Id">@a.Nombre</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small fw-bold">Cancha</label>
+                        <select class="form-select" @bind="filtroCanchaId">
+                            <option value="0">Todas</option>
+                            @foreach (var c in todasLasCanchas)
+                            {
+                                <option value="@c.Id">Cancha @c.Numero</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small fw-bold">Profesor</label>
+                        <select class="form-select" @bind="filtroProfesorId">
+                            <option value="0">Todos</option>
+                            @foreach (var p in todosLosProfesores)
+                            {
+                                <option value="@p.Id">@p.Nombre</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small fw-bold">Fecha</label>
+                        <input type="date" class="form-control" @bind="filtroFecha" />
+                    </div>
+                    <div class="col-md-4 d-flex gap-2">
+                        <button class="btn btn-primary flex-grow-1" @onclick="AplicarFiltros">Aplicar filtros</button>
+                        <button class="btn btn-outline-secondary" @onclick="LimpiarFiltros">Limpiar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="table-responsive shadow-sm" style="background: white; border-radius: 8px;">
             <table class="table table-hover mb-0">
                 <thead class="table-light">
@@ -135,21 +181,30 @@ else
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var t in turnos)
+                    @if (turnosFiltrados.Any())
+                    {
+                        @foreach (var t in turnosFiltrados)
+                        {
+                            <tr>
+                                <td class="fw-bold">@t.Id</td>
+                                <td>@t.Actividad.Nombre</td>
+                                <td>@t.Profesor.Nombre</td>
+                                <td>@t.Fecha.ToString("dd/MM/yyyy")</td>
+                                <td>@t.HoraInicio</td>
+                                <td>@t.HoraFin</td>
+                                <td><span class="badge bg-info text-dark">N° @t.Cancha.Numero</span></td>
+                                <td class="text-center">
+                                    <button class="btn btn-sm btn-outline-primary" @onclick="() => MostrarInscriptos(t.Id)">
+                                        Ver Inscriptos
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
                     {
                         <tr>
-                            <td class="fw-bold">@t.Id</td>
-                            <td>@t.Actividad.Nombre</td>
-                            <td>@t.Profesor.Nombre</td>
-                            <td>@t.Fecha.ToString("dd/MM/yyyy")</td>
-                            <td>@t.HoraInicio</td>
-                            <td>@t.HoraFin</td>
-                            <td><span class="badge bg-info text-dark">N° @t.Cancha.Numero</span></td>
-                            <td class="text-center">
-                                <button class="btn btn-sm btn-outline-primary" @onclick="() => MostrarInscriptos(t.Id)">
-                                    Ver Inscriptos
-                                </button>
-                            </td>
+                            <td colspan="8" class="text-center py-4 text-muted">No se encontraron turnos con los filtros seleccionados.</td>
                         </tr>
                     }
                 </tbody>
@@ -166,7 +221,7 @@ else
 @if (mostrarInscriptos)
 {
     <div class="modal show d-block" tabindex="-1" style="background: rgba(0,0,0,0.3);">
-        <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
                 <div class="modal-header bg-yellow text-white"><h5>Incriptos</h5></div>
                 <div class="modal-body">
@@ -213,24 +268,22 @@ else
     </div>
 }
 
-
-<div class="mb-3">
+<div class="mt-4">
     <button class="btn btn-warning w-50 mb-3" @onclick=" () => mostrarEscanner = true"><i class="bi bi-qr-code-scan"></i> Escanear QR</button>
 </div>
+
 @if (mostrarEscanner)
 {
     <div class="card shadow-sm mb-4 border-info" style="max-width: 300px;">
         <div class="card-body text-center">
             <h5 class="card-title">Escaneando QR...</h5>
-            <div class="bg-dark rounded p-2  mb-3">
-                <BlazorBarcodeScanner.ZXing.JS.BarcodeReader OnBarcodeReceived="ProcesarQR" @ref="lector"/>
+            <div class="bg-dark rounded p-2 mb-3">
+                <BlazorBarcodeScanner.ZXing.JS.BarcodeReader OnBarcodeReceived="ProcesarQR" @ref="lector" />
             </div>
-
             <button class="btn btn-secondary btn-sm" @onclick="() => mostrarEscanner = false">Cancelar escaneo</button>
         </div>
     </div>
 }
-
 
 @code {
     bool mostrarEscanner = false;
@@ -239,21 +292,49 @@ else
     bool mostrarDisponibles = false;
     bool quiereAgregar = false;
     string mensaje = "";
-    bool mostrarDialog = false;
-    int idAEliminar;
     Datos t = new Datos();
 
-    Cancha? canchaSeleccionada => canchasDispo.FirstOrDefault(c => c.Id == t.Id_Cancha);
+    private int filtroActividadId = 0;
+    private int filtroCanchaId = 0;
+    private int filtroProfesorId = 0;
+    private DateTime? filtroFecha;
 
-    List<Profesor> profesoresDispo = new List<Profesor>();
-    List<Actividad> actividades = new List<Actividad>();
-    List<Cancha> canchasDispo = new List<Cancha>();
-    List<Turno> turnos = new List<Turno>();
+    private List<Profesor> todosLosProfesores = new();
+    private List<Cancha> todasLasCanchas = new();
+    private List<Profesor> profesoresDispo = new();
+    private List<Actividad> actividades = new();
+    private List<Cancha> canchasDispo = new();
+    private List<Turno> turnos = new();
+    private List<Turno> turnosFiltrados = new();
+
+    Cancha? canchaSeleccionada => canchasDispo.FirstOrDefault(c => c.Id == t.Id_Cancha);
 
     protected override async Task OnInitializedAsync()
     {
         turnos = (await ListarTurnosUseCase.Ejecutar(null, null, null, null, null)).ToList();
         actividades = (await ListarActividadesUseCase.ejecutar()).ToList();
+        todosLosProfesores = (await ListarProfesoresUseCase.ejecutar()).ToList();
+        todasLasCanchas = (await ListarCanchasUseCase.ejecutar()).ToList();
+        turnosFiltrados = turnos;
+    }
+
+    private void AplicarFiltros()
+    {
+        turnosFiltrados = turnos.Where(t =>
+            (filtroActividadId == 0 || t.Id_Actividad == filtroActividadId) &&
+            (filtroCanchaId == 0 || t.Id_Cancha == filtroCanchaId) &&
+            (filtroProfesorId == 0 || t.Id_Profesor == filtroProfesorId) &&
+            (!filtroFecha.HasValue || t.Fecha == DateOnly.FromDateTime(filtroFecha.Value))
+        ).ToList();
+    }
+
+    private void LimpiarFiltros()
+    {
+        filtroActividadId = 0;
+        filtroCanchaId = 0;
+        filtroProfesorId = 0;
+        filtroFecha = null;
+        turnosFiltrados = turnos;
     }
 
     void CerrarSesion()
@@ -262,10 +343,7 @@ else
         Navegador.NavigateTo("/Login", true);
     }
 
-    void CrearTurno()
-    {
-        quiereAgregar = true;
-    }
+    void CrearTurno() => quiereAgregar = true;
 
     async Task RegistrarPago(int idReserva)
     {
@@ -274,13 +352,10 @@ else
             mensaje = "";
             await ConfirmarPagoReservaUseCase.Ejecutar(idReserva);
             mensaje = "Pago confirmado correctamente.";
-            mensaje = "";
         }
-        catch (Exception ex)
-        {
-            mensaje = ex.Message;
-        }
+        catch (Exception ex) { mensaje = ex.Message; }
     }
+
     async Task MostrarInscriptos(int Id)
     {
         try
@@ -303,10 +378,7 @@ else
             mensaje = "";
             await RegistrarAsistenciaManualUseCase.Ejecutar(idReserva);
         }
-        catch (Exception ex)
-        {
-            mensaje = ex.Message;
-        }
+        catch (Exception ex) { mensaje = ex.Message; }
     }
 
     async Task BuscarPorDisponibilidad()
@@ -343,14 +415,11 @@ else
             };
             await CrearTurnoUseCase.ejecutar(nuevoTurno);
             turnos = (await ListarTurnosUseCase.Ejecutar(null, null, null, null, null)).ToList();
+            AplicarFiltros();
             mensaje = "Turno creado correctamente.";
             quiereAgregar = false;
-            StateHasChanged();
         }
-        catch (Exception ex)
-        {
-            mensaje = ex.Message;
-        }
+        catch (Exception ex) { mensaje = ex.Message; }
     }
 
     private BlazorBarcodeScanner.ZXing.JS.BarcodeReader lector;
@@ -363,11 +432,7 @@ else
             mensaje = "Asistencia registrada correctamente.";
             mostrarEscanner = false;
         }
-        catch (Exception ex)
-        {
-            mensaje = ex.Message;
-        }
-        
+        catch (Exception ex) { mensaje = ex.Message; }
     }
 
     void Cancelar()

@@ -1,6 +1,6 @@
 ﻿@inject Sesion UsuarioSesion
 
-@if (UsuarioSesion.EstaAutenticado() && !UsuarioSesion.esCliente())
+@if (UsuarioSesion.EstaAutenticado() && !UsuarioSesion.esCliente() && !UsuarioSesion.UsuarioActual.DebeCambiarPassword)
 {
     <div class="nav-list">
         <div class="nav-item">

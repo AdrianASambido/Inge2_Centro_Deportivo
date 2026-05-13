@@ -1,7 +1,7 @@
 ﻿@page "/editar-cancha/{Id:int}"
 @rendermode InteractiveServer
 @inject ICanchaRepositorio RepositorioCancha
- @* @inject EditarCanchaUseCase EditarCanchaCase *@
+@inject EditarCanchaUseCase EditarCanchaCase
 @inject Sesion SesionUsuario
 @inject NavigationManager Navegador
 
@@ -53,9 +53,8 @@ else
     {
         mensaje = msj;
     }
-    void GuardarDatos()
+    async Task GuardarDatos()
     {
-        @*
         if (cancha == null)
         {
             return;
@@ -64,18 +63,22 @@ else
         try
         {
             mensaje = "";
-            var canchaNueva = new Cancha(numero,Capacidad);
-            EditarCanchaCase.Ejecutar(canchaNueva, idCanchaAEditar, SesionUsuario.UsuarioActual!.Id);
+
+            cancha.Numero = numero;
+            cancha.Capacidad = Capacidad;
+
+            await EditarCanchaCase.Ejecutar(cancha);
+
+            mensaje = "Edición exitosa";
+
             Navegador.NavigateTo("/canchas");
         }
         catch (Exception ex)
         {
             mensaje = ex.Message;
-            MostrarMensaje(mensaje);
         }
-        *@
-    }
-    
+        MostrarMensaje(mensaje);
+     }
 
     void Cancelar()
     {

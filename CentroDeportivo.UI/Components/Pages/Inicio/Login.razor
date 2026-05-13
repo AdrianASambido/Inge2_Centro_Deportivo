@@ -52,9 +52,13 @@
             var usuario = await IniciarSesionUseCase.ejecutar(datos.Correo, datos.Password);
             UsuarioSesion.IniciarSesion(usuario);
 
-            if (UsuarioSesion.esAdministrador() || UsuarioSesion.esEmpleado())
+            if (UsuarioSesion.esAdministrador() || (UsuarioSesion.esEmpleado() && !UsuarioSesion.UsuarioActual.DebeCambiarPassword))
             {
                 Navegador.NavigateTo("/listar-turnos-creados");
+            }
+            else if (UsuarioSesion.esEmpleado() && UsuarioSesion.UsuarioActual.DebeCambiarPassword)
+            {
+                Navegador.NavigateTo("/cambiar-contraseña");
             }
             else
             {
