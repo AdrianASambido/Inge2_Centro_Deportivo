@@ -36,12 +36,13 @@
         {
             <div class="alert alert-danger mt-3 text-center">@error</div>
         }
+
+        <div class="d-grid gap-2 mb-3">
+            <button class="btn btn-primary mb-3" @onclick="Redirigir">Confirmar</button>
+            <button class="btn btn-outline-primary mb-3" @onclick="Cancelar" hidden="@UsuarioSesion.esEmpleado()">Cancelar</button>
+        </div>
     </div>
 
-    <div class="d-grid gap-2 mb-3">
-        <button class="btn btn-primary" @onclick="Redirigir">Confirmar</button>
-        <button class="btn btn-outline-primary" @onclick="Cancelar" hidden="@UsuarioSesion.esEmpleado()">Cancelar</button>
-    </div>
 </div>
 
 @code {

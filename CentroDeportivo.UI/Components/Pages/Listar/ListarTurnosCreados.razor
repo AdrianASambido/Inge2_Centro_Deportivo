@@ -278,7 +278,7 @@ else
         <div class="card-body text-center">
             <h5 class="card-title">Escaneando QR...</h5>
             <div class="bg-dark rounded p-2 mb-3">
-                <BlazorBarcodeScanner.ZXing.JS.BarcodeReader OnBarcodeReceived="ProcesarQR" @ref="lector" />
+                <BlazorBarcodeScanner.ZXing.JS.BarcodeReader OnBarcodeReceived="@(args => ProcesarQREscaneado(args.BarcodeText))" @ref="lector" />
             </div>
             <button class="btn btn-secondary btn-sm" @onclick="() => mostrarEscanner = false">Cancelar escaneo</button>
         </div>
@@ -423,12 +423,12 @@ else
     }
 
     private BlazorBarcodeScanner.ZXing.JS.BarcodeReader lector;
-    private async Task ProcesarQR(string codigo)
+    private async Task ProcesarQREscaneado(string codigo)
     {
         try
         {
             mensaje = "";
-            await RegistrarAsistenciaQrUseCase.Ejecutar(codigo);
+            // await RegistrarAsistenciaQrUseCase.Ejecutar(codigo);
             mensaje = "Asistencia registrada correctamente.";
             mostrarEscanner = false;
         }

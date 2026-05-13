@@ -76,15 +76,19 @@ else
             )).ToList();
         }
     }
+
+    string error = "";
+    private byte[] qrCode = Array.Empty<byte>();
     async Task GenerarQr(int reservaId)
     {
+        error = "";
         try
         {
-            qrCodeBase64 = await GenerarQRUseCase.Ejecutar(reservaId);
+            qrCode = await GenerarQRUseCase.Ejecutar(reservaId);
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.Message);
+            error = ex.Message;
         }
     }
 
