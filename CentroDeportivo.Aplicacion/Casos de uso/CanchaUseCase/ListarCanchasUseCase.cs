@@ -8,10 +8,10 @@ using System.Threading.Tasks;
 
 namespace CentroDeportivo.Aplicacion.Casos_de_uso.CanchaUseCase
 {
-    public class ListarCanchasUseCase(ICanchaRepositorio repo)
+
+    public class ListarCanchasUseCase (ICanchaRepositorio repo)
     {
-        public async Task<IEnumerable<Cancha>> ejecutar()
-        {
+        public async Task<IEnumerable<Cancha>> ejecutar() {
             return await repo.ObtenerTodasAsync();
         }
     }

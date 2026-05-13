@@ -10,11 +10,9 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
 {
     public class GenerarQrUseCase(IQrServicio repo, IReservaRepositorio repoReserva, AsistenciaValidador validador)
     {
-        public async Task<byte[]> Ejecutar(int idReserva)
-        {
-            var (esValido, mensaje) = await validador.ValidarAsistencia(idReserva);
-            if (!esValido)
-            {
+        public async Task<byte[]> Ejecutar(int idReserva) { 
+            var(esValido, mensaje) = await validador.ValidarAsistencia(idReserva);
+            if (!esValido) {
                 throw new Exception(mensaje);
             }
 
@@ -23,8 +21,8 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
             reserva!.TokenQr = token;
 
             await repoReserva.ActualizarAsync(reserva);
-
-            return repo.GenerarImagenQr(token);
+            
+           return repo.GenerarImagenQr(token);
         }
     }
 }

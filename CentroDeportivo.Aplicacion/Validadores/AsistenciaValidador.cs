@@ -15,15 +15,13 @@ namespace CentroDeportivo.Aplicacion.Validadores
 
 
             var reserva = await repoReserva.ObtenerPorIdAsync(idReserva);
-            if (reserva == null)
-            {
+            if (reserva == null) {
                 return (false, "Error: reserva inexistente");
             }
 
             var turno = reserva.Turno;
 
-            if (turno == null)
-            {
+            if (turno == null) {
                 return (false, "Error: turno inexistente");
             }
 
@@ -41,7 +39,7 @@ namespace CentroDeportivo.Aplicacion.Validadores
             var inicioTurno = turno.Fecha.ToDateTime(turno.HoraInicio);
             TimeSpan tiempoRestante = inicioTurno - ahora;
 
-            if (tiempoRestante.TotalMinutes > 15)
+            if (tiempoRestante.TotalMinutes  > 15)
             {
                 return (false, "Error: puede generar el QR 15 minutos antes de la clase.");
             }
