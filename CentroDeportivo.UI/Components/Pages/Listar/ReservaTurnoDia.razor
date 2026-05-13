@@ -51,6 +51,7 @@ else
                                     <div>
                                         <span class="fw-bold">@t.HoraInicio.ToString("HH:mm") – @t.HoraFin.ToString("HH:mm")</span>
                                         <div class="small d-block text-muted">Libres: @t.CupoDisponible / @t.CupoMaximo</div>
+                                        <div class="small d-block text-muted">Precio:"$" @t.Actividad.Precio</div>
                                     </div>
                                     <button type="button" class="btn btn-sm btn-success" disabled="@procesando" @onclick="() => Reservar(t.Id)">
                                         Reservar
