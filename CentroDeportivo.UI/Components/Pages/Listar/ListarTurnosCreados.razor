@@ -1,5 +1,12 @@
 ﻿@page "/listar-turnos-creados"
-@using BlazorBarcodeScanner.ZXing.JS
+@using ZXing
+@using ZXing.QrCode
+@using System.Drawing
+@using System.IO
+@using ZXing.ImageSharp;
+@using SixLabors.ImageSharp;
+@using SixLabors.ImageSharp.PixelFormats;
+@inject IJSRuntime JS
 @using System.Globalization
 @inject Sesion UsuarioSesion
 @inject ListarTurnosUseCase ListarTurnosUseCase
@@ -27,7 +34,7 @@ else
 {
     <div class="container-fluid p-0">
         <h2 class="mb-1">Turnos creados</h2>
-        <p class="text-muted mb-4">Bienvenido, @UsuarioSesion.UsuarioActual!.Nombre</p>
+        <p class="text-muted mb-4">Bienvenido, @UsuarioSesion.UsuarioActual?.Nombre</p>
 
         <div class="d-flex gap-2 mb-4">
             <button class="btn btn-success" @onclick="CrearTurno">
@@ -183,18 +190,18 @@ else
                 <tbody>
                     @if (turnosFiltrados.Any())
                     {
-                        @foreach (var t in turnosFiltrados)
+                        @foreach (var tu in turnosFiltrados)
                         {
                             <tr>
-                                <td class="fw-bold">@t.Id</td>
-                                <td>@t.Actividad.Nombre</td>
-                                <td>@t.Profesor.Nombre</td>
-                                <td>@t.Fecha.ToString("dd/MM/yyyy")</td>
-                                <td>@t.HoraInicio</td>
-                                <td>@t.HoraFin</td>
-                                <td><span class="badge bg-info text-dark">N° @t.Cancha.Numero</span></td>
+                                <td class="fw-bold">@tu.Id</td>
+                                <td>@tu.Actividad.Nombre</td>
+                                <td>@tu.Profesor.Nombre</td>
+                                <td>@tu.Fecha.ToString("dd/MM/yyyy")</td>
+                                <td>@tu.HoraInicio</td>
+                                <td>@tu.HoraFin</td>
+                                <td><span class="badge bg-info text-dark">N° @tu.Cancha.Numero</span></td>
                                 <td class="text-center">
-                                    <button class="btn btn-sm btn-outline-primary" @onclick="() => MostrarInscriptos(t.Id)">
+                                    <button class="btn btn-sm btn-outline-primary" @onclick="() => MostrarInscriptos(tu.Id)">
                                         Ver Inscriptos
                                     </button>
                                 </td>
@@ -257,36 +264,58 @@ else
                     </div>
                 </div>
                 <div class="modal-footer">
-                    @if (!string.IsNullOrEmpty(mensaje))
-                    {
-                        <div class="alert alert-info mt-3 shadow-sm">@mensaje</div>
-                    }
                     <button class="btn btn-secondary" @onclick="() => mostrarInscriptos = false">Cerrar</button>
+                </div>
+            </div
+        </div>
+    </div>
+}
+
+<button class="btn btn-info text-white mt-3" @onclick="AbrirEscaner">
+                <i class="bi bi-qr-code-scan"></i> Escanear Asistencia
+            </button>
+
+@if (mostrarEscanner)
+{
+    <div class="modal show d-block" tabindex="-1" role="dialog" style="background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">
+                        <i class="bi bi-camera-fill me-2"></i> Escanear QR de Asistencia
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" @onclick="CerrarEscaner"></button>
+                </div>
+                <div class="modal-body p-0 bg-black" style="position: relative; min-height: 300px;">
+                    <video id="videoFeed"
+                           style="width: 100%; display: block; transform: scaleX(1);"
+                           autoplay
+                           muted
+                           playsinline>
+                    </video>
+                    
+                    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+                        width: 200px; height: 200px; border: 2px solid rgba(255,255,255,0.5);
+                        border-radius: 15px; box-shadow: 0 0 0 4000px rgba(0,0,0,0.3);">
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <div class="w-100 text-center">
+                        <p class="small text-muted mb-2">Asegurate de que el código esté bien iluminado</p>
+                        <button class="btn btn-outline-danger w-100" @onclick="CerrarEscaner">
+                            Cancelar y Volver
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 }
 
-<div class="mt-4">
-    <button class="btn btn-warning w-50 mb-3" @onclick=" () => mostrarEscanner = true"><i class="bi bi-qr-code-scan"></i> Escanear QR</button>
-</div>
-
-@if (mostrarEscanner)
-{
-    <div class="card shadow-sm mb-4 border-info" style="max-width: 300px;">
-        <div class="card-body text-center">
-            <h5 class="card-title">Escaneando QR...</h5>
-            <div class="bg-dark rounded p-2 mb-3">
-                <BlazorBarcodeScanner.ZXing.JS.BarcodeReader OnBarcodeReceived="@(args => ProcesarQREscaneado(args.BarcodeText))" @ref="lector" />
-            </div>
-            <button class="btn btn-secondary btn-sm" @onclick="() => mostrarEscanner = false">Cancelar escaneo</button>
-        </div>
-    </div>
-}
-
 @code {
+    
     bool mostrarEscanner = false;
+    bool jsListo = false;
     List<Reserva>? reservas = new List<Reserva>();
     bool mostrarInscriptos = false;
     bool mostrarDisponibles = false;
@@ -320,11 +349,11 @@ else
 
     private void AplicarFiltros()
     {
-        turnosFiltrados = turnos.Where(t =>
-            (filtroActividadId == 0 || t.Id_Actividad == filtroActividadId) &&
-            (filtroCanchaId == 0 || t.Id_Cancha == filtroCanchaId) &&
-            (filtroProfesorId == 0 || t.Id_Profesor == filtroProfesorId) &&
-            (!filtroFecha.HasValue || t.Fecha == DateOnly.FromDateTime(filtroFecha.Value))
+        turnosFiltrados = turnos.Where(tu =>
+            (filtroActividadId == 0 || tu.Id_Actividad == filtroActividadId) &&
+            (filtroCanchaId == 0 || tu.Id_Cancha == filtroCanchaId) &&
+            (filtroProfesorId == 0 || tu.Id_Profesor == filtroProfesorId) &&
+            (!filtroFecha.HasValue || tu.Fecha == DateOnly.FromDateTime(filtroFecha.Value))
         ).ToList();
     }
 
@@ -377,6 +406,7 @@ else
         {
             mensaje = "";
             await RegistrarAsistenciaManualUseCase.Ejecutar(idReserva);
+            mensaje = "Asistencia manual registrada.";
         }
         catch (Exception ex) { mensaje = ex.Message; }
     }
@@ -422,17 +452,75 @@ else
         catch (Exception ex) { mensaje = ex.Message; }
     }
 
-    private BlazorBarcodeScanner.ZXing.JS.BarcodeReader lector;
-    private async Task ProcesarQREscaneado(string codigo)
+
+    private CancellationTokenSource? cts;
+
+    private async Task AbrirEscaner()
+    {
+        mensaje = "";
+        mostrarEscanner = true;
+        StateHasChanged(); // Forzamos el renderizado del <video>
+    
+        await Task.Delay(500); // Espera mínima para que el DOM reconozca el ID del video
+
+        // LLAMADA CLAVE: Activa la cámara físicamente
+        bool exito = await JS.InvokeAsync<bool>("iniciarCamara", "videoElementId");
+
+        if (exito)
+        {
+            cts = new CancellationTokenSource();
+            await IniciarBucleEscaneo(cts.Token);
+        }
+        else
+        {
+            mensaje = "No se pudo acceder a la cámara. Revisa los permisos del navegador.";
+            mostrarEscanner = false;
+        }
+    }
+
+    private async Task IniciarBucleEscaneo(CancellationToken token)
+    {
+        while (!token.IsCancellationRequested)
+        {
+            var imagenBase64 = await JS.InvokeAsync<string>("capturarFoto", "videoElementId");
+
+            if (!string.IsNullOrEmpty(imagenBase64))
+            {
+                // Ahora 'DecodificarQr' ya existe en el contexto
+                var resultado = DecodificarQr(imagenBase64);
+
+                if (resultado != null)
+                {
+                    await ProcesarResultado(resultado);
+                    break;
+                }
+            }
+        
+            await Task.Delay(300, token);
+        }
+    }
+
+    private async Task ProcesarResultado(string codigoQr) // Ahora sí recibe un string
     {
         try
         {
-            mensaje = "";
-            // await RegistrarAsistenciaQrUseCase.Ejecutar(codigo);
-            mensaje = "Asistencia registrada correctamente.";
-            mostrarEscanner = false;
+            // Si el QR es el ID de la reserva o un hash
+            await RegistrarAsistenciaQrUseCase.Ejecutar(codigoQr);
+            mensaje = "¡Asistencia registrada con éxito!";
+            CerrarEscaner();
         }
-        catch (Exception ex) { mensaje = ex.Message; }
+        catch (Exception ex)
+        {
+            mensaje = $"Error: {ex.Message}";
+        }
+        StateHasChanged();
+    }
+
+    private void CerrarEscaner()
+    {
+        cts?.Cancel(); // Detiene el bucle while
+        mostrarEscanner = false;
+        StateHasChanged();
     }
 
     void Cancelar()
@@ -451,5 +539,36 @@ else
         public int Id_Actividad { get; set; }
         public int Id_Profesor { get; set; }
         public int Id_Cancha { get; set; }
+    }
+
+    private string? DecodificarQr(string base64Imagen)
+    {
+        try
+        {
+            // 1. Convertir Base64 a bytes
+            byte[] imageBytes = Convert.FromBase64String(base64Imagen);
+        
+            // 2. Cargar la imagen con ImageSharp
+            using var image = SixLabors.ImageSharp.Image.Load<SixLabors.ImageSharp.PixelFormats.L8>(imageBytes);
+        
+            // 3. Crear el lector GENÉRICO (esto evita el error CS8377)
+            var lector = new ZXing.BarcodeReaderGeneric();
+        
+            // 4. Crear la fuente de datos manualmente a partir de la imagen
+            var source = new ZXing.ImageSharp.ImageSharpLuminanceSource<SixLabors.ImageSharp.PixelFormats.L8>(image);
+        
+            // 5. Configurar opciones
+            lector.Options.PossibleFormats = new[] { ZXing.BarcodeFormat.QR_CODE };
+            lector.Options.TryHarder = true;
+
+            // 6. Decodificar usando la fuente manual
+            var resultado = lector.Decode(source);
+            return resultado?.Text;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error de escaneo: {ex.Message}");
+            return null;
+        }
     }
 }

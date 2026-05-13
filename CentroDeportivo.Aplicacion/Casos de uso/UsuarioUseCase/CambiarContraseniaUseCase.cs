@@ -35,6 +35,7 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.UsuarioUseCase
                 usuario.DebeCambiarPassword = false;
             }
             usuario.Password = repoHash.Hashear(contraNueva);
+            usuario.DebeCambiarPassword = false;
             await repo.ActualizarAsync(usuario);
         }
     }
