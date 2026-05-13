@@ -13,6 +13,8 @@ public class Sesion
         => UsuarioActual != null && UsuarioActual.Rol == Rol.Administrador;
     public bool esEmpleado()
         => UsuarioActual != null && UsuarioActual.Rol == Rol.Empleado;
+    public bool esCliente()
+        => UsuarioActual != null && UsuarioActual.Rol == Rol.Cliente;
     public void CerrarSesion()
         => UsuarioActual = null;
 
