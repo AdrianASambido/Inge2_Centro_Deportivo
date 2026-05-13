@@ -4,6 +4,8 @@
 @inject IReservaRepositorio ReservaRepositorio
 @inject Sesion UsuarioSesion
 @inject CancelarReservaUseCase CancelarReservaCase
+@inject ListarReservasUseCase ListarReservasCase
+@inject CancelarReservaUseCase CancelarReservaCase
 
 <PageTitle>Mis Reservas</PageTitle>
 
@@ -73,11 +75,11 @@ else
     {
         if (UsuarioSesion.UsuarioActual != null)
         {
-            reservas = (await ReservaRepositorio.ObtenerPorUsuarioAsync(
+            reservas = (await ListarReservasCase.Ejecutar(
                 UsuarioSesion.UsuarioActual.Id,
                 null,
                 null,
-                true // incluir pasadas si quieres historial
+                true
             )).ToList();
         }
     }
@@ -110,7 +112,7 @@ else
                 ? $"Reserva cancelada. Devolución: ${monto}"
                 : "Reserva cancelada sin devolución.";
 
-            reservas = (await ReservaRepositorio.ObtenerPorUsuarioAsync(
+            reservas = (await ListarReservasCase.Ejecutar(
                 UsuarioSesion.UsuarioActual!.Id,
                 null,
                 null,
