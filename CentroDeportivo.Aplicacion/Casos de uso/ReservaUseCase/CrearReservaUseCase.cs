@@ -28,6 +28,7 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
             }
 
             reserva.Estado = EstadoReserva.PendienteDePago;
+            reserva.Asistencia = Asistencia.Ausente;
             reserva.FechaReserva = DateOnly.FromDateTime(DateTime.Today);
 
             await repoReserva.AgregarAsync(reserva);

@@ -39,7 +39,10 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
 
         public async Task<Reserva?> ObtenerPorQrTokenAsync(string qrToken)
         {
-            throw new NotImplementedException();
+            return await contexto.Reservas
+                         .Include(r => r.Turno)   
+                         .Include(r => r.Usuario) 
+                         .FirstOrDefaultAsync(r => r.TokenQr == qrToken);
         }
 
         public async Task<IEnumerable<Reserva>> ObtenerPorTurnoAsync(int turnoId, string? dni = null)
