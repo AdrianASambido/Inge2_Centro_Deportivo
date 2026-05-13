@@ -40,7 +40,7 @@ else
             {
                 <tr>
                     <td>@r.Turno?.Actividad?.Nombre</td>
-                    <td>@r.Turno?.Fecha</td>
+                    <td>@r.Turno?.Fecha.ToShortDateString()</td>
                     <td>@r.Turno?.HoraInicio</td>
                     <td>@r.Turno?.Cancha?.Numero</td>
                     <td>@r.Estado</td>
@@ -51,14 +51,15 @@ else
                             Generar QR
                         </button>
 
-                        @if (qrCode != null && qrCode.Length > 0)
+                        @* CLAVE: Ahora preguntamos si el QR pertenece específicamente a esta reserva *@
+                        @if (reservaSeleccionadaId == r.Id && qrCode != null && qrCode.Length > 0)
                         {
-                            <div class="card shadow-sm my-4 border-primary" style="max-width: 300px;">
+                            <div class="card shadow-sm my-4 border-primary" style="max-width: 300px; position: absolute; z-index: 100;">
                                 <div class="card-header bg-primary text-white text-center">Tu código de acceso</div>
-                                <div class="card-body text-center">
+                                <div class="card-body text-center bg-white">
                                     <img src="data:image/png;base64,@Convert.ToBase64String(qrCode)" alt="QR Reserva" style="width: 200px;" />
                                     <p class="small text-muted mt-2">Presentá este código al ingresar</p>
-                                    <button class="btn btn-outline-secondary btn-sm" @onclick="() => qrCode = Array.Empty<byte>()">Cerrar</button>
+                                    <button class="btn btn-outline-secondary btn-sm" @onclick="CerrarQr">Cerrar</button>
                                 </div>
                             </div>
                         }
@@ -72,6 +73,7 @@ else
             }
         </tbody>
     </table>
+    
     @if (!string.IsNullOrEmpty(error))
     {
         <div class="alert alert-danger mt-3">@error</div>
@@ -80,34 +82,48 @@ else
 
 @code {
     List<Reserva>? reservas;
+    private int? reservaSeleccionadaId; // Seguimiento de qué QR mostrar
+    private byte[] qrCode = Array.Empty<byte>();
+    private string error = "";
 
     protected override async Task OnInitializedAsync()
     {
         if (UsuarioSesion.UsuarioActual != null)
         {
-            reservas = (await listarReservasUseCase.Ejecutar(UsuarioSesion.UsuarioActual.Id)).ToList();
+            var resultado = await listarReservasUseCase.Ejecutar(UsuarioSesion.UsuarioActual.Id);
+            reservas = resultado.ToList();
         }
     }
 
-    string error = "";
-    private byte[] qrCode = Array.Empty<byte>();
     async Task GenerarQr(int reservaId)
     {
         error = "";
+        // Si el usuario toca el mismo botón, lo cerramos
+        if (reservaSeleccionadaId == reservaId)
+        {
+            CerrarQr();
+            return;
+        }
+
         try
         {
             qrCode = await GenerarQRUseCase.Ejecutar(reservaId);
-            StateHasChanged();
+            reservaSeleccionadaId = reservaId; // Marcamos qué fila debe abrirse
         }
         catch (Exception ex)
         {
             error = ex.Message;
         }
-        StateHasChanged();
+    }
+
+    void CerrarQr()
+    {
+        qrCode = Array.Empty<byte>();
+        reservaSeleccionadaId = null;
     }
 
     async Task Cancelar(int idReserva)
     {
-
+        // Tu lógica de cancelación aquí
     }
 }

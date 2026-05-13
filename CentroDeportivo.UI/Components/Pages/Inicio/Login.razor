@@ -64,11 +64,11 @@
             {
                 Navegador.NavigateTo("/Turnos");
             }
+            StateHasChanged();
         }
         catch (Exception ex)
         {
             error = ex.Message;
-            error = "";
         }
     }
 

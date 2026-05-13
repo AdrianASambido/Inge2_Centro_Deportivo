@@ -1,0 +1,117 @@
+﻿@page "/Devoluciones"
+@rendermode InteractiveServer
+@inject ConfirmarDevolucionUseCase ConfirmarDevolucionUseCase
+@inject ListarDevolucionesPendientesUseCase ListarDevolucionesPendientesUseCase
+@inject NavigationManager Navigation
+
+<PageTitle>Inicio - Centro Deportivo</PageTitle>
+
+<div class="container text-center mt-5">
+    <div class="p-5 mb-4 bg-light rounded-3 shadow-sm">
+        <h1 class="display-5 fw-bold text-primary">Devoluciones</h1>
+        
+        <hr class="my-4">
+
+        @if (!mostrarLista)
+        {
+            <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+                <button class="btn btn-primary btn-lg px-4 gap-3" @onclick="CargarLista">
+                    <i class="bi bi-calendar-check"></i> Listar Devoluciones Pendientes
+                </button>
+            </div>
+        }
+
+        @if (mensajeExito != null)
+        {
+            <div class="alert alert-success mt-3" role="alert">
+                @mensajeExito
+            </div>
+        }
+
+        @if (mostrarLista)
+        {
+            <div class="mt-4 text-start">
+                @if (devoluciones == null || !devoluciones.Any())
+                {
+                    @* Escenario 2: Sin devoluciones pendientes *@
+                    <div class="alert alert-info text-center">No hay devoluciones pendientes.</div>
+                }
+                else
+                {
+                    @* Escenario 1: Listado con devoluciones pendientes *@
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Cliente (Nombre, Apellido, DNI)</th>
+                                    <th>Turno Cancelado</th>
+                                    <th>Monto</th>
+                                    <th>Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var dev in devoluciones)
+                                {
+                                    <tr @onclick="() => SeleccionarDevolucion(dev)"
+                                        style="cursor:pointer;"
+                                        class="@(devolucionSeleccionada?.Id == dev.Id ? "table-primary" : "")">
+                                        <td>@dev.Usuario?.Nombre @dev.Usuario?.Apellido (@dev.Usuario?.Dni)</td>
+                                        <td>@(dev.Reserva?.Turno?.Fecha.ToShortDateString() ?? "") - @((dev.Reserva?.Turno != null) ? $"{dev.Reserva.Turno.HoraInicio} - {dev.Reserva.Turno.HoraFin}" : "")</td>
+                                        <td class="fw-bold text-success">$@dev.MontoADevolver</td>
+                                        <td>
+                                            @if (devolucionSeleccionada?.Id == dev.Id)
+                                            {
+                                                <button class="btn btn-success btn-sm" @onclick="Confirmar">
+                                                    Confirmar devolución
+                                                </button>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                <div class="text-center mt-3">
+                    <button class="btn btn-secondary btn-sm" @onclick="() => { mostrarLista = false; mensajeExito = null; }">Volver</button>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    private bool mostrarLista = false;
+    private string? mensajeExito;
+    private List<Devolucion>? devoluciones;
+    private Devolucion? devolucionSeleccionada;
+
+    private async Task CargarLista()
+    {
+        mensajeExito = null;
+        // Llamada al caso de uso para obtener los datos según la HU
+        devoluciones = (await ListarDevolucionesPendientesUseCase.ejecutar()).ToList();
+        mostrarLista = true;
+    }
+
+    private void SeleccionarDevolucion(Devolucion dev)
+    {
+        devolucionSeleccionada = dev;
+        mensajeExito = null; // Limpiar mensaje al cambiar selección
+    }
+
+    private async Task Confirmar()
+    {
+        if (devolucionSeleccionada != null)
+        {
+            // Llamada al caso de uso de confirmación
+            await ConfirmarDevolucionUseCase.Ejecutar(devolucionSeleccionada.Id);
+
+            mensajeExito = "¡Transacción exitosa! La devolución ha sido confirmada.";
+            devolucionSeleccionada = null;
+
+            // Recargamos la lista para reflejar los cambios (Escenario 2 si queda vacía)
+            devoluciones = (await ListarDevolucionesPendientesUseCase.ejecutar()).ToList();
+        }
+    }
+}
