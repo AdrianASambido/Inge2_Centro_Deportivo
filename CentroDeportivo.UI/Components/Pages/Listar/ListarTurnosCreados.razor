@@ -311,6 +311,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        StateHasChanged();
         turnos = (await ListarTurnosUseCase.Ejecutar(null, null, null, null, null)).ToList();
         actividades = (await ListarActividadesUseCase.ejecutar()).ToList();
         todosLosProfesores = (await ListarProfesoresUseCase.ejecutar()).ToList();

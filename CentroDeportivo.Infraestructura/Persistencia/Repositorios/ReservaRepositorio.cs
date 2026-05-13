@@ -31,12 +31,18 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
 
         public async Task<Reserva?> ObtenerPorIdAsync(int id)
         {
-            return await contexto.Reservas.FirstOrDefaultAsync(r => r.Id == id);
+            return await contexto.Reservas
+                .Include(r => r.Turno)   // Traigo los datos del horario, fecha
+                .Include(r => r.Usuario) // Taigo los datos del cliente 
+                .FirstOrDefaultAsync(r => r.Id == id);
         }
 
         public async Task<Reserva?> ObtenerPorQrTokenAsync(string qrToken)
         {
-            throw new NotImplementedException();
+            return await contexto.Reservas
+                         .Include(r => r.Turno)
+                         .Include(r => r.Usuario)
+                         .FirstOrDefaultAsync(r => r.TokenQr == qrToken);
         }
 
         public async Task<IEnumerable<Reserva>> ObtenerPorTurnoAsync(int turnoId, string? dni = null)

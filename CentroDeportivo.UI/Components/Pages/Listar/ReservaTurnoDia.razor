@@ -129,10 +129,11 @@ else
         
         var todos = await ListarTurnosUseCase.Ejecutar(fechaElegida.Value, ActividadId.Value, null, null, null);
         var ahora = DateTime.Now;
+        var fechaHoy = DateOnly.FromDateTime(ahora);
         var horaActual = TimeOnly.FromDateTime(ahora);
 
         turnosFiltrados = todos
-            .Where(t => t.CupoDisponible > 0 && t.Estado != EstadoTurno.Cancelado && !t.Reservas.Any(r => r.Id_Usuario == idUsuario) && t.HoraInicio > horaActual)
+            .Where(t => t.CupoDisponible > 0 && t.Estado != EstadoTurno.Cancelado && (t.Fecha > fechaHoy || (t.Fecha == fechaHoy && t.HoraInicio > horaActual)) && !t.Reservas.Any(r => r.Id_Usuario == idUsuario))
             .OrderBy(t => t.HoraInicio)
             .ToList();
     }
