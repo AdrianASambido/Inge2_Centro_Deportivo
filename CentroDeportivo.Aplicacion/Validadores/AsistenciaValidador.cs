@@ -12,7 +12,7 @@ namespace CentroDeportivo.Aplicacion.Validadores
     {
         public async Task<(bool esValido, string mensaje)> ValidarAsistencia(int idReserva)
         {
-           
+
 
             var reserva = await repoReserva.ObtenerPorIdAsync(idReserva);
             if (reserva == null) {

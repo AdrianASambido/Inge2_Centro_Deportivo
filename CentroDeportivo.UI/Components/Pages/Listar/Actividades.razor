@@ -128,7 +128,7 @@ else
     {
         try
         {
-            var acti = new Actividad(act.nombre, act.descripcion, act.precio);
+            var acti = new Actividad(act.nombre, act.descripcion, act.precio ?? 0);
             await CrearActividadUseCase.ejecutar(acti);
             actividad = (await ListarActividadesUseCase.ejecutar()).ToList();
             quiereAgregar = false;
@@ -143,6 +143,6 @@ else
     {
         public string nombre { get; set; } = "";
         public string descripcion { get; set; } = "";
-        public double precio { get; set; }
+        public double? precio { get; set; }
     }
 }

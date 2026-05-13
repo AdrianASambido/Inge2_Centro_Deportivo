@@ -34,9 +34,9 @@ else
     [Parameter]
     public int Id { get; set; }
     public int idProfesorAEditar;
-    public string nombre;
-    public string apellido;
-    public string dni;
+    public string nombre = string.Empty;
+    public string apellido = string.Empty;
+    public string dni = string.Empty;
 
     public Profesor? profesor;
 
@@ -58,7 +58,7 @@ else
     {
         mensaje = msj;
     }
-    void GuardarDatos()
+    async Task GuardarDatos()
     {
         if (profesor == null)
         {
@@ -69,7 +69,7 @@ else
         {
             mensaje = "";
             var profesorNuevo = new Profesor(nombre, apellido, dni);
-            EditarProfesorCase.ejecutar(profesorNuevo, idProfesorAEditar, SesionUsuario.UsuarioActual!.Id);
+            await EditarProfesorCase.Ejecutar(profesorNuevo, idProfesorAEditar);
             Navegador.NavigateTo("/profesores");
         }
         catch (Exception ex)
@@ -83,5 +83,9 @@ else
     {
         Navegador.NavigateTo("/profesores");
         mensaje = "";
+    }
+    protected override void OnInitialized()
+    {
+        Console.WriteLine("👉 EDITAR PROFESOR CARGADO");
     }
 }

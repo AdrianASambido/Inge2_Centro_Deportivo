@@ -8,20 +8,21 @@ using CentroDeportivo.Aplicacion.Interfaces;
 
 namespace CentroDeportivo.Aplicacion.Validadores
 {
-    public class CanchaValidador (ICanchaRepositorio repo)
+    public class CanchaValidador(ICanchaRepositorio repo)
     {
-        public async Task<(bool esValido, string mensaje)> validar(Cancha c) { 
+        public async Task<(bool esValido, string mensaje)> validar(Cancha c)
+        {
 
             string mensaje = "";
 
-            
-            if (c.Numero <= 0) 
+
+            if (c.Numero <= 0)
             {
                 mensaje += "Ingrese un número de cancha válido (mayor a 0).\n";
             }
             else
             {
-                
+
                 if (await repo.YaExiste(c.Numero))
                 {
                     mensaje += "El número de cancha ya existe.\n";
@@ -32,14 +33,17 @@ namespace CentroDeportivo.Aplicacion.Validadores
                 mensaje += "Ingrese una capacidad valida.\n";
             }
 
-            return (string.IsNullOrEmpty(mensaje),mensaje);
+            return (string.IsNullOrEmpty(mensaje), mensaje);
         }
-        public async Task<(bool esValido, string mensaje)> ValidarEliminacion(int id) {
+        public async Task<(bool esValido, string mensaje)> ValidarEliminacion(int id)
+        {
             var cancha = await repo.ObtenerPorIdAsync(id);
-            if (cancha == null) {
+            if (cancha == null)
+            {
                 return (false, "Cancha inexistente");
             }
-            if (await repo.TieneTurnosAsignadosAsync(id)){
+            if (await repo.TieneTurnosAsignadosAsync(id))
+            {
                 return (false, "Error al eliminar, la cancha tiene turnos asignados");
             }
             return (true, "");

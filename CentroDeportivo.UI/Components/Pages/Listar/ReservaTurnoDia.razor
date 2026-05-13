@@ -1,225 +1,158 @@
 @page "/Turnos/dia"
 @rendermode InteractiveServer
 @using System.Globalization
+@using CentroDeportivo.Aplicacion.Entidades
 @inject Sesion UsuarioSesion
 @inject NavigationManager Navegador
-@inject ListarTurnosCalendarioUseCase ListarTurnosCalendarioUseCase
-@inject IActividadRepositorio ActividadRepositorio
+@inject ListarTurnosUseCase ListarTurnosUseCase
+@inject ObtenerActividadPorId ObtenerActividadPorId
 @inject CrearReservaUseCase CrearReservaUseCase
-@inject AceptarOfertaListaEsperaUseCase AceptarOfertaListaEsperaUseCase
-@inject ProcesarOfertasListaEsperaVencidasUseCase ProcesarOfertasListaEsperaVencidas
-@inject IListaEsperaRepositorio ListaEsperaRepositorio
 
 <PageTitle>Horarios del día</PageTitle>
 
-<div class="container py-4">
-    @if (UsuarioSesion.UsuarioActual is null)
-    {
-        <p class="text-center">Debe iniciar sesión.</p>
-    }
-    else if (!parametrosOk)
-    {
-        <div class="alert alert-warning">Indique actividad y fecha válida (desde la pantalla de turnos).</div>
+@if (UsuarioSesion.UsuarioActual is null)
+{
+    <div class="alert alert-warning">Debe iniciar sesión. <NavLink href="/Login">Ir al Login</NavLink></div>
+}
+else if (!parametrosOk)
+{
+    <div class="container-fluid p-0">
+        <div class="alert alert-warning">Indique actividad y fecha válida.</div>
         <button type="button" class="btn btn-secondary" @onclick="VolverTurnos">Volver</button>
-    }
-    else
-    {
-        <div class="row justify-content-center">
-            <div class="col-lg-10">
-                <div class="card mb-4">
-                    <div class="card-body">
-                        <h3 class="card-title text-center">@actividadNombre</h3>
-                        <p class="text-center mb-0">
-                            <strong>Día:</strong> @fechaElegida!.Value.ToString("dddd d MMMM yyyy", new CultureInfo("es-AR"))
-                        </p>
-                    </div>
-                </div>
+    </div>
+}
+else
+{
+    <div class="container-fluid p-0">
+        <h2 class="mb-1">@actividadNombre</h2>
+        <p class="text-muted mb-4">
+            Día: @fechaFormateada
+        </p>
 
-                @if (!string.IsNullOrEmpty(mensajeExito))
-                {
-                    <div class="alert alert-success">@mensajeExito</div>
-                }
-                @if (!string.IsNullOrEmpty(mensajeInfo))
-                {
-                    <div class="alert alert-info">@mensajeInfo</div>
-                }
-                @if (!string.IsNullOrEmpty(mensajeError))
-                {
-                    <div class="alert alert-danger">@mensajeError</div>
-                }
+        @if (!string.IsNullOrEmpty(mensajeExito))
+        {
+            <div class="alert alert-success shadow-sm">@mensajeExito</div>
+        }
+        @if (!string.IsNullOrEmpty(mensajeError))
+        {
+            <div class="alert alert-danger shadow-sm">@mensajeError</div>
+        }
 
-                @if (tieneOfertaLista)
-                {
-                    <div class="alert alert-warning">
-                        Tiene un cupo ofrecido desde la lista de espera para uno de estos horarios.
-                        Confirmá dentro de los 15 minutos indicados en el correo.
-                        <div class="mt-2">
-                            <button type="button" class="btn btn-success" @onclick="ConfirmarOferta" disabled="@procesando">
-                                Confirmar reserva (lista de espera)
-                            </button>
-                        </div>
-                    </div>
-                }
-
-                <p class="small text-muted mb-3">
-                    Horarios de 16:00 a 22:00. Verde: hay cupo libre. Gris: cupo completo.
-                </p>
-
-                <div class="row">
-                    <div class="col-md-6">
-                        <h5 class="text-center">Bloques 16:00–19:00</h5>
-                        <ul class="list-group mb-3">
-                            @foreach (var t in turnos.Where(x => x.HoraInicio.Hour < 20))
+        <div class="row">
+            <div class="col-12 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white fw-bold">Turnos Disponibles</div>
+                    <ul class="list-group list-group-flush">
+                        @if (turnosFiltrados.Any())
+                        {
+                            @foreach (var t in turnosFiltrados)
                             {
-                                @FilaTurno(t)
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <span class="fw-bold">@t.HoraInicio.ToString("HH:mm") – @t.HoraFin.ToString("HH:mm")</span>
+                                        <div class="small d-block text-muted">Libres: @t.CupoDisponible / @t.CupoMaximo</div>
+                                    </div>
+                                    <button type="button" class="btn btn-sm btn-success" disabled="@procesando" @onclick="() => Reservar(t.Id)">
+                                        Reservar
+                                    </button>
+                                </li>
                             }
-                        </ul>
-                    </div>
-                    <div class="col-md-6">
-                        <h5 class="text-center">Bloques 20:00–22:00</h5>
-                        <ul class="list-group mb-3">
-                            @foreach (var t in turnos.Where(x => x.HoraInicio.Hour >= 20))
-                            {
-                                @FilaTurno(t)
-                            }
-                        </ul>
-                    </div>
+                        }
+                        else
+                        {
+                            <li class="list-group-item text-center py-4 text-muted">
+                                No hay turnos disponibles para reservar en esta fecha.
+                            </li>
+                        }
+                    </ul>
                 </div>
-
-                <button type="button" class="btn btn-secondary" @onclick="VolverTurnos">Volver a turnos</button>
             </div>
         </div>
-    }
-</div>
+
+        <button type="button" class="btn btn-secondary mt-2" @onclick="VolverTurnos">Volver a turnos</button>
+    </div>
+}
 
 @code {
-    [SupplyParameterFromQuery]
-    public int? ActividadId { get; set; }
-
-    [SupplyParameterFromQuery]
-    public string? Fecha { get; set; }
+    [SupplyParameterFromQuery] public int? ActividadId { get; set; }
+    [SupplyParameterFromQuery] public string? Fecha { get; set; }
 
     private bool parametrosOk;
     private DateOnly? fechaElegida;
+    private string fechaFormateada = "";
     private string actividadNombre = "";
-    private IReadOnlyList<Turno> turnos = [];
-    private readonly Dictionary<int, int> cantidadListaEsperaPorTurno = new();
-    private bool tieneOfertaLista;
     private bool procesando;
     private string? mensajeExito;
-    private string? mensajeInfo;
     private string? mensajeError;
 
-    private RenderFragment FilaTurno(Turno t) => __builder =>
-    {
-        var enLista = cantidadListaEsperaPorTurno.GetValueOrDefault(t.Id);
-        var hayCupo = t.CupoDisponible > 0 && t.Estado != EstadoTurno.Cancelado;
-        __builder.OpenElement(0, "li");
-        __builder.AddAttribute(1, "class", "list-group-item " + (hayCupo ? "list-group-item-success" : "list-group-item-secondary"));
-
-        __builder.OpenElement(2, "div");
-        __builder.AddAttribute(3, "class", "d-flex justify-content-between align-items-center");
-        __builder.AddContent(4, $"{t.HoraInicio:HH:mm} – {t.HoraFin:HH:mm}");
-        __builder.OpenElement(5, "span");
-        __builder.AddAttribute(6, "class", "small");
-        __builder.AddContent(7, $"Cupos libres: {t.CupoDisponible} / {t.CupoMaximo}");
-        __builder.CloseElement();
-        __builder.CloseElement();
-
-        __builder.OpenElement(8, "div");
-        __builder.AddAttribute(9, "class", "small mt-1");
-        __builder.AddContent(10, $"Lista de espera (pendientes u oferta): {enLista}");
-        __builder.CloseElement();
-
-        if (hayCupo)
-        {
-            var idCapt = t.Id;
-            __builder.OpenElement(11, "button");
-            __builder.AddAttribute(12, "type", "button");
-            __builder.AddAttribute(13, "class", "btn btn-sm btn-primary mt-2");
-            __builder.AddAttribute(14, "disabled", procesando);
-            __builder.AddAttribute(15, "onclick", EventCallback.Factory.Create(this, () => Reservar(idCapt)));
-            __builder.AddContent(16, "Seleccionar horario");
-            __builder.CloseElement();
-        }
-
-        __builder.CloseElement();
-    };
+    private List<Turno> turnosFiltrados = new();
 
     protected override async Task OnParametersSetAsync()
     {
-        mensajeError = mensajeExito = mensajeInfo = null;
+        procesando = true;
+        mensajeError = mensajeExito = null;
 
-        if (UsuarioSesion.UsuarioActual is null)
-        {
-            Navegador.NavigateTo("/Login");
-            return;
-        }
+        if (UsuarioSesion.UsuarioActual is null) return;
 
-        if (ActividadId is not > 0 || string.IsNullOrWhiteSpace(Fecha))
+        if (ActividadId is not > 0 || string.IsNullOrWhiteSpace(Fecha) || !DateOnly.TryParse(Fecha, CultureInfo.InvariantCulture, out var fp))
         {
             parametrosOk = false;
-            return;
-        }
-
-        if (!DateOnly.TryParse(Fecha, CultureInfo.InvariantCulture, out var fp))
-        {
-            parametrosOk = false;
+            procesando = false;
             return;
         }
 
         parametrosOk = true;
         fechaElegida = fp;
-        await ProcesarOfertasListaEsperaVencidas.ejecutar();
+        fechaFormateada = fechaElegida.Value.ToString("dddd d MMMM yyyy", new CultureInfo("es-AR"));
 
-        var act = await ActividadRepositorio.ObtenerPorIdAsync(ActividadId!.Value);
-        actividadNombre = act?.Nombre ?? "Actividad";
-
-        await CargarTurnosYListas();
+        try
+        {
+            var act = await ObtenerActividadPorId.Ejecutar(ActividadId.Value);
+            actividadNombre = act?.Nombre ?? "Actividad";
+            await CargarTurnos();
+        }
+        catch (Exception ex)
+        {
+            mensajeError = "Error de carga: " + ex.Message;
+        }
+        finally
+        {
+            procesando = false;
+        }
     }
 
-    private async Task CargarTurnosYListas()
+    private async Task CargarTurnos()
     {
-        if (!parametrosOk || fechaElegida is null || ActividadId is null || UsuarioSesion.UsuarioActual is null)
-            return;
+        if (!parametrosOk || fechaElegida is null || ActividadId is null) return;
 
-        turnos = await ListarTurnosCalendarioUseCase.ejecutar(ActividadId.Value, fechaElegida.Value);
-        cantidadListaEsperaPorTurno.Clear();
-        tieneOfertaLista = false;
+        var idUsuario = UsuarioSesion.UsuarioActual!.Id;
+        
+        var todos = await ListarTurnosUseCase.Ejecutar(fechaElegida.Value, ActividadId.Value, null, null, null);
+        var ahora = DateTime.Now;
+        var horaActual = TimeOnly.FromDateTime(ahora);
 
-        foreach (var t in turnos)
-        {
-            var lista = (await ListaEsperaRepositorio.ObtenerPorTurnoOrdenadasAsync(t.Id)).ToList();
-            cantidadListaEsperaPorTurno[t.Id] = lista.Count(x =>
-                x.Estado is EstadoListaEspera.EnEspera or EstadoListaEspera.OfertaEnviada);
-
-            if (await ListaEsperaRepositorio.ObtenerOfertaActivaUsuarioAsync(UsuarioSesion.UsuarioActual.Id, t.Id) != null)
-                tieneOfertaLista = true;
-        }
+        turnosFiltrados = todos
+            .Where(t => t.CupoDisponible > 0 && t.Estado != EstadoTurno.Cancelado && !t.Reservas.Any(r => r.Id_Usuario == idUsuario) && t.HoraInicio > horaActual)
+            .OrderBy(t => t.HoraInicio)
+            .ToList();
     }
 
     private async Task Reservar(int turnoId)
-    { //Al metodo crear reserva le tenes que mandar la reserva creada. La creas con Id de usuario,y Id de Turno. Luego el caso de uso le setea los demas valores.
-        
+    {
         procesando = true;
-        mensajeError = mensajeExito = mensajeInfo = null;
+        mensajeError = mensajeExito = null;
         try
         {
-            var uid = UsuarioSesion.UsuarioActual!.Id;
-            var nuevaReserva = new Reserva
+            var nuevaReserva = new Reserva()
             {
-                Id_Usuario = uid,
+                Id_Usuario = UsuarioSesion.UsuarioActual!.Id,
                 Id_Turno = turnoId
             };
 
-            
             await CrearReservaUseCase.Ejecutar(nuevaReserva);
 
-            // si no tira excepcion el CU es porq salio bien (creo q iria aca el mensaje este)
-            mensajeExito = "Reserva exitosa";
-
-            
-            await CargarTurnosYListas();
+            mensajeExito = "Reserva realizada correctamente.";
+            await CargarTurnos();
         }
         catch (Exception ex)
         {
@@ -228,44 +161,7 @@
         finally
         {
             procesando = false;
-        }
-    }
-
-    private async Task ConfirmarOferta()
-    {
-        procesando = true;
-        mensajeError = mensajeExito = mensajeInfo = null;
-        try
-        {
-            var uid = UsuarioSesion.UsuarioActual!.Id;
-            var confirmado = false;
-            foreach (var t in turnos)
-            {
-                var oferta = await ListaEsperaRepositorio.ObtenerOfertaActivaUsuarioAsync(uid, t.Id);
-                if (oferta == null)
-                    continue;
-                var (ok, msg, _) = await AceptarOfertaListaEsperaUseCase.ejecutar(uid, t.Id);
-                if (ok)
-                {
-                    mensajeExito = msg;
-                    confirmado = true;
-                    break;
-                }
-                mensajeError = msg;
-            }
-
-            if (!confirmado && mensajeError == null)
-                mensajeError = "No hay oferta vigente para confirmar.";
-
-            await CargarTurnosYListas();
-        }
-        catch (Exception ex)
-        {
-            mensajeError = ex.Message;
-        }
-        finally
-        {
-            procesando = false;
+            StateHasChanged();
         }
     }
 

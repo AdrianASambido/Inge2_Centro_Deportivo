@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using CentroDeportivo.Aplicacion.Interfaces;
+using CentroDeportivo.Aplicacion.Entidades;
 
 namespace CentroDeportivo.Aplicacion.Casos_de_uso.ActividadUseCase
 {
@@ -17,7 +19,7 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ActividadUseCase
                 throw new Exception("Error: actividad inexistente.");
             }
 
-            return actividad; 
+            return actividad;
         }
     }
 }

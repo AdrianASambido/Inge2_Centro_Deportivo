@@ -1,35 +1,67 @@
-﻿@page "/editar-usr/{Id:int}"
+﻿﻿@page "/editar-usr/{Id:int}"
 @rendermode InteractiveServer
 @inject IUsuarioRepositorio RepositorioUsuario
 @inject EditarUsuarioUseCase EditarUsuarioCase
 @inject Sesion SesionUsuario
 @inject NavigationManager Navegador
 
-<PageTitle>Editar Usuario</PageTitle>
+<PageTitle>Editar datos personales</PageTitle>
 
-<h3>Datos del usuario</h3>
+<div class="container-fluid p-0">
 
-@if (usuario == null)
-{
+    <h2 class="mb-1">Editar datos personales</h2>
+    <p class="text-muted mb-4">
+        Actualizá la información del usuario
+    </p>
 
-}
-else
-{
-    <input placeholder="Nombre" @bind="nombre" class="form-control">
-    <input placeholder="Apellido" @bind="apellido" class="form-control">
-    <input placeholder="Correo" @bind="correo" class="form-control">
-   @*  <input placeholder="Contraseña" @bind="contrasenia1" class="form-control" type="password">
-    <input placeholder="Contraseña" @bind="contrasenia2" class="form-control" type="password"> *@
-}
+    @if (usuario == null)
+    {
+        <div class="alert alert-info">
+            Cargando datos del usuario...
+        </div>
+    }
+    else
+    {
+        <div class="card shadow-sm border-0 rounded-4 p-4" style="max-width: 700px;">
 
-<button class="btn btn-success" @onclick="GuardarDatos">Guardar datos</button>
-<button class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
+            <h5 class="mb-3">Información personal</h5>
 
-@if (!string.IsNullOrEmpty(mensaje))
-{
-    <div class="alert alert-danger">@mensaje</div>
-}
+            <input placeholder="Nombre" @bind="nombre" class="form-control mb-2">
+            <input placeholder="Apellido" @bind="apellido" class="form-control mb-2">
+            <input placeholder="DNI" @bind="dni" class="form-control mb-2">
+            <input placeholder="Domicilio" @bind="domicilio" class="form-control mb-2">
+            <input placeholder="Correo" @bind="correo" class="form-control mb-2">
 
+            <div class="d-flex gap-2 mt-3 justify-content-end">
+
+                <button class="btn btn-outline-primary"
+                        @onclick="GuardarDatos">
+                    Guardar cambios
+                </button>
+
+                <button class="btn btn-outline-warning"
+                        @onclick="CambiarContrasenia">
+                    Cambiar contraseña
+                </button>
+
+                <button class="btn btn-outline-secondary"
+                        @onclick="Cancelar">
+                    Cancelar
+                </button>
+
+            </div>
+
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(mensaje))
+    {
+        <div class="alert alert-danger mt-3">
+            @mensaje
+        </div>
+    }
+
+</div>
 
 @code {
     string mensaje = "";
@@ -37,47 +69,61 @@ else
     [Parameter]
     public int Id { get; set; }
 
+    public Usuario? usuario;
+
     public string nombre = "";
     public string apellido = "";
+    public string dni = "";
+    public string domicilio = "";
     public string correo = "";
-    public string contrasenia1 = "";
-    public string contrasenia2 = "";
-    public Usuario? usuario;
-    
+
+    void CambiarContrasenia()
+    {
+        Navegador.NavigateTo("/CambiarContraseña");
+    }
+
     protected override async Task OnInitializedAsync()
     {
         usuario = await RepositorioUsuario.ObtenerPorIdAsync(Id);
+
         if (usuario != null)
         {
             nombre = usuario.Nombre;
             apellido = usuario.Apellido;
+            dni = usuario.Dni;
+            domicilio = usuario.Domicilio;
             correo = usuario.Email ?? "";
-            @* contrasenia1 = usuario.Contrasenia;
-            contrasenia2 = usuario.Contrasenia; *@
         }
     }
 
     void GuardarDatos()
     {
         if (usuario == null)
-        {
             return;
-        }
 
         try
         {
+            // actualizar objeto con datos del formulario
+            usuario.Nombre = nombre;
+            usuario.Apellido = apellido;
+            usuario.Dni = dni;
+            usuario.Domicilio = domicilio;
+            usuario.Email = correo;
+
             EditarUsuarioCase.Ejecutar(usuario, SesionUsuario.UsuarioActual!.Id);
+
+            mensaje = "Los datos se han modificado correctamente.";
+
             Navegador.NavigateTo("/usuarios");
         }
         catch (Exception ex)
         {
             mensaje = ex.Message;
         }
-
     }
 
     void Cancelar()
     {
-        Navegador.NavigateTo("/usuarios");
+        Navegador.NavigateTo("/MiPerfil");
     }
 }

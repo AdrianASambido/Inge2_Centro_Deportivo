@@ -76,17 +76,30 @@
     private bool mostrarCalendarioCompleto;
 
     private DateOnly ReferenciaMes => new(DateTime.Today.Year, DateTime.Today.Month, 1);
+    string mensaje = "";
 
     protected override async Task OnInitializedAsync()
     {
-        if (UsuarioSesion.UsuarioActual is null)
+        try
         {
-            Navegador.NavigateTo("/Login");
-            return;
-        }
+            if (UsuarioSesion.UsuarioActual is null)
+            {
+                Navegador.NavigateTo("/Login");
+                return;
+            }
 
-        var todas = await ListarActividadesUseCase.ejecutar();
-        actividades = todas.Where(a => NombresActividades.Contains(a.Nombre)).OrderBy(a => a.Nombre).ToList();
+            var resultado = await ListarActividadesUseCase.ejecutar();
+            actividades = resultado.ToList();
+            
+            if (!actividades.Any())
+            {
+                mensaje = "No hay actividades en la base de datos.";
+            }
+        }
+        catch (Exception ex)
+        {
+            mensaje = "Error de sistema: " + ex.Message;
+        }
     }
 
     private void AlActividadCambiada()

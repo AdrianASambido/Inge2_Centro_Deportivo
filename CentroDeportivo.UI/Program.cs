@@ -48,6 +48,14 @@ builder.Services.AddScoped<LoginValidador>();
 builder.Services.AddScoped<DevolucionValidador>();
 builder.Services.AddScoped<AsistenciaValidador>();
 
+
+builder.Services.AddScoped<IQrServicio, QrServicio>();
+
+
+builder.Services.AddScoped<AsistenciaValidador>();
+
+
+builder.Services.AddScoped<GenerarQrUseCase>();
 // --- 4. REGISTRAR CASOS DE USO ---
 builder.Services.AddScoped<RegistrarUsuarioUseCase>();
 builder.Services.AddScoped<CrearEmpleadoUseCase>();
@@ -61,6 +69,7 @@ builder.Services.AddScoped<ListarEmpleadosUseCase>();
 builder.Services.AddScoped<CrearActividadUseCase>();
 builder.Services.AddScoped<ListarActividadesUseCase>();
 builder.Services.AddScoped<EliminarActividadUseCase>();
+builder.Services.AddScoped<ObtenerActividadPorId>();
 
 builder.Services.AddScoped<EliminarCanchaUseCase>();
 builder.Services.AddScoped<CrearCanchaUseCase>();

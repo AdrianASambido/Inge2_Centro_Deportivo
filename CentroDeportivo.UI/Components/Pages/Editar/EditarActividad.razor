@@ -1,0 +1,71 @@
+﻿@page "/editar-actividad/{Id:int}"
+@rendermode InteractiveServer
+@inject IActividadRepositorio RepositorioActividad
+@inject EditarActividadUseCase EditarActividadCase
+@inject Sesion SesionUsuario
+@inject NavigationManager Navegador
+
+<PageTitle>Editar Actividad</PageTitle>
+
+<h3>Editar Actividad</h3>
+
+@if (actividad == null)
+{
+    <p>Cargando...</p>
+}
+else
+{
+    <input placeholder="Nombre" @bind="nombre" class="form-control mb-2" />
+    <input placeholder="Descripción" @bind="descripcion" class="form-control mb-2" />
+    <input placeholder="Precio" @bind="precio" class="form-control mb-3" type="number" step="0.01" />
+
+    <div class="d-flex gap-2">
+        <button class="btn btn-success" @onclick="GuardarDatos">Guardar cambios</button>
+        <button class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
+    </div>
+}
+
+@if (!string.IsNullOrEmpty(mensaje))
+{
+    <div class="alert alert-danger mt-3">@mensaje</div>
+}
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    public Actividad? actividad;
+    public string nombre = "";
+    public string descripcion = "";
+    public double precio;
+
+    public string mensaje = "";
+
+    protected override async Task OnInitializedAsync()
+    {   
+        actividad = await RepositorioActividad.ObtenerPorIdAsync(Id);
+        if (actividad != null)
+        {
+            nombre = actividad.Nombre;
+            descripcion = actividad.Descripcion;
+            precio = actividad.Precio;
+        }
+    }
+
+    async Task GuardarDatos()
+    {  
+        if (actividad == null) return;
+
+        try
+        {
+            var acti = new Actividad(nombre, descripcion, precio);
+            await EditarActividadCase.Ejecutar(acti, Id);
+            Navegador.NavigateTo("/Actividades");
+        }
+        catch (Exception ex)
+        {
+            mensaje = ex.Message;
+        }
+    }
+
+    void Cancelar() => Navegador.NavigateTo("/Actividades");
+}

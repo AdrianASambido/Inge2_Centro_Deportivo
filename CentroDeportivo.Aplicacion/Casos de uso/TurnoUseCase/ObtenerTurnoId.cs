@@ -14,7 +14,7 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.TurnoUseCase
             var turno = await repo.ObtenerPorIdAsync(idTurno);
             if (turno == null) {
                 throw new Exception("Error: turno inexistente");
-            } 
+            }
             return turno;
         }
     }
