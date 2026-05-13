@@ -3,6 +3,7 @@
 
 @inject IReservaRepositorio ReservaRepositorio
 @inject Sesion UsuarioSesion
+@inject CancelarReservaUseCase CancelarReservaCase
 
 <PageTitle>Mis Reservas</PageTitle>
 
@@ -63,6 +64,7 @@ else
 
 @code {
     List<Reserva>? reservas;
+    string mensaje = "";
 
     protected override async Task OnInitializedAsync()
     {
@@ -83,6 +85,28 @@ else
 
     async Task Cancelar(int idReserva)
     {
+        try
+        {
+            Console.WriteLine($"CLICK CANCELAR: {idReserva}");
 
+
+            var (conDevolucion, monto) = await CancelarReservaCase.Ejecutar(idReserva);
+
+            mensaje = conDevolucion
+                ? $"Reserva cancelada. Devolución: ${monto}"
+                : "Reserva cancelada sin devolución.";
+
+            reservas = (await ReservaRepositorio.ObtenerPorUsuarioAsync(
+                UsuarioSesion.UsuarioActual!.Id,
+                null,
+                null,
+                true
+            )).ToList();
+        }
+        catch (Exception ex)
+        {
+            mensaje = ex.ToString(); // 👈 IMPORTANTE (no solo ex.Message)
+            Console.WriteLine(ex);
+        }
     }
 }

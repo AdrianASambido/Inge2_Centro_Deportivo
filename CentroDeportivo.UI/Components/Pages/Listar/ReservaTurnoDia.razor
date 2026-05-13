@@ -134,13 +134,13 @@ else
         fechaElegida = fp;
         fechaFormateada = fechaElegida.Value.ToString("dddd d MMMM yyyy", new CultureInfo("es-AR"));
 
-        try 
+        try
         {
             var act = await ObtenerActividadPorId.Ejecutar(ActividadId.Value);
             actividadNombre = act?.Nombre ?? "Actividad";
             await CargarTurnos();
         }
-        catch (Exception ex) 
+        catch (Exception ex)
         {
             mensajeError = "Error de carga: " + ex.Message;
         }
@@ -155,7 +155,7 @@ else
         if (!parametrosOk || fechaElegida is null || ActividadId is null) return;
 
         var todos = (await ListarTurnosUseCase.Ejecutar(fechaElegida.Value, ActividadId.Value, null, null, null)).ToList();
-        
+
         turnosTarde = todos.Where(x => x.HoraInicio.Hour < 20).ToList();
         turnosNoche = todos.Where(x => x.HoraInicio.Hour >= 20).ToList();
     }
@@ -166,14 +166,14 @@ else
         mensajeError = mensajeExito = null;
         try
         {
-            var nuevaReserva = new Reserva() 
-            { 
-                Id_Usuario = UsuarioSesion.UsuarioActual!.Id, 
-                Id_Turno = turnoId 
+            var nuevaReserva = new Reserva()
+            {
+                Id_Usuario = UsuarioSesion.UsuarioActual!.Id,
+                Id_Turno = turnoId
             };
 
             await CrearReservaUseCase.Ejecutar(nuevaReserva);
-            
+
             mensajeExito = "Reserva realizada correctamente.";
             await CargarTurnos();
         }

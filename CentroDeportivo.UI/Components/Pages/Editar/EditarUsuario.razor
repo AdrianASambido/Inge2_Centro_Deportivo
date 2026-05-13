@@ -96,31 +96,31 @@
         }
     }
 
-    void GuardarDatos()
+async Task GuardarDatos()
+{
+    if (usuario == null)
+        return;
+
+    try
     {
-        if (usuario == null)
-            return;
+        // Actualizamos el objeto con los datos del formulario
+        usuario.Nombre = nombre;
+        usuario.Apellido = apellido;
+        usuario.Dni = dni;
+        usuario.Domicilio = domicilio;
+        usuario.Email = correo;
 
-        try
-        {
-            // actualizar objeto con datos del formulario
-            usuario.Nombre = nombre;
-            usuario.Apellido = apellido;
-            usuario.Dni = dni;
-            usuario.Domicilio = domicilio;
-            usuario.Email = correo;
+        // Llamada await al UseCase
+        await EditarUsuarioCase.Ejecutar(usuario, usuario.Id);
 
-            EditarUsuarioCase.Ejecutar(usuario, SesionUsuario.UsuarioActual!.Id);
-
-            mensaje = "Los datos se han modificado correctamente.";
-
-            Navegador.NavigateTo("/usuarios");
-        }
-        catch (Exception ex)
-        {
-            mensaje = ex.Message;
-        }
+        mensaje = "Los datos se han modificado correctamente.";
+        Navegador.NavigateTo("/MiPerfil");
     }
+    catch (Exception ex)
+    {
+        mensaje = ex.Message;
+    }
+}
 
     void Cancelar()
     {
