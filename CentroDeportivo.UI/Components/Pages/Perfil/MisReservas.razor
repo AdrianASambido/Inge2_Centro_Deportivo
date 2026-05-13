@@ -4,6 +4,7 @@
 @inject IReservaRepositorio ReservaRepositorio
 @inject Sesion UsuarioSesion
 @inject ListarReservasUseCase listarReservasUseCase
+@inject NavigationManager Navigation
 
 <PageTitle>Mis Reservas</PageTitle>
 
@@ -42,7 +43,7 @@ else
                     <td>@r.Turno?.Actividad?.Nombre</td>
                     <td>@r.Turno?.Fecha.ToShortDateString()</td>
                     <td>@r.Turno?.HoraInicio</td>
-                    <td>@r.Turno.Cancha.Id</td>
+                    <td>@r.Turno?.Cancha.Id</td>
                     <td>@r.Estado</td>
 
                     <td>
