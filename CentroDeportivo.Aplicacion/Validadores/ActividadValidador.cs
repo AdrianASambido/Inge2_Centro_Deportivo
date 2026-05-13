@@ -14,30 +14,48 @@ namespace CentroDeportivo.Aplicacion.Validadores
         {
             string mensaje = "";
 
-            // 1. Validaciones de campos obligatorios
+            
             if (string.IsNullOrWhiteSpace(actividad.Nombre) || string.IsNullOrWhiteSpace(actividad.Descripcion))
             {
                 mensaje += "Error: Debe completar todos los campos.\n";
             }
 
-            // 2. Validación de lógica de negocio (Precio)
+            
             if (actividad.Precio < 0)
             {
                 mensaje += "Error: El precio debe ser mayor a 0.\n";
             }
 
-            // 3. Validación contra la Base de Datos (Asincrónica)
-            // Solo chequeamos si existe si el nombre no está vacío para evitar consultas innecesarias
+
             if (!string.IsNullOrWhiteSpace(actividad.Nombre))
             {
-                if (await repo.YaExiste(actividad.Nombre))
+                // Normalizamos el nombre antes de preguntar si existe
+                string nombreLimpio = NormalizarTexto(actividad.Nombre);
+
+                // El Repo ahora debe buscar de forma insensible a mayúsculas y acentos
+                if (await repo.YaExiste(nombreLimpio))
                 {
-                    mensaje += "Error: Esta actividad ya existe.\n";
+                    mensaje += $"Error: La actividad '{actividad.Nombre}' ya existe (o una similar).\n";
                 }
             }
 
-            // Retornamos la tupla: es válido si el mensaje quedó vacío
+
             return (string.IsNullOrEmpty(mensaje), mensaje);
+        }
+
+        private string NormalizarTexto(string texto)
+        {
+            if (string.IsNullOrWhiteSpace(texto)) return "";
+
+            // Pasa a mayús y normaliza para separar caracteres de sus acentos
+            string textoNormalizado = texto.ToUpper().Normalize(NormalizationForm.FormD);
+
+            // Filtra solo los caracteres que no sean acentos
+            var sinAcentos = textoNormalizado
+                .Where(c => System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c) != System.Globalization.UnicodeCategory.NonSpacingMark)
+                .ToArray();
+
+            return new string(sinAcentos).Normalize(NormalizationForm.FormC);
         }
 
         public async Task<(bool esValido, string mensaje)> validarEliminacion(int idActividad)

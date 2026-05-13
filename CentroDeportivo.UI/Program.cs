@@ -68,6 +68,7 @@ builder.Services.AddScoped<ListarEmpleadosUseCase>();
 
 builder.Services.AddScoped<CrearActividadUseCase>();
 builder.Services.AddScoped<ListarActividadesUseCase>();
+builder.Services.AddScoped<EditarActividadUseCase>();
 builder.Services.AddScoped<EliminarActividadUseCase>();
 builder.Services.AddScoped<ObtenerActividadPorId>();
 
