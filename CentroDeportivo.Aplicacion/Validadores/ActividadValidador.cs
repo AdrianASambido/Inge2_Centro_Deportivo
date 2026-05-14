@@ -21,7 +21,7 @@ namespace CentroDeportivo.Aplicacion.Validadores
             }
 
             
-            if (actividad.Precio < 0)
+            if (actividad.Precio <= 0)
             {
                 mensaje += "Error: El precio debe ser mayor a 0.\n";
             }
@@ -29,10 +29,10 @@ namespace CentroDeportivo.Aplicacion.Validadores
 
             if (!string.IsNullOrWhiteSpace(actividad.Nombre))
             {
-                // Normalizamos el nombre antes de preguntar si existe
+                // Normalizo el nombre
                 string nombreLimpio = NormalizarTexto(actividad.Nombre);
 
-                // El Repo ahora debe buscar de forma insensible a mayúsculas y acentos
+                // El Repo ahora buscade indiferente a mayúsculas y acentos
                 if (await repo.YaExiste(nombreLimpio))
                 {
                     mensaje += $"Error: La actividad '{actividad.Nombre}' ya existe (o una similar).\n";

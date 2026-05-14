@@ -4,8 +4,9 @@
 @using CentroDeportivo.Aplicacion.Entidades
 @inject Sesion UsuarioSesion
 @inject NavigationManager Navegador
-@inject ListarTurnosUseCase ListarTurnosUseCase
+@inject ListarTurnosCalendarioUseCase ListarTurnosCalendarioUseCase
 @inject ObtenerActividadPorId ObtenerActividadPorId
+@inject ObtenerUsuarioPorId ObtenerUsuarioPorId
 @inject CrearReservaUseCase CrearReservaUseCase
 
 <PageTitle>Horarios del día</PageTitle>
@@ -128,7 +129,7 @@ else
 
         var idUsuario = UsuarioSesion.UsuarioActual!.Id;
         
-        var todos = await ListarTurnosUseCase.Ejecutar(fechaElegida.Value, ActividadId.Value, null, null, null);
+        var todos = await ListarTurnosCalendarioUseCase.ejecutar(idUsuario,fechaElegida.Value, ActividadId.Value);
         var ahora = DateTime.Now;
         var fechaHoy = DateOnly.FromDateTime(ahora);
         var horaActual = TimeOnly.FromDateTime(ahora);

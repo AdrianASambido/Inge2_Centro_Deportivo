@@ -12,7 +12,7 @@ namespace CentroDeportivo.Aplicacion.Validadores
 {
     public class UsuarioClienteValidador : UsuarioValidadorBase
     {
-        public UsuarioClienteValidador(IUsuarioRepositorio repo) : base(repo)
+        public UsuarioClienteValidador(IUsuarioRepositorio repo, IProfesorRepositorio repoProfe) : base(repo, repoProfe)
         {
         }
 
