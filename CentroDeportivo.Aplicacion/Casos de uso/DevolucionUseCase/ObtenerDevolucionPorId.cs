@@ -10,11 +10,9 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.DevolucionUseCase
 {
     public class ObtenerDevolucionPorId(IDevolucionRepositorio repo)
     {
-        public async Task<Devolucion> Ejecutar(int idDevolucion)
-        {
+        public async Task<Devolucion> Ejecutar(int idDevolucion) { 
             var devolucion = await repo.ObtenerPorIdAsync(idDevolucion);
-            if (devolucion == null)
-            {
+            if (devolucion == null) {
                 throw new Exception("Error: devolucion inexistente");
             }
             return devolucion;

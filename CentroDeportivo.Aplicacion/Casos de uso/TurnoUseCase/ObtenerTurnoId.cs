@@ -10,11 +10,9 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.TurnoUseCase
 {
     public class ObtenerTurnoId(ITurnoRepositorio repo)
     {
-        public async Task<Turno> Ejecutar(int idTurno)
-        {
+        public async Task<Turno> Ejecutar(int idTurno) { 
             var turno = await repo.ObtenerPorIdAsync(idTurno);
-            if (turno == null)
-            {
+            if (turno == null) {
                 throw new Exception("Error: turno inexistente");
             }
             return turno;

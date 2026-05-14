@@ -11,11 +11,9 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.CanchaUseCase
 {
     public class ObtenerCanchaPorId(ICanchaRepositorio repo)
     {
-        public async Task<Cancha> Ejecutar(int idCancha)
-        {
+        public async Task<Cancha> Ejecutar(int idCancha){
             var cancha = await repo.ObtenerPorIdAsync(idCancha);
-            if (cancha == null)
-            {
+            if (cancha == null) {
                 throw new Exception("Error: cancha inexistente");
             }
             return cancha;

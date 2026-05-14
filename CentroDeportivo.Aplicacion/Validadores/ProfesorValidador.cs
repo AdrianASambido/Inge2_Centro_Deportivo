@@ -8,12 +8,11 @@ using CentroDeportivo.Aplicacion.Interfaces;
 
 namespace CentroDeportivo.Aplicacion.Validadores
 {
-    public class ProfesorValidador(IProfesorRepositorio repo)
+    public class ProfesorValidador(IProfesorRepositorio repo, IUsuarioRepositorio repoUsuario)
     {
         public async Task<(bool esValido, string mensaje)> Validar(Profesor p) {
             string mensaje = "";
 
-            // 1. Agrupamos validación de campos vacíos
             if (string.IsNullOrWhiteSpace(p.Nombre) ||
                 string.IsNullOrWhiteSpace(p.Apellido) ||
                 string.IsNullOrWhiteSpace(p.Dni))
@@ -23,9 +22,9 @@ namespace CentroDeportivo.Aplicacion.Validadores
 
             if (!string.IsNullOrWhiteSpace(p.Dni)){
 
-                if (await repo.YaExiste(p.Dni))
+                if (await repo.YaExiste(p.Dni) || await repoUsuario.YaExiste(p.Dni))
                 {
-                    mensaje += "Error: ya existe un profesor con ese DNI. \n";
+                    mensaje += "Error: el DNI ingresado ya existe. \n";
                 }
 
             }

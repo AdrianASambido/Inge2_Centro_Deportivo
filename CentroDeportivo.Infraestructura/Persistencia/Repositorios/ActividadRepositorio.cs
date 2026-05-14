@@ -49,10 +49,32 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
             return await context.Turnos.AnyAsync(t => t.Id_Actividad == actividadId && (t.Estado == EstadoTurno.Disponible || t.Estado == EstadoTurno.Lleno));
         }
 
-        public async Task<bool> YaExiste(string nombre)
+        private string Normalizar(string texto)
         {
-            return await context.Actividades.AnyAsync(a => a.Nombre == nombre);
+            if (string.IsNullOrWhiteSpace(texto)) return "";
+            var temp = texto.Normalize(NormalizationForm.FormD);
+            var sb = new StringBuilder();
+            foreach (var c in temp)
+            {
+                if (System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c) != System.Globalization.UnicodeCategory.NonSpacingMark)
+                    sb.Append(c);
+            }
+            return sb.ToString().Normalize(NormalizationForm.FormC).ToUpper();
         }
+
+        public async Task<bool> YaExiste(string nombreNuevo)
+        {
+            var nombreNuevoLimpio = Normalizar(nombreNuevo);
+
+            // Traemos solo los nombres de la DB
+            var nombresExistentes = await context.Actividades
+                .Select(a => a.Nombre)
+                .ToListAsync();
+
+            // Comparamos en memoria normalizando cada nombre de la DB
+            return nombresExistentes.Any(n => Normalizar(n) == nombreNuevoLimpio);
+        }
+
         public async Task<bool> YaExisteParaEditar(string nombre, int idActual)
         {
             // Devuelve true solo si hay otra actividad con ese nombre, pero que NO sea la que estamos editando

@@ -40,8 +40,8 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
         public async Task<Reserva?> ObtenerPorQrTokenAsync(string qrToken)
         {
             return await contexto.Reservas
-                         .Include(r => r.Turno)
-                         .Include(r => r.Usuario)
+                         .Include(r => r.Turno)   
+                         .Include(r => r.Usuario) 
                          .FirstOrDefaultAsync(r => r.TokenQr == qrToken);
         }
 
@@ -71,8 +71,8 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
                     .ThenInclude(t => t!.Actividad)
                 .Include(r => r.Turno)
                     .ThenInclude(t => t!.Profesor)
-                .Include(r => r.Turno)
-                    .ThenInclude(t => t!.Cancha)
+                .Include (r => r.Turno)
+                    .ThenInclude(t => t!.Cancha) ///AGREGA ESTO
                 .Where(r => r.Id_Usuario == usuarioId)
                 .AsQueryable();
 
@@ -80,11 +80,11 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
             if (!incluirPasadas)
                 query = query.Where(r => r.Turno!.Fecha >= hoy);
 
-            // Filtro por estado (pendienteDePago, confirmado, cancelado)
+            // Filtro por estado (pendienteDePago, confirmado, cancelado) .
             if (estado.HasValue)
                 query = query.Where(r => r.Estado == estado.Value);
 
-            // Filtro por actividad
+            // Filtro por actividadr
             if (actividadId.HasValue)
                 query = query.Where(r => r.Turno!.Id_Actividad == actividadId.Value);
 

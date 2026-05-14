@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace CentroDeportivo.Aplicacion.Validadores
 {
-    public abstract class UsuarioValidadorBase(IUsuarioRepositorio repo)
+    public abstract class UsuarioValidadorBase(IUsuarioRepositorio repo, IProfesorRepositorio repoProfe)
     {
         protected readonly IUsuarioRepositorio _repo = repo;
 

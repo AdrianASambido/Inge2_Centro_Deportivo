@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace CentroDeportivo.Aplicacion.Validadores
 {
-    public class UsuarioEmpleadoValidador(IUsuarioRepositorio repo) : UsuarioValidadorBase(repo)
+    public class UsuarioEmpleadoValidador(IUsuarioRepositorio repo, IProfesorRepositorio repoProfe) : UsuarioValidadorBase(repo, repoProfe)
     {
        
 

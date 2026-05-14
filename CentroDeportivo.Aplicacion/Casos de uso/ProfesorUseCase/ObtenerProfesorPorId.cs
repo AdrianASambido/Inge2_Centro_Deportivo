@@ -10,11 +10,9 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ProfesorUseCase
 {
     public class ObtenerProfesorPorId(IProfesorRepositorio repo)
     {
-        public async Task<Profesor> Ejecutar(int idProfesor)
-        {
+        public async Task<Profesor> Ejecutar(int idProfesor) { 
             var profesor = await repo.ObtenerPorIdAsync(idProfesor);
-            if (profesor == null)
-            {
+            if (profesor == null) {
                 throw new Exception("Error: profesor inexistente.");
             }
             return profesor;

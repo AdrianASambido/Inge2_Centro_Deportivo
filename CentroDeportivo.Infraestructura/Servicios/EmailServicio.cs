@@ -5,50 +5,62 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Net;
-using System.Net.Mail;
+using MailKit.Net.Smtp;
+using MailKit.Security;
+using MimeKit;
 
 namespace CentroDeportivo.Infraestructura.Servicios
 {
     public class EmailServicio : IEmailServicio
     {
-        // En un entorno profesional, estos datos vendrían del appsettings.json
-        private readonly string _emailEmisor = "tu-centro-deportivo@gmail.com";
-        private readonly string _passwordApp = "tu-contraseña-de-aplicacion"; // No es tu pass real, es un token
-        public async Task EnviarContraseniaTemporalAsync(string email, string contraseniaTemporal)
-        {
-            var mensaje = new MailMessage();
-            mensaje.From = new MailAddress(_emailEmisor, "Centro Deportivo - Administración");
-            mensaje.To.Add(new MailAddress(email));
-            mensaje.Subject = "Bienvenido al Equipo - Contraseña Temporal";
+            // Datos sacados de tu captura de pantalla de Mailtrap
+            private readonly string _host = "sandbox.smtp.mailtrap.io";
+            private readonly int _port = 587;
+            private readonly string _username = "cc40ec27feb855";
+            private readonly string _password = "64dd5d2e21eb4a"; // El que ves al tocar el ojito en Mailtrap
 
-            mensaje.Body = $@"
-            <h1>Bienvenido al Centro Deportivo</h1>
-            <p>Se ha creado tu cuenta de empleado con éxito.</p>
-            <p>Tu contraseña temporal es: <strong>{contraseniaTemporal}</strong></p>
-            <br>
-            <p>Por motivos de seguridad, deberás cambiarla al ingresar por primera vez.</p>";
-
-            mensaje.IsBodyHtml = true;
-
-            using var clienteSmtp = new SmtpClient("smtp.gmail.com")
+   
+            public async Task EnviarContraseniaTemporalAsync(string emailDestino, string contraseniaTemporal)
             {
-                Port = 587,
-                Credentials = new NetworkCredential(_emailEmisor, _passwordApp),
-                EnableSsl = true,
-            };
+            // 1. Creamos el mensaje con MimeKit
+            var mensaje = new MimeMessage();
+            mensaje.From.Add(new MailboxAddress("Centro Deportivo", "admin@centrodeportivo.com"));
+            mensaje.To.Add(new MailboxAddress("", emailDestino));
+            mensaje.Subject = "Bienvenido - Tu contraseña temporal";
 
+            var bodyBuilder = new BodyBuilder
+            {
+                HtmlBody = $@"
+                    <h3>¡Bienvenido al sistema!</h3>
+                    <p>Se ha creado tu cuenta de empleado correctamente.</p>
+                    <p>Tu contraseña temporal es: <b>{contraseniaTemporal}</b></p>
+                    <p>Recordá cambiarla al ingresar por primera vez.</p>"
+            };
+            mensaje.Body = bodyBuilder.ToMessageBody();
+
+            // 2. Enviamos con el cliente de MailKit
+            using var client = new SmtpClient();
             try
             {
-                await clienteSmtp.SendMailAsync(mensaje);
+                // Conexión con StartTls (el punto débil del SmtpClient de .NET)
+                await client.ConnectAsync(_host, _port, SecureSocketOptions.StartTls);
+
+                // Autenticación
+                await client.AuthenticateAsync(_username, _password);
+
+                // Envío
+                await client.SendAsync(mensaje);
+
+                await client.DisconnectAsync(true);
+                Console.WriteLine("Correo enviado exitosamente con MailKit.");
             }
             catch (Exception ex)
             {
-                // En Ingeniería II, es vital loguear el error pero no frenar el alta del usuario
-                // Podrías lanzar una excepción personalizada o simplemente loguear
-                Console.WriteLine($"Error enviando email: {ex.Message}");
+                Console.WriteLine($"Error con MailKit: {ex.Message}");
+                throw;
             }
         }
+       
 
         public Task EnviarLinkRecuperacionAsync(string email, string link)
         {
@@ -58,15 +70,6 @@ namespace CentroDeportivo.Infraestructura.Servicios
         public Task EnviarRecordatorioTurnoAsync(string email, Turno turno)
         {
             Console.WriteLine($"[Email simulado] Recordatorio turno para {email}");
-            return Task.CompletedTask;
-        }
-
-        public Task EnviarCupoListaEsperaAsync(string email, Turno turno, int minutosParaResponder)
-        {
-            Console.WriteLine(
-                $"[Email simulado] Cupo liberado en lista de espera para {email}. " +
-                $"Actividad: {turno.Actividad?.Nombre}, {turno.Fecha:yyyy-MM-dd} {turno.HoraInicio}. " +
-                $"Tiene {minutosParaResponder} minutos para confirmar en el sitio (Turnos).");
             return Task.CompletedTask;
         }
     }

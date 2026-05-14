@@ -8,13 +8,12 @@ using System.Threading.Tasks;
 
 namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
 {
-    public class ObtenerReservaPorId(IReservaRepositorio repo)
+    public class ObtenerReservaPorId (IReservaRepositorio repo)
     {
-        public async Task<Reserva> Ejecutar(int idReserva)
+        public async Task<Reserva> Ejecutar (int idReserva)
         {
-            var reserva = await repo.ObtenerPorIdAsync(idReserva);
-            if (reserva == null)
-            {
+            var reserva = await repo.ObtenerPorIdAsync (idReserva);
+            if (reserva == null) {
                 throw new Exception("Error: reserva inexistente");
             }
             return reserva;

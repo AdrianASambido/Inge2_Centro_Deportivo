@@ -82,36 +82,38 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
                 .AnyAsync(t => t.Id == turnoId && t.Reservas.Any());
         }
 
-        public async Task<IEnumerable<Turno>> ObtenerParaCalendarioAsync(int usuarioId, int? actividadId = null)
+        public async Task<IEnumerable<Turno>> ObtenerParaCalendarioAsync(int usuarioId, DateOnly fecha, int actividadId)
         {
             var hoy = DateOnly.FromDateTime(DateTime.Now);
 
-            //  Fecha y Hora de sus reservas activas
+            // Busca horarios que ya tiene el cliente en esa fecha
+            
             var horariosOcupados = await contexto.Reservas
                 .Where(r => r.Id_Usuario == usuarioId &&
-                           (r.Estado == EstadoReserva.Confirmado || r.Estado == EstadoReserva.PendienteDePago))
-                .Select(r => new {r.Turno.Fecha, r.Turno.HoraInicio })
+                            r.Turno.Fecha == fecha &&
+                            (r.Estado == EstadoReserva.Confirmado || r.Estado == EstadoReserva.PendienteDePago))
+                .Select(r => new { r.Turno.Fecha, r.Turno.HoraInicio })
                 .ToListAsync();
 
-            //  Query principal
-            var query = contexto.Turnos
-                        .Include(t => t.Actividad)
-                        .Include(t => t.Profesor)
-                        .Include(t => t.Cancha)
-                        .Where(t => t.Estado == EstadoTurno.Disponible && t.Fecha >= hoy)
-                        .AsQueryable();
+            //  Trae los turnos disponibles para la Actividad y Fecha elegidas
+            
+            var turnosCandidatos = await contexto.Turnos
+                .Include(t => t.Actividad)
+                .Include(t => t.Profesor)
+                .Include(t => t.Cancha)
+                .Where(t => t.Id_Actividad == actividadId
+                         && t.Fecha == fecha
+                         && t.Estado == EstadoTurno.Disponible
+                         && t.Fecha >= hoy)
+                .ToListAsync();
 
-            //  Filtra los turnos, solo mostramos si NO hay coincidencia de Fecha y HoraInicio
-            var todosLosDisponibles = await query.ToListAsync();
-
-            var filtrados = todosLosDisponibles.Where(t =>
+            // Excluye los turnos que coincidan con horarios que el usuario ya reservó
+           
+            var filtrados = turnosCandidatos.Where(t =>
                 !horariosOcupados.Any(h => h.Fecha == t.Fecha && h.HoraInicio == t.HoraInicio)
             );
 
-            if (actividadId.HasValue)
-                filtrados = filtrados.Where(t => t.Id_Actividad == actividadId.Value);
-
-            return filtrados.OrderBy(t => t.Fecha).ThenBy(t => t.HoraInicio);
+            return filtrados.OrderBy(t => t.HoraInicio);
         }
 
         public async Task FinalizarTurnosVencidosAsync()

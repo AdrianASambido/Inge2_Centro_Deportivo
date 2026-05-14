@@ -34,6 +34,7 @@ builder.Services.AddScoped<IDevolucionRepositorio, DevolucionRepositorio>();
 builder.Services.AddScoped<IHashServicio, ServicioHash>();
 builder.Services.AddScoped<IEmailServicio, EmailServicio>();
 builder.Services.AddHostedService<TurnosBackgroundServicio>();
+builder.Services.AddScoped<IQrServicio, QrServicio>();
 
 // --- 3. REGISTRAR VALIDADORES (Lógica de Negocio) ---
 builder.Services.AddScoped<UsuarioClienteValidador>();
@@ -45,6 +46,7 @@ builder.Services.AddScoped<TurnoValidador>();
 builder.Services.AddScoped<ProfesorValidador>();
 builder.Services.AddScoped<LoginValidador>();
 builder.Services.AddScoped<DevolucionValidador>();
+builder.Services.AddScoped<AsistenciaValidador>();
 
 
 builder.Services.AddScoped<IQrServicio, QrServicio>();
@@ -63,8 +65,10 @@ builder.Services.AddScoped<EliminarEmpleadoUseCase>();
 builder.Services.AddScoped<RecuperarContraseniaUseCase>();
 builder.Services.AddScoped<ListarEmpleadosUseCase>();
 
+
 builder.Services.AddScoped<CrearActividadUseCase>();
 builder.Services.AddScoped<ListarActividadesUseCase>();
+builder.Services.AddScoped<EditarActividadUseCase>();
 builder.Services.AddScoped<EliminarActividadUseCase>();
 builder.Services.AddScoped<ObtenerActividadPorId>();
 builder.Services.AddScoped<EditarActividadUseCase>();

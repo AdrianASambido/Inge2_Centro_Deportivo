@@ -10,9 +10,9 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.TurnoUseCase
 {
     public class ListarTurnosCalendarioUseCase(ITurnoRepositorio repo)
     {
-        public async Task<IEnumerable<Turno>> ejecutar(int idUsuario, int? idActividad = null)
+        public async Task<IEnumerable<Turno>> ejecutar(int idUsuario, DateOnly fecha, int idActividad)
         {
-            return await repo.ObtenerParaCalendarioAsync(idUsuario, idActividad);
+            return await repo.ObtenerParaCalendarioAsync(idUsuario, fecha, idActividad);
         }
     }
 }
