@@ -73,11 +73,11 @@
             
             if (UsuarioSesion.esEmpleado())
             {
-                Navegador.NavigateTo("/listar-turnos-creados", forceLoad: true);
+                Navegador.NavigateTo("/listar-turnos-creados");
             }
             else
             {
-                Navegador.NavigateTo("/Turnos", forceLoad: true);
+                Navegador.NavigateTo("/MiPerfil");
             }
         }
         catch (Exception ex)
