@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace CentroDeportivo.Aplicacion.Validadores
 {
-    public abstract class UsuarioValidadorBase(IUsuarioRepositorio repo)
+    public abstract class UsuarioValidadorBase(IUsuarioRepositorio repo, IProfesorRepositorio repoProfe)
     {
         protected readonly IUsuarioRepositorio _repo = repo;
         public async Task<(bool esValido, string mensaje)> ValidarDatosComunes(Usuario u) {
@@ -25,7 +25,7 @@ namespace CentroDeportivo.Aplicacion.Validadores
 
             if (!string.IsNullOrWhiteSpace(u.Dni))
             {
-                if (await repo.YaExiste(u.Dni))
+                if (await repo.YaExiste(u.Dni) || await repoProfe.YaExiste(u.Dni))
                 {
                     mensaje += "Error: El DNI ingresado ya existe. \n";
                 }

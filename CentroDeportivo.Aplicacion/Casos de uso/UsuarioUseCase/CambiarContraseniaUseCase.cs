@@ -30,12 +30,11 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.UsuarioUseCase
             {
                 throw new Exception("La contraseña actual es incorrecta");
             }
-            if (usuario.Rol == Rol.Cliente && usuario.DebeCambiarPassword)
+            if (usuario.Rol == Rol.Empleado && usuario.DebeCambiarPassword)
             {
                 usuario.DebeCambiarPassword = false;
             }
             usuario.Password = repoHash.Hashear(contraNueva);
-            usuario.DebeCambiarPassword = false;
             await repo.ActualizarAsync(usuario);
         }
     }
