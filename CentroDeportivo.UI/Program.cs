@@ -97,6 +97,14 @@ builder.Services.AddScoped<ConsultarDisponibilidadUseCase>();
 builder.Services.AddScoped<ConfirmarDevolucionUseCase>();
 builder.Services.AddScoped<ListarDevolucionesPendientesUseCase>();
 
+builder.Services.AddScoped<ObtenerUsuarioPorId>();
+builder.Services.AddScoped<ObtenerProfesorPorId>();
+builder.Services.AddScoped<ObtenerCanchaPorId>();
+builder.Services.AddScoped<ObtenerReservaPorId>();
+builder.Services.AddScoped<ObtenerTurnoId>();   
+builder.Services.AddScoped<ObtenerActividadPorId>();
+builder.Services.AddScoped<ObtenerDevolucionPorId>();
+
 builder.Services.AddScoped<Sesion>(); 
 
 // Add services to the container.

@@ -40,11 +40,16 @@ else
                 Cerrar sesión
             </button>
 
+            <NavLink class="btn btn-warning"
+                     href="@($"/cambiar-contrasenia/{UsuarioSesion.UsuarioActual.Id}")">
+                Editar usuario
+            </NavLink>
+            @*
             <button class="btn btn-warning ms-2"
                     @onclick="CambiarContraseña">
                 Cambiar contraseña
             </button>
-
+            *@
         </div>
     </div>
 }
@@ -62,9 +67,10 @@ else
         Navegador.NavigateTo("/Login", true);
     }
 
+    /*
     void CambiarContraseña()
     {
-        Navegador.NavigateTo("/cambiar-contraseña", true);
+        Navegador.NavigateTo("/cambiar-contrasenia/{UsuarioSesion.UsuarioActual.Id}", true);
     }
-
+    */
 }

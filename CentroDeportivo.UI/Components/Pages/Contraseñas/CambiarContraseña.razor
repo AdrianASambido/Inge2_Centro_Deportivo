@@ -1,8 +1,9 @@
-﻿@page "/cambiar-contraseña"
+﻿@page "/cambiar-contrasenia/{Id:int}"
 @inject Sesion UsuarioSesion
-@rendermode InteractiveServer
+@rendermode InteractiveServer 
 @inject NavigationManager Navegador
 @inject CambiarContraseniaUseCase CambiarContraseniaUseCase
+@inject ObtenerUsuarioPorId ObtenerUsuarioPorId
 
 <PageTitle>Cambiar contraseña</PageTitle>
 
@@ -33,7 +34,7 @@
         </div>
 
 
-        <div class="d-grid gap-2 mb-3">
+        <div class="d-grid gap-2 mb-3 mt-2">
             <button class="btn btn-primary mb-3" @onclick="Redirigir">Confirmar</button>
             <button class="btn btn-outline-primary mb-3" @onclick="Cancelar" hidden="@UsuarioSesion.esEmpleado()">Cancelar</button>
         </div>
@@ -47,7 +48,7 @@
 </div>
 
 @code {
-    int Id { get; set; }
+    [Parameter] public int Id { get; set; }
     string actual = "";
     string nueva1 = "";
     string nueva2 = "";
@@ -55,32 +56,28 @@
 
     async Task Cancelar()
     {
-        Navegador.NavigateTo("MiPerfil");
+        Navegador.NavigateTo("/MiPerfil");
     }
+
 
     string error = "";
 
     async Task Redirigir()
-    {   
+    {
         error = "";
+
         try
         {
-            Id = UsuarioSesion.UsuarioActual.Id;
-            if (nueva1 != nueva2)
-            {
-                error = "Las contraseñas nuevas no coinciden.";
-            };
             await CambiarContraseniaUseCase.ejecutar(actual, nueva1, Id);
-
+            var usuarioActualizado = await ObtenerUsuarioPorId.Ejecutar(Id);
+            
             if (UsuarioSesion.esEmpleado())
             {
-                Navegador.NavigateTo("/listar-turnos-creados");
-                StateHasChanged();
+                Navegador.NavigateTo("/listar-turnos-creados", forceLoad: true);
             }
             else
             {
-                Navegador.NavigateTo("/Turnos");
-                StateHasChanged();
+                Navegador.NavigateTo("/Turnos", forceLoad: true);
             }
         }
         catch (Exception ex)
@@ -88,5 +85,5 @@
             error = ex.Message;
         }
     }
-
 }
+
