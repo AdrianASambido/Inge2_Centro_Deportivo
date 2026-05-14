@@ -450,6 +450,7 @@ else
             };
             await CrearTurnoUseCase.ejecutar(nuevoTurno);
             turnos = (await ListarTurnosUseCase.Ejecutar(null, null, null, null, null)).ToList();
+            t = new Datos();
             AplicarFiltros();
             mensajeTurno = "Turno creado correctamente.";
             quiereAgregar = false;

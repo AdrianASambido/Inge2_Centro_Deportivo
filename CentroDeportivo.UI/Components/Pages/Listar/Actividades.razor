@@ -131,6 +131,7 @@ else
             var acti = new Actividad(act.nombre, act.descripcion, act.precio ?? 0);
             await CrearActividadUseCase.ejecutar(acti);
             actividad = (await ListarActividadesUseCase.ejecutar()).ToList();
+            act = new Datos();
             quiereAgregar = false;
             mensaje = "";
         }

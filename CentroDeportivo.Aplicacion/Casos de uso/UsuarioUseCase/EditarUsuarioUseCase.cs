@@ -1,6 +1,9 @@
 ﻿using CentroDeportivo.Aplicacion.Entidades;
 using CentroDeportivo.Aplicacion.Interfaces;
 using CentroDeportivo.Aplicacion.Validadores;
+using System;
+using System.Threading.Tasks;
+using CentroDeportivo.Aplicacion.Validadores;
 
 namespace CentroDeportivo.Aplicacion.Casos_de_uso.UsuarioUseCase
 {
@@ -9,16 +12,17 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.UsuarioUseCase
         private readonly IUsuarioRepositorio _repo;
         private readonly UsuarioClienteValidador _validador;
 
-        public EditarUsuarioUseCase(IUsuarioRepositorio repo)
+        public EditarUsuarioUseCase(IUsuarioRepositorio repo, UsuarioClienteValidador validador)
         {
             _repo = repo;
-            _validador = new UsuarioClienteValidador(_repo);
+            _validador = validador;
         }
 
         public async Task Ejecutar(Usuario usuario, int idUsuario)
         {
             // 1. Verificar que el usuario existe
             var existente = await _repo.ObtenerPorIdAsync(idUsuario);
+
             if (existente == null)
                 throw new Exception("Usuario no encontrado");
 
