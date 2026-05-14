@@ -9,10 +9,11 @@ using System.Threading.Tasks;
 
 namespace CentroDeportivo.Aplicacion.Validadores
 {
-    public abstract class UsuarioValidadorBase(IUsuarioRepositorio repo)
+    public abstract class UsuarioValidadorBase(IUsuarioRepositorio repo, IProfesorRepositorio repoProfe)
     {
         protected readonly IUsuarioRepositorio _repo = repo;
-        
+        protected readonly IProfesorRepositorio _repoProfesor = repoProfe;
+
         //Validacion en comun ambos csos
         private async Task<(bool esValido, string mensaje)> ValidarCamposObligatorios(Usuario u)
         {
@@ -36,10 +37,13 @@ namespace CentroDeportivo.Aplicacion.Validadores
             var (camposOk, msg) = await ValidarCamposObligatorios(u);
 
             if (!string.IsNullOrWhiteSpace(u.Dni) && await _repo.YaExiste(u.Dni))
-                msg += "El DNI ingresado ya existe.\n";
+                msg += "El DNI pertenece a un usuario registrado.\n";
+
+            if (!string.IsNullOrWhiteSpace(u.Dni) && await _repoProfesor.YaExiste(u.Dni))
+                msg += "El DNI pertenece a un usuario registrado.\n";
 
             if (!string.IsNullOrWhiteSpace(u.Email) && await _repo.YaExisteEmail(u.Email))
-                msg += "El correo ingresado ya existe.\n";
+                msg += "El correo ingresado pertenece a un usuario registrado.\n";
 
             return (string.IsNullOrEmpty(msg), msg);
         }

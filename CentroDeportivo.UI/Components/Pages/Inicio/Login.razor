@@ -58,17 +58,17 @@
             }
             else if (UsuarioSesion.esEmpleado() && UsuarioSesion.UsuarioActual.DebeCambiarPassword)
             {
-                Navegador.NavigateTo("/cambiar-contraseña");
+                Navegador.NavigateTo($"/cambiar-contrasenia/{UsuarioSesion.UsuarioActual.Id}");
             }
             else
             {
                 Navegador.NavigateTo("/Turnos");
             }
+            StateHasChanged();
         }
         catch (Exception ex)
         {
             error = ex.Message;
-            error = "";
         }
     }
 

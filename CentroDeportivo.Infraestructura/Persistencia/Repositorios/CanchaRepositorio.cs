@@ -28,7 +28,8 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
         public async Task EliminarAsync(int id)
         {
             var cancha = await this.ObtenerPorIdAsync(id);
-            if (cancha != null) { 
+            if (cancha != null)
+            {
                 contexto.Canchas.Remove(cancha);
                 await contexto.SaveChangesAsync();
             }
@@ -106,4 +107,3 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
         }
     }
 }
-

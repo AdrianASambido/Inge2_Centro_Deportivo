@@ -8,11 +8,12 @@
 
 
   <ItemGroup>
-    <PackageReference Include="BlazorBarcodeScanner.ZXing.JS" Version="1.0.4" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.26">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="XImage.BarcodeReader" Version="12.6.1" />
+    <PackageReference Include="ZXing.Net.Bindings.ImageSharp.V2" Version="0.16.18" />
   </ItemGroup>
 
   <ItemGroup>

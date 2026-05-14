@@ -73,6 +73,7 @@ builder.Services.AddScoped<EditarUsuarioUseCase>();
 
 builder.Services.AddScoped<CrearActividadUseCase>();
 builder.Services.AddScoped<ListarActividadesUseCase>();
+builder.Services.AddScoped<EditarActividadUseCase>();
 builder.Services.AddScoped<EliminarActividadUseCase>();
 builder.Services.AddScoped<ObtenerActividadPorId>();
 builder.Services.AddScoped<EditarActividadUseCase>();
@@ -105,6 +106,15 @@ builder.Services.AddScoped<ConsultarDisponibilidadUseCase>();
 
 builder.Services.AddScoped<ConfirmarDevolucionUseCase>();
 builder.Services.AddScoped<ListarDevolucionesPendientesUseCase>();
+
+builder.Services.AddScoped<ObtenerUsuarioPorId>();
+builder.Services.AddScoped<ObtenerProfesorPorId>();
+builder.Services.AddScoped<ObtenerCanchaPorId>();
+builder.Services.AddScoped<ObtenerReservaPorId>();
+builder.Services.AddScoped<ObtenerTurnoId>();   
+builder.Services.AddScoped<ObtenerActividadPorId>();
+builder.Services.AddScoped<ObtenerDevolucionPorId>();
+builder.Services.AddScoped<EditarUsuarioUseCase>();
 
 builder.Services.AddScoped<Sesion>(); 
 
@@ -139,7 +149,7 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseAntiforgery();
 

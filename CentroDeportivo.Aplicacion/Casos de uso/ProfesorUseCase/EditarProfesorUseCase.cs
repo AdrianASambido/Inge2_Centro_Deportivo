@@ -28,11 +28,7 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ProfesorUseCase
             if (existente == null)
                 throw new Exception("El profesor no existe");
 
-            // 🔴 VALIDACIÓN DE DNI DUPLICADO (excepto el mismo profesor)
-            if (await repo.YaExisteDniParaEditar(profesorEditado.Dni, idProfesor))
-                throw new Exception("El DNI ingresado ya pertenece a otro profesor registrado");
-
-            var (esValido, mensaje) = await validador.ValidarEdicion(profesorEditado);
+            var (esValido, mensaje) = await validador.ValidarEdicion(profesorEditado, idProfesor);
 
             if (!esValido)
                 throw new Exception(mensaje);

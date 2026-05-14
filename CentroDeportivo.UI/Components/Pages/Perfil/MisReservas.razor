@@ -3,100 +3,152 @@
 @inject GenerarQrUseCase GenerarQRUseCase
 @inject IReservaRepositorio ReservaRepositorio
 @inject Sesion UsuarioSesion
-@inject CancelarReservaUseCase CancelarReservaCase
-@inject ListarReservasUseCase ListarReservasCase
+@inject ListarReservasUseCase ListarReservasUseCase
+@inject NavigationManager Navigation
 @inject CancelarReservaUseCase CancelarReservaCase
 
 <PageTitle>Mis Reservas</PageTitle>
 
-<h1>MIS RESERVAS</h1>
+<div class="container-fluid p-0">
+    <div class="p-5 mb-4 bg-light rounded-3 shadow-sm">
+        <h2 class="mb-1">Mis reservas</h2>
 
-@if (!UsuarioSesion.EstaAutenticado())
-{
-    <p>No estás logueado.</p>
-    <NavLink href="/login">Iniciar sesión</NavLink>
-}
-else if (reservas == null)
-{
-    <p>Cargando reservas...</p>
-}
-else if (!reservas.Any())
-{
-    <p>No tenés reservas registradas.</p>
-}
-else
-{
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Actividad</th>
-                <th>Fecha</th>
-                <th>Horario</th>
-                <th>Cancha</th>
-                <th>Estado</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var r in reservas)
+        
+        <div class="table-responsive shadow-sm" style="background: white; border-radius: 8px;">
+
+            @if (qrCode != null && qrCode.Length > 0)
             {
-                <tr>
-                    <td>@r.Turno?.Actividad?.Nombre</td>
-                    <td>@r.Turno?.Fecha</td>
-                    <td>@r.Turno?.HoraInicio</td>
-                    <td>@r.Turno?.Cancha?.Numero</td>
-                    <td>@r.Estado</td>
-
-                    <td>
-                        @if (r.Estado != EstadoReserva.Cancelado)
-                        {
-                            <button class="btn btn-danger btn-sm"
-                                    @onclick="() => Cancelar(r.Id)">
-                                Cancelar reserva
-                            </button>
-                            <button class="btn btn-primary btn-sm me-1"
-                                    @onclick="() => GenerarQr(r.Id)">
-                                Generar QR
-                            </button>
-
-                        }
-                    </td>
-                </tr>
+                <div class="card mb-4 shadow-sm" style="max-width: 300px; margin: auto;">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Tu Código QR</h5>
+                        <img src="data:image/png;base64,@Convert.ToBase64String(qrCode)" class="img-fluid" alt="QR Asistencia" />
+                        <p class="card-text small text-muted mt-2">Presentalo en la recepción para ingresar.</p>
+                        <button class="btn btn-outline-secondary btn-sm" @onclick="() => qrCode = Array.Empty<byte>()">Cerrar</button>
+                    </div>
+                </div>
             }
-        </tbody>
-    </table>
-}
 
+            @if (!UsuarioSesion.EstaAutenticado())
+            {
+                <p>No estás logueado.</p>
+                <NavLink href="/login" class="btn btn-primary">Iniciar sesión</NavLink>
+            }
+            else if (reservas == null)
+            {
+                <p><em>Cargando reservas...</em></p>
+            }
+            else if (!reservas.Any())
+            {
+                <p>No tenés reservas registradas.</p>
+            }
+            else
+            {
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Actividad</th>
+                            <th>Fecha</th>
+                            <th>Horario</th>
+                            <th>Cancha</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var r in reservas)
+                        {
+                            <tr>
+                                <td>@r.Turno?.Actividad?.Nombre</td>
+                                <td>@r.Turno?.Fecha.ToShortDateString()</td>
+                                <td>@r.Turno?.HoraInicio</td>
+                                <td>@r.Turno?.Cancha.Numero</td>
+                                <td>@r.Estado</td>
+
+                                <td>
+                                    <button class="btn btn-primary btn-sm me-1"
+                                            @onclick="() => GenerarQr(r.Id)">
+                                        <i class="bi bi-qr-code"></i> Generar QR
+                                    </button>
+
+                                    @if (reservaSeleccionadaId == r.Id && qrCode != null && qrCode.Length > 0)
+                                    {
+                                        <div class="card shadow-sm my-4 border-primary" style="max-width: 300px; position: absolute; z-index: 100;">
+                                            <div class="card-header bg-primary text-white text-center">Tu código de acceso</div>
+                                            <div class="card-body text-center bg-white">
+                                                <img src="data:image/png;base64,@Convert.ToBase64String(qrCode)" alt="QR Reserva" style="width: 200px;" />
+                                                <p class="small text-muted mt-2">Presentá este código al ingresar</p>
+                                                <button class="btn btn-outline-secondary btn-sm" @onclick="CerrarQr">Cerrar</button>
+                                            </div>
+                                        </div>
+                                    }
+
+                                    <button class="btn btn-danger btn-sm"
+                                            @onclick="() => Cancelar(r.Id)">
+                                        Cancelar
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+
+        @if (!string.IsNullOrEmpty(error))
+        {
+            <div class="alert alert-info mt-3 shadow-sm">@error</div>
+        }
+    </div>
+</div>
+
+    
 @code {
     List<Reserva>? reservas;
-    string mensaje = "";
+    private int? reservaSeleccionadaId;
+    private byte[] qrCode = Array.Empty<byte>();
+    private string error = "";
 
     protected override async Task OnInitializedAsync()
-    {
-        if (UsuarioSesion.UsuarioActual != null)
-        {
-            reservas = (await ListarReservasCase.Ejecutar(
-                UsuarioSesion.UsuarioActual.Id,
-                null,
-                null,
-                true
-            )).ToList();
-        }
-    }
-
-    string error = "";
-    private byte[] qrCode = Array.Empty<byte>();
-    async Task GenerarQr(int reservaId)
     {
         error = "";
         try
         {
-            qrCode = await GenerarQRUseCase.Ejecutar(reservaId);
+            reservas = (await ListarReservasUseCase.Ejecutar(UsuarioSesion.UsuarioActual.Id)).ToList();
         }
         catch (Exception ex)
         {
             error = ex.Message;
         }
+
+    }
+
+    async Task GenerarQr(int reservaId)
+    {
+        error = "";
+        if (reservaSeleccionadaId == reservaId)
+        {
+            CerrarQr();
+            return;
+        }
+
+        try
+        {
+            // Aquí se dispara tu lógica del Caso de Uso
+            qrCode = await GenerarQRUseCase.Ejecutar(reservaId);
+            reservaSeleccionadaId = reservaId;
+        }
+        catch (Exception ex)
+        {
+            // Aquí capturamos la excepción del Validador (ej: "Faltan más de 15 min")
+            error = ex.Message;
+            StateHasChanged(); // Forzamos el refresco para mostrar el alert rojo
+        }
+    }
+
+    void CerrarQr()
+    {
+        qrCode = Array.Empty<byte>();
+        reservaSeleccionadaId = null;
     }
 
     async Task Cancelar(int idReserva)
@@ -108,11 +160,11 @@ else
 
             var (conDevolucion, monto) = await CancelarReservaCase.Ejecutar(idReserva);
 
-            mensaje = conDevolucion
+            error = conDevolucion
                 ? $"Reserva cancelada. Devolución: ${monto}"
                 : "Reserva cancelada sin devolución.";
 
-            reservas = (await ListarReservasCase.Ejecutar(
+            reservas = (await ListarReservasUseCase.Ejecutar(
                 UsuarioSesion.UsuarioActual!.Id,
                 null,
                 null,
@@ -121,8 +173,7 @@ else
         }
         catch (Exception ex)
         {
-            mensaje = ex.ToString(); // 👈 IMPORTANTE (no solo ex.Message)
-            Console.WriteLine(ex);
+            error = ex.Message;
         }
     }
 }

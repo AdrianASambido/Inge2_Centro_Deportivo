@@ -80,11 +80,11 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
             if (!incluirPasadas)
                 query = query.Where(r => r.Turno!.Fecha >= hoy);
 
-            // Filtro por estado (pendienteDePago, confirmado, cancelado)
+            // Filtro por estado (pendienteDePago, confirmado, cancelado) .
             if (estado.HasValue)
                 query = query.Where(r => r.Estado == estado.Value);
 
-            // Filtro por actividad
+            // Filtro por actividadr
             if (actividadId.HasValue)
                 query = query.Where(r => r.Turno!.Id_Actividad == actividadId.Value);
 

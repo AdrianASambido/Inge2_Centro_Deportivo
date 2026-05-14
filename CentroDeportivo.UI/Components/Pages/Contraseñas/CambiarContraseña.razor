@@ -1,8 +1,9 @@
-﻿@page "/cambiar-contraseña"
+﻿@page "/cambiar-contrasenia/{Id:int}"
 @inject Sesion UsuarioSesion
-@rendermode InteractiveServer
+@rendermode InteractiveServer 
 @inject NavigationManager Navegador
 @inject CambiarContraseniaUseCase CambiarContraseniaUseCase
+@inject ObtenerUsuarioPorId ObtenerUsuarioPorId
 
 <PageTitle>Cambiar contraseña</PageTitle>
 
@@ -32,51 +33,51 @@
             </NavLink>
         </div>
 
+
+        <div class="d-grid gap-2 mb-3 mt-2">
+            <button class="btn btn-primary mb-3" @onclick="Redirigir">Confirmar</button>
+            <button class="btn btn-outline-primary mb-3" @onclick="Cancelar" hidden="@UsuarioSesion.esEmpleado()">Cancelar</button>
+        </div>
+
         @if (!string.IsNullOrEmpty(error))
         {
             <div class="alert alert-danger mt-3 text-center">@error</div>
         }
-
-        <div class="d-grid gap-2 mb-3">
-            <button class="btn btn-primary mb-3" @onclick="Redirigir">Confirmar</button>
-            <button class="btn btn-outline-primary mb-3" @onclick="Cancelar" hidden="@UsuarioSesion.esEmpleado()">Cancelar</button>
-        </div>
     </div>
 
 </div>
 
 @code {
-        int Id { get; set; }
-        string actual = "";
-        string nueva1 = "";
-        string nueva2 = "";
-        string email = "";
+    [Parameter] public int Id { get; set; }
+    string actual = "";
+    string nueva1 = "";
+    string nueva2 = "";
+    string email = "";
 
     async Task Cancelar()
     {
-        Navegador.NavigateTo("MiPerfil");
+        Navegador.NavigateTo("/MiPerfil");
     }
+
 
     string error = "";
 
     async Task Redirigir()
-    {   
+    {
         error = "";
+
         try
         {
-            if (nueva1 != nueva2)
-            {
-                error = "Las contraseñas nuevas no coinciden.";
-            };
-            await CambiarContraseniaUseCase.ejecutar(actual, nueva1, UsuarioSesion.UsuarioActual.Id);
-        
+            await CambiarContraseniaUseCase.ejecutar(actual, nueva1, Id);
+            var usuarioActualizado = await ObtenerUsuarioPorId.Ejecutar(Id);
+            
             if (UsuarioSesion.esEmpleado())
             {
                 Navegador.NavigateTo("/listar-turnos-creados");
             }
             else
             {
-                Navegador.NavigateTo("/Turnos");
+                Navegador.NavigateTo("/MiPerfil");
             }
         }
         catch (Exception ex)
@@ -84,5 +85,5 @@
             error = ex.Message;
         }
     }
-
 }
+

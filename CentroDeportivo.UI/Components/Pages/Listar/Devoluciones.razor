@@ -1,0 +1,89 @@
+﻿@page "/Devoluciones"
+@rendermode InteractiveServer
+@inject ConfirmarDevolucionUseCase ConfirmarDevolucionUseCase
+@inject ListarDevolucionesPendientesUseCase ListarDevolucionesPendientesUseCase
+@inject NavigationManager Navigation
+
+<PageTitle>Inicio - Centro Deportivo</PageTitle>
+
+<div class="container-fluid p-0">
+    <div class="p-5 mb-4 bg-light rounded-3 shadow-sm">
+            <h2 class="mb-1">Devoluciones pendientes</h2>
+
+        
+        <div class="table-responsive shadow-sm" style="background: white; border-radius: 8px;">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Apellido</th>
+                        <th>DNI</th>
+                        <th>Fecha</th>
+                        <th>Actividad</th>
+                        <th>Monto a devolver</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (devoluciones.Any())
+                    {
+                        @foreach (var de in devoluciones)
+                        {
+                            <tr>
+                                <td class="fw-bold">@de.Usuario.Nombre</td>
+                                <td>@de.Usuario.Apellido</td>
+                                <td>@de.Usuario.Dni</td>
+                                <td>@de.Reserva.Turno.Fecha.ToString("dd/MM/yyyy")</td>
+                                <td>@de.Reserva.Turno.Actividad</td>
+                                <td class="text-center">
+                                    <button class="btn btn-success btn-outline-primary" @onclick="() => Confirmar(de.Id)">
+                                        Confirmar devolucion
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="8" class="text-center py-4 text-muted">No se encontraron devoluciones pendientes.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        @if (!string.IsNullOrEmpty(mensajeExito))
+        {
+            <div class="alert alert-info mt-3 shadow-sm">@mensajeExito</div>
+        }
+    </div>
+</div>
+
+@code {
+
+    private string? mensajeExito;
+    private List<Devolucion>? devoluciones;
+
+    private async Task Confirmar(int idDevolucion)
+    {
+        try
+        {
+            mensajeExito = null;
+            await ConfirmarDevolucionUseCase.Ejecutar(idDevolucion);
+
+            mensajeExito = "¡Transacción exitosa! La devolución ha sido confirmada.";
+
+            devoluciones = (await ListarDevolucionesPendientesUseCase.ejecutar()).ToList();
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            mensajeExito = $"Error al confirmar la devolución: {ex.Message}";
+        }
+    }
+
+    async Task OnInitializedAsyncTask()
+    {
+        devoluciones = (await ListarDevolucionesPendientesUseCase.ejecutar()).ToList();
+    }
+}

@@ -3,7 +3,7 @@
     --font-datos: 'Inter', sans-serif;
 }
 
-/* ===== GENERAL ===== */
+
 
 html, body {
     margin: 0;
@@ -21,18 +21,18 @@ h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-titulos);
 }
 
-/* ===== ESTRUCTURA GLOBAL (REEMPLAZAR) ===== */
+
 .page {
-    display: flex; /* Esto pone el sidebar y el contenido uno al lado del otro */
+    display: flex; 
     min-height: 100vh;
 }
 
-/* ===== SIDEBAR (REEMPLAZAR) ===== */
+
 .sidebar {
     position: fixed;
     top: 0;
     left: 0;
-    width: 250px; /* Un poco más ancho para que respire el texto */
+    width: 250px; 
     height: 100vh;
     background-color: #1a1a2e;
     color: white;
@@ -49,7 +49,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .logo {
-    width: 110px; /* Tamaño corregido */
+    width: 110px; 
     height: auto;
     display: block;
     margin: 0 auto;
@@ -67,16 +67,16 @@ h1, h2, h3, h4, h5, h6 {
 
 .main-content {
     flex: 1;
-    margin-left: 250px !important; /* El ancho exacto del sidebar */
-    padding: 2rem !important; /* Espaciado interno */
+    margin-left: 250px !important; 
+    padding: 2rem !important; 
     display: flex;
     flex-direction: column;
-    align-items: flex-start; /* <--- ESTO obliga a que el contenido pegue a la izquierda */
-    width: calc(100% - 250px); /* Resta el sidebar del ancho total */
+    align-items: flex-start; 
+    width: calc(100% - 250px);
     background-color: #f8f9fa;
 }
 
-/* ===== NAVMENU (REEMPLAZAR) ===== */
+
 .nav-item {
     margin-bottom: 5px;
 }
@@ -94,30 +94,29 @@ h1, h2, h3, h4, h5, h6 {
 .nav-link:hover {
     background-color: #243b55;
     color: white !important;
-    padding-left: 20px; /* Efecto sutil al pasar el mouse */
+    padding-left: 20px; 
 }
 
-    /* Para que se note cuál sección está abierta */
+  
 .nav-link.active {
     background-color: #3b5bdb;
     color: white !important;
     font-weight: bold;
 }
 
-/* ===== TITULOS ===== */
 
 h2 {
     margin-bottom: 20px;
 }
 
-/* ===== CARDS ===== */
+
 
 .card {
     border-radius: 18px;
     border: none;
 }
 
-/* ===== LOGIN ===== */
+
 
 .login-container {
     min-height: 100vh;
@@ -136,12 +135,12 @@ h2 {
 
 .content {
     width: 100% !important;
-    margin: 0 !important; /* Quita márgenes automáticos que centran el contenido */
+    margin: 0 !important; 
     text-align: left !important;
 }
 
 .table-responsive {
-    overflow-x: auto; /* Permite scroll solo en la tabla si no entra, no en toda la página */
+    overflow-x: auto; 
     background-color: white;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
@@ -152,7 +151,7 @@ table {
     width: 100% !important;
     margin-bottom: 0;
     border-collapse: collapse;
-    white-space: nowrap; /* Evita que los textos de las celdas se amontonen en varias filas */
+    white-space: nowrap; 
 }
 
 thead {
@@ -171,8 +170,8 @@ td {
     vertical-align: middle;
 }
 
-/* Para que los títulos no tengan margen izquierdo extra */
 h2, h3, .btn-group, .table-responsive {
     margin-left: 0 !important;
     width: 100%;
 }
+

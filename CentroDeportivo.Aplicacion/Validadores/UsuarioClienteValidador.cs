@@ -13,7 +13,7 @@ namespace CentroDeportivo.Aplicacion.Validadores
 {
     public class UsuarioClienteValidador : UsuarioValidadorBase
     {
-        public UsuarioClienteValidador(IUsuarioRepositorio repo) : base(repo)
+        public UsuarioClienteValidador(IUsuarioRepositorio repo, IProfesorRepositorio repoProfe) : base(repo, repoProfe)
         {
         }
 
@@ -36,6 +36,8 @@ namespace CentroDeportivo.Aplicacion.Validadores
             if (!string.IsNullOrWhiteSpace(u.Dni))
             {
                 if (await _repo.YaExisteDniParaEditar(u.Dni, u.Id)) // Nota: excluye el propio usuario
+                    mensaje += "El DNI ingresado ya se encuentra registrado en el sistema.\n";
+                if (await _repoProfesor.YaExiste(u.Dni))
                     mensaje += "El DNI ingresado ya se encuentra registrado en el sistema.\n";
             }
 

@@ -103,14 +103,12 @@ async Task GuardarDatos()
 
     try
     {
-        // Actualizamos el objeto con los datos del formulario
         usuario.Nombre = nombre;
         usuario.Apellido = apellido;
         usuario.Dni = dni;
         usuario.Domicilio = domicilio;
         usuario.Email = correo;
 
-        // Llamada await al UseCase
         await EditarUsuarioCase.Ejecutar(usuario, usuario.Id);
 
         mensaje = "Los datos se han modificado correctamente.";
