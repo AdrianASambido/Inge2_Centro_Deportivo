@@ -4,6 +4,7 @@
 @inject IReservaRepositorio ReservaRepositorio
 @inject Sesion UsuarioSesion
 @inject ListarReservasUseCase listarReservasUseCase
+@inject NavigationManager Navigation
 
 <PageTitle>Mis Reservas</PageTitle>
 
@@ -64,7 +65,7 @@ else
                     <td>@r.Turno?.Actividad?.Nombre</td>
                     <td>@r.Turno?.Fecha.ToShortDateString()</td>
                     <td>@r.Turno?.HoraInicio</td>
-                    <td>@r.Turno?.Cancha.Id</td>
+                    <td>@r.Turno?.Cancha.Numero</td>
                     <td>@r.Estado</td>
 
                     <td>
@@ -73,7 +74,6 @@ else
                             <i class="bi bi-qr-code"></i> Generar QR
                         </button>
 
-                        @* CLAVE: Ahora preguntamos si el QR pertenece específicamente a esta reserva *@
                         @if (reservaSeleccionadaId == r.Id && qrCode != null && qrCode.Length > 0)
                         {
                             <div class="card shadow-sm my-4 border-primary" style="max-width: 300px; position: absolute; z-index: 100;">

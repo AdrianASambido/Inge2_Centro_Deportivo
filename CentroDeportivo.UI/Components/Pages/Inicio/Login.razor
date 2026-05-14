@@ -58,7 +58,7 @@
             }
             else if (UsuarioSesion.esEmpleado() && UsuarioSesion.UsuarioActual.DebeCambiarPassword)
             {
-                Navegador.NavigateTo("/cambiar-contraseña");
+                Navegador.NavigateTo($"/cambiar-contrasenia/{UsuarioSesion.UsuarioActual.Id}");
             }
             else
             {

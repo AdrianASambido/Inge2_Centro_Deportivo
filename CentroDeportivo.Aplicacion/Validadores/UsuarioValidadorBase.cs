@@ -12,7 +12,8 @@ namespace CentroDeportivo.Aplicacion.Validadores
     public abstract class UsuarioValidadorBase(IUsuarioRepositorio repo, IProfesorRepositorio repoProfe)
     {
         protected readonly IUsuarioRepositorio _repo = repo;
-        public async Task<(bool esValido, string mensaje)> ValidarDatosComunes(Usuario u) {
+        public async Task<(bool esValido, string mensaje)> ValidarDatosComunes(Usuario u)
+        {
             string mensaje = "";
 
             if (string.IsNullOrWhiteSpace(u.Apellido) || string.IsNullOrWhiteSpace(u.Nombre) ||
@@ -32,15 +33,17 @@ namespace CentroDeportivo.Aplicacion.Validadores
             }
 
             if (!string.IsNullOrWhiteSpace(u.Email))
+            {
+                if (await repo.YaExisteEmail(u.Email))
                 {
-                if (await repo.YaExisteEmail(u.Email)) {
                     mensaje += "Error : el email ingresado ya existe. \n";
-                } 
+                }
             }
 
             var (valido, msjPass) = ValidarPassword(u);
 
-            if (!valido) {
+            if (!valido)
+            {
                 mensaje += msjPass;
             }
 
