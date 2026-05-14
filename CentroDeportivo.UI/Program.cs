@@ -67,6 +67,7 @@ builder.Services.AddScoped<CrearActividadUseCase>();
 builder.Services.AddScoped<ListarActividadesUseCase>();
 builder.Services.AddScoped<EliminarActividadUseCase>();
 builder.Services.AddScoped<ObtenerActividadPorId>();
+builder.Services.AddScoped<EditarActividadUseCase>();
 
 builder.Services.AddScoped<EliminarCanchaUseCase>();
 builder.Services.AddScoped<CrearCanchaUseCase>();
@@ -104,6 +105,7 @@ builder.Services.AddScoped<ObtenerReservaPorId>();
 builder.Services.AddScoped<ObtenerTurnoId>();   
 builder.Services.AddScoped<ObtenerActividadPorId>();
 builder.Services.AddScoped<ObtenerDevolucionPorId>();
+builder.Services.AddScoped<EditarUsuarioUseCase>();
 
 builder.Services.AddScoped<Sesion>(); 
 
