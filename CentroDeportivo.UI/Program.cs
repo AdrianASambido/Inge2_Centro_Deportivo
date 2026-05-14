@@ -109,7 +109,7 @@ builder.Services.AddScoped<ObtenerReservaPorId>();
 builder.Services.AddScoped<ObtenerTurnoId>();   
 builder.Services.AddScoped<ObtenerActividadPorId>();
 builder.Services.AddScoped<ObtenerDevolucionPorId>();
-builder.Services.AddScoped<EditarUsuarioUseCase>();
+//builder.Services.AddScoped<EditarUsuarioUseCase>();
 
 builder.Services.AddScoped<Sesion>(); 
 
