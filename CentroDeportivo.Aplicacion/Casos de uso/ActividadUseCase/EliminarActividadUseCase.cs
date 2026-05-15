@@ -1,4 +1,5 @@
 ﻿using CentroDeportivo.Aplicacion.Interfaces;
+using CentroDeportivo.Aplicacion.Entidades;
 using CentroDeportivo.Aplicacion.Validadores;
 using System;
 using System.Collections.Generic;
@@ -19,7 +20,9 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ActividadUseCase
                 throw new Exception(mensaje);
             }
 
-            await repo.EliminarAsync(idActividad);
+            var actividad = await repo.ObtenerPorIdAsync(idActividad);
+            actividad!.Existe = false;
+            await repo.ActualizarAsync(actividad);
         }
     }
 }

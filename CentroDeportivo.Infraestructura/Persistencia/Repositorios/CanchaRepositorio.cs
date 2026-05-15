@@ -56,29 +56,29 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
                 .ToListAsync();
 
             return await contexto.Canchas
-                .Where(c => !canchasOcupadas.Contains(c.Id))
+                .Where(c => !canchasOcupadas.Contains(c.Id) && c.Existe)
                 .AsNoTracking()
                 .ToListAsync();
         }
 
         public async Task<Cancha?> ObtenerPorIdAsync(int id)
         {
-            return await contexto.Canchas.FirstOrDefaultAsync(c => c.Id == id);
+            return await contexto.Canchas.FirstOrDefaultAsync(c => c.Id == id && c.Existe);
         }
 
         public async Task<Cancha?> ObtenerPorNumeroAsync(int numeroCancha)
         {
-            return await contexto.Canchas.FirstOrDefaultAsync(c => c.Numero == numeroCancha);
+            return await contexto.Canchas.FirstOrDefaultAsync(c => c.Numero == numeroCancha && c.Existe);
         }
 
         public async Task<IEnumerable<Cancha>> ObtenerTodasAsync()
         {
-            return await contexto.Canchas.AsNoTracking().ToListAsync();
+            return await contexto.Canchas.Where(c => c.Existe).AsNoTracking().ToListAsync();
         }
 
         public async Task<bool> YaExiste(int numero)
         {
-            return await contexto.Canchas.AnyAsync(c => c.Numero == numero);
+            return await contexto.Canchas.AnyAsync(c => c.Numero == numero && c.Existe);
         }
 
         public async Task<bool> YaExisteNumeroParaEditar(int numero, int idActual)

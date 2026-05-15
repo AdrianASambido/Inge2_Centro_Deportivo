@@ -99,7 +99,7 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
         {
             return await contexto.Reservas
                        .AnyAsync(r => r.Id_Usuario == usuarioId &&
-                       r.Turno.Fecha == fecha &&
+                       r.Turno!.Fecha == fecha &&
                        r.Turno.HoraInicio == horarioInicio &&
                        (r.Estado == EstadoReserva.Confirmado || r.Estado == EstadoReserva.PendienteDePago));
         }

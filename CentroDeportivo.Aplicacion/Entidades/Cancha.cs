@@ -11,6 +11,7 @@ namespace CentroDeportivo.Aplicacion.Entidades
         public int Id { get; private set; }
         public int Numero { get; set; }
         public int Capacidad { get; set; }
+        public bool Existe { get; set; }
 
         public Cancha(int numero, int capacidad)
         {

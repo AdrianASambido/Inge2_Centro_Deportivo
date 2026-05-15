@@ -16,7 +16,10 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.CanchaUseCase
             {
                 throw new Exception(mensaje);
             }
-            await repo.EliminarAsync(id);
+
+            var cancha = await repo.ObtenerPorIdAsync(id);
+            cancha!.Existe = false;
+            await repo.ActualizarAsync(cancha);
         }
     }
 }

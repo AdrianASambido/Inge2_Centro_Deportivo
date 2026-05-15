@@ -4,6 +4,7 @@
 @inject IReservaRepositorio ReservaRepositorio
 @inject Sesion UsuarioSesion
 @inject ListarReservasUseCase listarReservasUseCase
+@inject CancelarReservaUseCase cancelarReservasUseCase
 @inject NavigationManager Navigation
 
 <PageTitle>Mis Reservas</PageTitle>
@@ -154,6 +155,27 @@ else
 
     async Task Cancelar(int idReserva)
     {
-        // Tu lógica de cancelación aquí
+        try
+        {
+            // Llamada al Caso de Uso. Devuelve si aplica devolución y el monto.
+            var (conDevolucion, monto) = await cancelarReservasUseCase.Ejecutar(idReserva);
+
+            // Informamos el resultado al usuario
+            error = conDevolucion
+                ? $"Reserva cancelada exitosamente. Se ha generado una devolución de: ${monto}"
+                : "Reserva cancelada exitosamente (No corresponde devolución por políticas de tiempo).";
+
+            // Refrescamos la lista de reservas para que la cancelada ya no figure o cambie su estado
+            if (UsuarioSesion.UsuarioActual != null)
+            {
+                var resultado = await listarReservasUseCase.Ejecutar(UsuarioSesion.UsuarioActual.Id);
+                reservas = resultado.ToList();
+            }
+        }
+        catch (Exception ex)
+        {
+            // Aquí capturamos tus "throw new Exception" del backend
+            error = ex.Message;
+        }
     }
 }

@@ -91,5 +91,10 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
         {
             return await context.Usuarios.AnyAsync(u => u.Email == email && u.Id != idActual);
         }
+
+        public async Task<Usuario?> ObtenerPorToken(string token)
+        {
+            return await context.Usuarios.FirstOrDefaultAsync(u => u.TokenRecuperacion == token);
+        }
     }
 }
