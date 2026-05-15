@@ -136,6 +136,7 @@ else
             var c = new Cancha(can.numero ?? 0, can.capacidad ?? 0);
             await CrearCanchaUseCase.ejecutar(c);
             cancha = (await ListarCanchasUseCase.ejecutar()).ToList();
+            c = new Cancha();
             quiereAgregar = false;
             mensaje = "";
         }

@@ -12,42 +12,54 @@ namespace CentroDeportivo.Aplicacion.Validadores
     public abstract class UsuarioValidadorBase(IUsuarioRepositorio repo, IProfesorRepositorio repoProfe)
     {
         protected readonly IUsuarioRepositorio _repo = repo;
-        public async Task<(bool esValido, string mensaje)> ValidarDatosComunes(Usuario u)
+        protected readonly IProfesorRepositorio _repoProfesor = repoProfe;
+
+        //Validacion en comun ambos csos
+        private async Task<(bool esValido, string mensaje)> ValidarCamposObligatorios(Usuario u)
         {
             string mensaje = "";
 
-            if (string.IsNullOrWhiteSpace(u.Apellido) || string.IsNullOrWhiteSpace(u.Nombre) ||
-            string.IsNullOrWhiteSpace(u.Domicilio) || string.IsNullOrWhiteSpace(u.Email) ||
-            string.IsNullOrWhiteSpace(u.Dni))
+            if (string.IsNullOrWhiteSpace(u.Apellido) ||
+                string.IsNullOrWhiteSpace(u.Nombre) ||
+                string.IsNullOrWhiteSpace(u.Domicilio) ||
+                string.IsNullOrWhiteSpace(u.Email) ||
+                string.IsNullOrWhiteSpace(u.Dni))
             {
-                mensaje += "Error: Debe completar todos los campos obligatorios.\n";
-            }
-
-
-            if (!string.IsNullOrWhiteSpace(u.Dni))
-            {
-                if (await repo.YaExiste(u.Dni) || await repoProfe.YaExiste(u.Dni))
-                {
-                    mensaje += "Error: El DNI ingresado ya existe. \n";
-                }
-            }
-
-            if (!string.IsNullOrWhiteSpace(u.Email))
-            {
-                if (await repo.YaExisteEmail(u.Email))
-                {
-                    mensaje += "Error : el email ingresado ya existe. \n";
-                }
-            }
-
-            var (valido, msjPass) = ValidarPassword(u);
-
-            if (!valido)
-            {
-                mensaje += msjPass;
+                mensaje += "Debe completar todos los campos obligatorios.\n";
             }
 
             return (string.IsNullOrEmpty(mensaje), mensaje);
+        }
+
+        // Validacion para crear
+        public async Task<(bool esValido, string mensaje)> ValidarDatosComunes(Usuario u)
+        {
+            var (camposOk, msg) = await ValidarCamposObligatorios(u);
+
+            if (!string.IsNullOrWhiteSpace(u.Dni) && await _repo.YaExiste(u.Dni))
+                msg += "El DNI pertenece a un usuario registrado.\n";
+
+            if (!string.IsNullOrWhiteSpace(u.Dni) && await _repoProfesor.YaExiste(u.Dni))
+                msg += "El DNI pertenece a un usuario registrado.\n";
+
+            if (!string.IsNullOrWhiteSpace(u.Email) && await _repo.YaExisteEmail(u.Email))
+                msg += "El correo ingresado pertenece a un usuario registrado.\n";
+
+            return (string.IsNullOrEmpty(msg), msg);
+        }
+
+        // Validacion para editar
+        public async Task<(bool esValido, string mensaje)> ValidarEdicionBase(Usuario u)
+        {
+            var (camposOk, msg) = await ValidarCamposObligatorios(u);
+
+            if (!string.IsNullOrWhiteSpace(u.Dni) && await _repo.YaExisteDniParaEditar(u.Dni, u.Id))
+                msg += "El DNI ingresado ya se encuentra registrado en otro usuario.\n";
+
+            if (!string.IsNullOrWhiteSpace(u.Email) && await _repo.YaExisteEmailParaEditar(u.Email, u.Id))
+                msg += "El correo ingresado ya se encuentra registrado en otro usuario.\n";
+
+            return (string.IsNullOrEmpty(msg), msg);
         }
 
         // Método estático para que el Caso de Uso lo use directamente

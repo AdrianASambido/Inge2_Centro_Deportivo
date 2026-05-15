@@ -5,26 +5,32 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using CentroDeportivo.Aplicacion.Validadores;
+using CentroDeportivo.Aplicacion.Interfaces;
+using CentroDeportivo.Aplicacion.Entidades;
 
 namespace CentroDeportivo.Aplicacion.Validadores
 {
     public class UsuarioEmpleadoValidador(IUsuarioRepositorio repo, IProfesorRepositorio repoProfe) : UsuarioValidadorBase(repo, repoProfe)
     {
-       
 
-        protected override (bool esValidoPass,string mensajePass) ValidarPassword(Usuario u)
+
+        protected override (bool esValidoPass, string mensajePass) ValidarPassword(Usuario u)
         {
             return (true, "");
         }
 
-        public async Task<(bool esValido,string mensaje)> validarEliminar(int idEmpleado) { 
+        public async Task<(bool esValido, string mensaje)> validarEliminar(int idEmpleado)
+        {
             var usuario = await repo.ObtenerPorIdAsync(idEmpleado);
 
-            if (usuario == null) {
+            if (usuario == null)
+            {
                 return (false, "Empleado no encontrado");
             }
 
-            if (usuario.Rol != Rol.Empleado) {
+            if (usuario.Rol != Rol.Empleado)
+            {
                 return (false, "El usuario seleccionado no es Empleado");
             }
 

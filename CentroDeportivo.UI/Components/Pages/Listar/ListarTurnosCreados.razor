@@ -47,9 +47,9 @@ else
 
         @if (quiereAgregar)
         {
-            @if (!string.IsNullOrEmpty(mensaje))
+            @if (!string.IsNullOrEmpty(mensajeTurno))
             {
-                <div class="alert alert-info mt-3 shadow-sm">@mensaje</div>
+                <div class="alert alert-info mt-3 shadow-sm">@mensajeTurno</div>
             }
 
             <div class="card shadow-sm mb-4 border-primary" style="max-width: 600px;">
@@ -261,6 +261,10 @@ else
                                 }
                             </tbody>
                         </table>
+                        @if (!string.IsNullOrEmpty(mensajeTabla))
+                        {
+                            <div class="alert alert-info mt-3 shadow-sm">@mensajeTabla</div>
+                        }
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -313,7 +317,8 @@ else
 }
 
 @code {
-    
+    string mensajeTurno = "";
+    string mensajeTabla = "";
     bool mostrarEscanner = false;
     bool jsListo = false;
     List<Reserva>? reservas = new List<Reserva>();
@@ -378,11 +383,11 @@ else
     {
         try
         {
-            mensaje = "";
+            mensajeTabla = "";
             await ConfirmarPagoReservaUseCase.Ejecutar(idReserva);
-            mensaje = "Pago confirmado correctamente.";
+            mensajeTabla = "Pago confirmado correctamente.";
         }
-        catch (Exception ex) { mensaje = ex.Message; }
+        catch (Exception ex) { mensajeTabla = ex.Message; }
     }
 
     async Task MostrarInscriptos(int Id)
@@ -391,11 +396,11 @@ else
         {
             mostrarInscriptos = true;
             reservas = (await ListarInscriptosUseCase.Ejecutar(Id)).ToList();
-            mensaje = "";
+            mensajeTabla = "";
         }
         catch (Exception ex)
         {
-            mensaje = ex.Message;
+            mensajeTabla = ex.Message;
             mostrarInscriptos = false;
         }
     }
@@ -404,18 +409,18 @@ else
     {
         try
         {
-            mensaje = "";
+            mensajeTabla = "";
             await RegistrarAsistenciaManualUseCase.Ejecutar(idReserva);
-            mensaje = "Asistencia manual registrada.";
+            mensajeTabla = "Asistencia manual registrada.";
         }
-        catch (Exception ex) { mensaje = ex.Message; }
+        catch (Exception ex) { mensajeTabla = ex.Message; }
     }
 
     async Task BuscarPorDisponibilidad()
     {
         try
         {
-            mensaje = "";
+            mensajeTurno = "";
             var (profesD, canchasD) = await ConsultarDisponibilidadUseCase.ejecutar(t.Fecha, t.HoraInicio);
             profesoresDispo = profesD.ToList();
             canchasDispo = canchasD.ToList();
@@ -423,7 +428,7 @@ else
         }
         catch (Exception ex)
         {
-            mensaje = ex.Message;
+            mensajeTurno = ex.Message;
             mostrarDisponibles = false;
         }
     }
@@ -432,7 +437,7 @@ else
     {
         try
         {
-            mensaje = "";
+            mensajeTurno = "";
             var nuevoTurno = new Turno
             {
                 Fecha = this.t.Fecha,
@@ -445,11 +450,12 @@ else
             };
             await CrearTurnoUseCase.ejecutar(nuevoTurno);
             turnos = (await ListarTurnosUseCase.Ejecutar(null, null, null, null, null)).ToList();
+            t = new Datos();
             AplicarFiltros();
-            mensaje = "Turno creado correctamente.";
+            mensajeTurno = "Turno creado correctamente.";
             quiereAgregar = false;
         }
-        catch (Exception ex) { mensaje = ex.Message; }
+        catch (Exception ex) { mensajeTurno = ex.Message; }
     }
 
 
