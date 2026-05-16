@@ -470,7 +470,7 @@ else
         await Task.Delay(500); // Espera mínima para que el DOM reconozca el ID del video
 
         // LLAMADA CLAVE: Activa la cámara físicamente
-        bool exito = await JS.InvokeAsync<bool>("iniciarCamara", "videoElementId");
+        bool exito = await JS.InvokeAsync<bool>("iniciarCamara", "videoFeed");
 
         if (exito)
         {
@@ -488,7 +488,7 @@ else
     {
         while (!token.IsCancellationRequested)
         {
-            var imagenBase64 = await JS.InvokeAsync<string>("capturarFoto", "videoElementId");
+            var imagenBase64 = await JS.InvokeAsync<string>("capturarFoto", "videoFeed");
 
             if (!string.IsNullOrEmpty(imagenBase64))
             {
@@ -522,11 +522,14 @@ else
         StateHasChanged();
     }
 
-    private void CerrarEscaner()
+    private async void CerrarEscaner()
     {
-        cts?.Cancel(); // Detiene el bucle while
-        mostrarEscanner = false;
-        StateHasChanged();
+        
+        cts?.Cancel();
+     await JS.InvokeVoidAsync("detenerCamara");
+           mostrarEscanner = false;
+    StateHasChanged();
+
     }
 
     void Cancelar()
