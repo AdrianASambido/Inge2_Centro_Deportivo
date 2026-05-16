@@ -15,6 +15,8 @@ namespace CentroDeportivo.Aplicacion.Entidades
         public string Dni { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
+        public string? TokenRecuperacion {  get; set; } = string.Empty;
+        public DateTime? TokenRecuperacionVencimiento {  get; set; } 
         public bool DebeCambiarPassword { get; set; } = false;
         public Rol Rol { get; set; }
 

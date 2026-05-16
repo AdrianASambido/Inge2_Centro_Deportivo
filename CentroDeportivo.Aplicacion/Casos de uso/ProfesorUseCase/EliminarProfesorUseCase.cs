@@ -1,5 +1,6 @@
 ﻿using CentroDeportivo.Aplicacion.Interfaces;
 using CentroDeportivo.Aplicacion.Validadores;
+using CentroDeportivo.Aplicacion.Entidades;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,7 +18,9 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ProfesorUseCase
                 throw new Exception(mensaje);
             }
 
-            await repo.EliminarAsync(id);
+            var p = await repo.ObtenerPorIdAsync(id);
+            p!.Existe = false;
+            await repo.ActualizarAsync(p);
         }
     }
 }

@@ -64,6 +64,7 @@ builder.Services.AddScoped<CambiarContraseniaUseCase>();
 builder.Services.AddScoped<EliminarEmpleadoUseCase>();
 builder.Services.AddScoped<RecuperarContraseniaUseCase>();
 builder.Services.AddScoped<ListarEmpleadosUseCase>();
+builder.Services.AddScoped<RestablecerContraseniaUseCase>();
 
 
 builder.Services.AddScoped<CrearActividadUseCase>();
