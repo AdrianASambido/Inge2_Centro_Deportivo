@@ -1,4 +1,5 @@
-﻿let stream = null;
+﻿// Usamos una variable global para mantener la referencia al stream
+let streamPrincipal = null;
 
 window.iniciarCamara = async function (videoId) {
     try {
@@ -8,13 +9,30 @@ window.iniciarCamara = async function (videoId) {
             return false;
         }
 
-        stream = await navigator.mediaDevices.getUserMedia({
-            video: { facingMode: "environment" } // cámara trasera en móvil
+        // Si ya hay una cámara encendida, la detenemos primero para evitar conflictos
+        if (streamPrincipal) {
+            streamPrincipal.getTracks().forEach(track => track.stop());
+        }
+
+        // Solicitamos acceso a la cámara
+        streamPrincipal = await navigator.mediaDevices.getUserMedia({
+            video: {
+                facingMode: "environment", // Prioriza cámara trasera en móviles
+                width: { ideal: 1280 },    // Pedimos buena resolución para que el QR se lea bien
+                height: { ideal: 720 }
+            }
         });
 
-        video.srcObject = stream;
-        await video.play();
-        return true;
+        video.srcObject = streamPrincipal;
+
+        // Esperamos a que el video esté listo para reproducirse
+        return new Promise((resolve) => {
+            video.onloadedmetadata = () => {
+                video.play();
+                resolve(true);
+            };
+        });
+
     } catch (err) {
         console.error("Error al acceder a la cámara:", err);
         return false;
@@ -24,17 +42,21 @@ window.iniciarCamara = async function (videoId) {
 window.capturarFoto = async function (videoId) {
     try {
         const video = document.getElementById(videoId);
-        if (!video || !stream) return null;
+        // Si el video no está listo o no hay stream, salimos
+        if (!video || !streamPrincipal || video.readyState !== 4) return null;
 
         const canvas = document.createElement("canvas");
+        // Capturamos a la resolución real del video para no perder calidad en el QR
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
 
         const ctx = canvas.getContext("2d");
-        ctx.drawImage(video, 0, 0);
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-        // Devuelve la imagen en base64 sin el prefijo
-        const base64 = canvas.toDataURL("image/jpeg", 0.8);
+        // Subimos un poquito la calidad (0.9) para que ZXing no sufra con los píxeles
+        const base64 = canvas.toDataURL("image/jpeg", 0.9);
+
+        // Enviamos solo el contenido Base64 puro a C#
         return base64.split(",")[1];
     } catch (err) {
         console.error("Error al capturar foto:", err);
@@ -43,8 +65,9 @@ window.capturarFoto = async function (videoId) {
 };
 
 window.detenerCamara = function () {
-    if (stream) {
-        stream.getTracks().forEach(track => track.stop());
-        stream = null;
+    if (streamPrincipal) {
+        streamPrincipal.getTracks().forEach(track => track.stop());
+        streamPrincipal = null;
+        console.log("Cámara detenida y stream liberado.");
     }
 };

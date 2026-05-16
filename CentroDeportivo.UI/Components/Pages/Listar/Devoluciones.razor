@@ -82,7 +82,7 @@
         }
     }
 
-    async Task OnInitializedAsyncTask()
+    protected override async Task OnInitializedAsync()
     {
         devoluciones = (await ListarDevolucionesPendientesUseCase.ejecutar()).ToList();
     }

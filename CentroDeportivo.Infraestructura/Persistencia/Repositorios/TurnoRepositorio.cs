@@ -82,21 +82,18 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
                 .AnyAsync(t => t.Id == turnoId && t.Reservas.Any());
         }
 
+
         public async Task<IEnumerable<Turno>> ObtenerParaCalendarioAsync(int usuarioId, DateOnly fecha, int actividadId)
         {
             var hoy = DateOnly.FromDateTime(DateTime.Now);
 
-            // Busca horarios que ya tiene el cliente en esa fecha
-            
-            var horariosOcupados = await contexto.Reservas
+            var reservasCliente = await contexto.Reservas
                 .Where(r => r.Id_Usuario == usuarioId &&
                             r.Turno.Fecha == fecha &&
                             (r.Estado == EstadoReserva.Confirmado || r.Estado == EstadoReserva.PendienteDePago))
-                .Select(r => new { r.Turno.Fecha, r.Turno.HoraInicio })
+                .Select(r => new { r.Turno.HoraInicio, r.Turno.HoraFin }) 
                 .ToListAsync();
 
-            //  Trae los turnos disponibles para la Actividad y Fecha elegidas
-            
             var turnosCandidatos = await contexto.Turnos
                 .Include(t => t.Actividad)
                 .Include(t => t.Profesor)
@@ -107,13 +104,14 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
                          && t.Fecha >= hoy)
                 .ToListAsync();
 
-            // Excluye los turnos que coincidan con horarios que el usuario ya reservó
-           
             var filtrados = turnosCandidatos.Where(t =>
-                !horariosOcupados.Any(h => h.Fecha == t.Fecha && h.HoraInicio == t.HoraInicio)
+                !reservasCliente.Any(r =>
+ 
+                    t.HoraInicio < r.HoraFin && t.HoraFin > r.HoraInicio
+                )
             );
 
-            return filtrados.OrderBy(t => t.HoraInicio);
+            return filtrados;
         }
 
         public async Task FinalizarTurnosVencidosAsync()

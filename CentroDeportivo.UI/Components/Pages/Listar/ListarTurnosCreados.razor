@@ -485,52 +485,69 @@ else
     }
 
     private async Task IniciarBucleEscaneo(CancellationToken token)
+{
+    try 
     {
         while (!token.IsCancellationRequested)
         {
+            // Capturamos la imagen desde el JS mejorado
             var imagenBase64 = await JS.InvokeAsync<string>("capturarFoto", "videoFeed");
 
             if (!string.IsNullOrEmpty(imagenBase64))
             {
-                // Ahora 'DecodificarQr' ya existe en el contexto
                 var resultado = DecodificarQr(imagenBase64);
 
                 if (resultado != null)
                 {
+                    // Si encontramos un QR, detenemos el bucle y procesamos
                     await ProcesarResultado(resultado);
-                    break;
+                    break; 
                 }
             }
-        
-            await Task.Delay(300, token);
+            // 500ms es un buen equilibrio para no saturar el procesador
+            await Task.Delay(500, token); 
         }
     }
+    catch (OperationCanceledException) { /* Cierre normal */ }
+}
 
-    private async Task ProcesarResultado(string codigoQr) // Ahora sí recibe un string
+    private async Task ProcesarResultado(string codigoQr)
+{
+    try
     {
-        try
-        {
-            // Si el QR es el ID de la reserva o un hash
-            await RegistrarAsistenciaQrUseCase.Ejecutar(codigoQr);
-            mensaje = "¡Asistencia registrada con éxito!";
-            CerrarEscaner();
-        }
-        catch (Exception ex)
-        {
-            mensaje = $"Error: {ex.Message}";
-        }
-        StateHasChanged();
-    }
-
-    private async void CerrarEscaner()
-    {
+        // IMPORTANTE: Aquí puedes limpiar el código si viene con espacios
+        string qrLimpio = codigoQr.Trim();
         
-        cts?.Cancel();
-     await JS.InvokeVoidAsync("detenerCamara");
-           mostrarEscanner = false;
+        await RegistrarAsistenciaQrUseCase.Ejecutar(qrLimpio);
+        
+        // Seteamos el mensaje general para que se vea en el alert de la página principal
+        mensaje = "¡Asistencia registrada con éxito!";
+        
+        // Cerramos el modal
+        await CerrarEscaner();
+    }
+    catch (Exception ex)
+    {
+        // Si el QR no es válido para el sistema, lo mostramos en el mensaje de error
+        mensaje = $"Error en QR: {ex.Message}";
+        await CerrarEscaner();
+    }
     StateHasChanged();
+}
 
+    private async Task CerrarEscaner()
+{
+    if (cts != null)
+    {
+        cts.Cancel();
+        cts.Dispose();
+        cts = null;
     }
+    
+    await JS.InvokeVoidAsync("detenerCamara");
+    mostrarEscanner = false;
+    StateHasChanged();
+}
 
     void Cancelar()
     {
