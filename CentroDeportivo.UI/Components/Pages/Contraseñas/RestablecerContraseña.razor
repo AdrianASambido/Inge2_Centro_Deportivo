@@ -41,10 +41,8 @@
     [SupplyParameterFromQuery(Name = "token")]
     public string? Token { get; set; }
 
-    // Este método se ejecuta apenas carga la página
     protected override void OnInitialized()
     {
-        // Si por algún motivo SupplyParameterFromQuery falla, lo pescamos manualmente
         if (string.IsNullOrEmpty(Token))
         {
             var uri = Navegador.ToAbsoluteUri(Navegador.Uri);
@@ -74,7 +72,6 @@
                 return;
             }
 
-            // Ahora Token ya debería tener el valor desde el OnInitialized
             if (string.IsNullOrEmpty(Token))
             {
                 error = "El link de recuperación no es válido o ha expirado.";
