@@ -20,16 +20,18 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.UsuarioUseCase
                 throw new Exception("Usuario inexistente");
             }
 
+            if (!repoHash.Verificar(contraVieja, usuario.Password))
+            {
+                throw new Exception("La contraseña actual es incorrecta");
+            }
+
             var (esValido, mensaje) = UsuarioValidadorBase.ValidarFormatoPassword(contraNueva);
             if (!esValido)
             {
                 throw new Exception(mensaje);
             }
 
-            if (!repoHash.Verificar(contraVieja, usuario.Password))
-            {
-                throw new Exception("La contraseña actual es incorrecta");
-            }
+            
             if (usuario.Rol == Rol.Empleado && usuario.DebeCambiarPassword)
             {
                 usuario.DebeCambiarPassword = false;

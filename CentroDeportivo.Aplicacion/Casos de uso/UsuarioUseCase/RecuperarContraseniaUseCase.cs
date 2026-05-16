@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Cache;
 using System.Text;
 using System.Threading.Tasks;
 using CentroDeportivo.Aplicacion.Interfaces;
@@ -22,7 +23,8 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.UsuarioUseCase
             usuario.TokenRecuperacion = token;
             usuario.TokenRecuperacionVencimiento = vencimiento;
 
-            var link = $"https://centrodeportivo.com/restablecer-contrasenia?token={token}";
+            var link = $"https://localhost:5001/restablecer-contrasenia?token={token}";
+            await repo.ActualizarAsync(usuario);
             await repoEmail.EnviarLinkRecuperacionAsync(email, link);
         }
     }

@@ -2,7 +2,7 @@
 @inject IUsuarioRepositorio UsuarioRepositorio
 @rendermode InteractiveServer
 @inject NavigationManager Navegador
-@inject RestablecerContraseñaUseCase RestablecerContraseñaUseCase
+@inject RestablecerContraseniaUseCase RestablecerContraseñaUseCase
 
 <PageTitle>Restablecer Contraseña</PageTitle>
 
@@ -37,18 +37,52 @@
     string nueva1 = "";
     string nueva2 = "";
 
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "token")]
+    public string? Token { get; set; }
+
+    // Este método se ejecuta apenas carga la página
+    protected override void OnInitialized()
+    {
+        // Si por algún motivo SupplyParameterFromQuery falla, lo pescamos manualmente
+        if (string.IsNullOrEmpty(Token))
+        {
+            var uri = Navegador.ToAbsoluteUri(Navegador.Uri);
+            var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
+            
+            if (query.TryGetValue("token", out var tokenValue))
+            {
+                Token = tokenValue;
+            }
+        }
+    }
+
     async Task Redirigir()
     {
         error = "";
         try
         {
-            if (nueva1 == null || nueva2 == null || nueva1 != nueva2)
+            if (string.IsNullOrWhiteSpace(nueva1) || string.IsNullOrWhiteSpace(nueva2))
             {
-                error = "Las contraseñas no coinciden o son nulas";
+                error = "Debe completar ambos campos.";
                 return;
             }
 
-            await RestablecerContraseñaUseCase.Ejecutar(nueva1);
+            if (nueva1 != nueva2)
+            {
+                error = "Las contraseñas no coinciden.";
+                return;
+            }
+
+            // Ahora Token ya debería tener el valor desde el OnInitialized
+            if (string.IsNullOrEmpty(Token))
+            {
+                error = "El link de recuperación no es válido o ha expirado.";
+                return;
+            }
+
+            await RestablecerContraseñaUseCase.Ejecutar(nueva1,Token);
+
             nueva1 = "";
             nueva2 = "";
             Navegador.NavigateTo("/Login");
@@ -58,4 +92,5 @@
             error = ex.Message;
         }
     }
+}
 }

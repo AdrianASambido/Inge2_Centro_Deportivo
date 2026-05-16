@@ -114,7 +114,7 @@
         error = "";
         try
         {
-            reservas = (await ListarReservasUseCase.Ejecutar(UsuarioSesion.UsuarioActual.Id)).ToList();
+            reservas = (await listarReservasUseCase.Ejecutar(UsuarioSesion.UsuarioActual.Id)).ToList();
         }
         catch (Exception ex)
         {

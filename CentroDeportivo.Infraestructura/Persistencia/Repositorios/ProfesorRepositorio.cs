@@ -83,7 +83,7 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
 
         public async Task<bool> YaExisteDniParaEditar(string dni, int idActual)
         {
-            return await contexto.Profesores.AnyAsync(p => p.Dni == dni && p.Id != idActual);
+            return await contexto.Profesores.AnyAsync(p => p.Dni == dni && p.Id != idActual && p.Existe);
         }
 
         //si tiene turnos asignados no se puede eliminar el profesor

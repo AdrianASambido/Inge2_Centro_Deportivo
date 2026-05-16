@@ -47,10 +47,6 @@ namespace CentroDeportivo.Aplicacion.Validadores
                 {
                     mensaje += "Error: ya existe un usuario con ese DNI.\n";
                 }
-                if (await _repo.YaExiste(p.Dni))
-                {
-                    mensaje += "Error: ya existe un usuario con ese DNI.\n";
-                }
             }
 
             return (string.IsNullOrEmpty(mensaje), mensaje);
