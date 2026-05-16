@@ -68,7 +68,6 @@ else
                             <td>@e.Apellido</td>
                             <td>@e.Dni</td>
                             <td class="text-center">
-                                <button class="btn btn-sm btn-primary" @onclick="() => Editar(e.Id)">Editar</button>
                                 <button class="btn btn-sm btn-danger" @onclick="() => ConfirmarEliminacion(e.Id)">Eliminar</button>
                             </td>
                         </tr>
@@ -110,12 +109,12 @@ else
         mensaje = "";
     }
     
-    public void Editar(int Id) => Navegador.NavigateTo($"/editar-empleado/{Id}");
     
     void ConfirmarEliminacion(int Id) { idAEliminar = Id; mostrarDialog = true; }
 
     async Task Eliminar()
     {
+        mensaje = "";
         mostrarDialog = false;
         try
         {
@@ -129,6 +128,7 @@ else
 
     async Task Aceptar()
     {
+        mensaje = "";
         try
         {
 
@@ -137,7 +137,7 @@ else
             await CrearEmpleadoUseCase.ejecutar(emple);
             
             empleado = (await ListarEmpleadosUseCase.ejecutar()).ToList();
-            
+            emp = new Datos();
             mensaje = "Empleado creado exitosamente.";
             quiereAgregar = false;
             StateHasChanged();

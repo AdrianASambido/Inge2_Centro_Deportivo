@@ -134,15 +134,13 @@
 
         try
         {
-            // Aquí se dispara tu lógica del Caso de Uso
             qrCode = await GenerarQRUseCase.Ejecutar(reservaId);
             reservaSeleccionadaId = reservaId; 
         }
         catch (Exception ex)
         {
-            // Aquí capturamos la excepción del Validador (ej: "Faltan más de 15 min")
             error = ex.Message;
-            StateHasChanged(); // Forzamos el refresco para mostrar el alert rojo
+            StateHasChanged(); 
         }
     }
 
@@ -156,10 +154,8 @@
     {
         try
         {
-            // Llamada al Caso de Uso. Devuelve si aplica devolución y el monto.
             var (conDevolucion, monto) = await cancelarReservasUseCase.Ejecutar(idReserva);
 
-            // Informamos el resultado al usuario
             error = conDevolucion
                 ? $"Reserva cancelada exitosamente. Se ha generado una devolución de: ${monto}"
                 : "Reserva cancelada exitosamente (No corresponde devolución por políticas de tiempo).";

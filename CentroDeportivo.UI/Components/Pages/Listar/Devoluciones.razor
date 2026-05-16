@@ -30,13 +30,14 @@
                         @foreach (var de in devoluciones)
                         {
                             <tr>
-                                <td class="fw-bold">@de?.Usuario?.Nombre</td>
+                                <td>@de?.Usuario?.Nombre</td>
                                 <td>@de?.Usuario?.Apellido</td>
                                 <td>@de?.Usuario?.Dni</td>
                                 <td>@de?.Reserva?.Turno?.Fecha.ToString("dd/MM/yyyy")</td>
                                 <td>@de?.Reserva?.Turno?.Actividad?.Nombre</td>
+                                <td>$@de?.MontoADevolver</td>
                                 <td class="text-center">
-                                    <button class="btn btn-success btn-outline-primary" @onclick="() => Confirmar(de.Id)">
+                                    <button class="btn btn-outline-success" @onclick="() => Confirmar(de.Id)">
                                         Confirmar devolucion
                                     </button>
                                 </td>
@@ -82,7 +83,7 @@
         }
     }
 
-    async Task OnInitializedAsyncTask()
+    protected override async Task OnInitializedAsync()
     {
         devoluciones = (await ListarDevolucionesPendientesUseCase.ejecutar()).ToList();
     }
