@@ -83,7 +83,7 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
 
         public async Task<bool> YaExisteNumeroParaEditar(int numero, int idActual)
         {
-            return await contexto.Canchas.AnyAsync(c => c.Numero == numero && c.Id != idActual);
+            return await contexto.Canchas.AnyAsync(c => c.Numero == numero && c.Id != idActual && c.Existe);
         }
 
         //si tiene turnos asignados no se puede eliminar ni editar la cancha

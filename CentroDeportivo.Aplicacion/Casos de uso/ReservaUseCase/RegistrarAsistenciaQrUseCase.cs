@@ -19,12 +19,14 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
                     throw new Exception ("Error: Código QR inválido o inexistente.");
                 }
 
+                if (reserva.Turno.Estado == EstadoTurno.Finalizado) {
+                    throw new Exception("Error: la clase ya finalizo.");
+                }
                 
                 if (reserva.Asistencia == Asistencia.Presente)
                 {
                     throw new Exception ("Error: Esta asistencia ya fue registrada anteriormente.");
                 }
-
                 
                 if (reserva.Turno.Fecha != DateOnly.FromDateTime(DateTime.Now))
                 {

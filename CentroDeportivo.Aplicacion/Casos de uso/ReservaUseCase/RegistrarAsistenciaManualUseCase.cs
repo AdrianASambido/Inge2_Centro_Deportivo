@@ -17,6 +17,8 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
                 throw new Exception("Error: reserva inexistente");
             }
 
+
+
             if (reserva.Asistencia == Asistencia.Presente || reserva.Estado == EstadoReserva.Cancelado || reserva.Estado == EstadoReserva.PendienteDePago) {
                 throw new Exception("Error: no se puede confirmar asistencia en esta reserva.");
             }

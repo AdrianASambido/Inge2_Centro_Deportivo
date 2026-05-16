@@ -78,25 +78,29 @@ namespace CentroDeportivo.Aplicacion.Validadores
         {
             string mensaje = "";
 
-            // Campos obligatorios
+           
             if (string.IsNullOrWhiteSpace(actividad.Nombre) ||
                 string.IsNullOrWhiteSpace(actividad.Descripcion))
             {
                 mensaje += "Error: Debe completar todos los campos.\n";
             }
 
-            // Precio válido
-            if (actividad.Precio < 0)
+           
+            if (actividad.Precio <= 0)
             {
                 mensaje += "Error: El precio debe ser mayor a 0.\n";
             }
 
-            // Validación de duplicado (correcta)
+            
             if (!string.IsNullOrWhiteSpace(actividad.Nombre))
             {
-                if (await repo.YaExisteParaEditar(actividad.Nombre, idActividad))
+                
+                string nombreNormalizado = NormalizarTexto(actividad.Nombre);
+
+             
+                if (await repo.YaExisteParaEditar(nombreNormalizado, idActividad))
                 {
-                    mensaje += "Error: Ya existe otra actividad con ese nombre.\n";
+                    mensaje += $"Error: Ya existe otra actividad con el nombre '{actividad.Nombre}'\n";
                 }
             }
 
