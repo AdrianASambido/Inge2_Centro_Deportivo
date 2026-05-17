@@ -17,6 +17,10 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
                 throw new Exception("Reserva inexistente.");
             }
 
+            if (reserva.Turno!.Estado == EstadoTurno.Finalizado) {
+                throw new Exception("Error: la reserva corresponde a un turno ya finalizado.");
+            }
+
             if (reserva.Estado != EstadoReserva.PendienteDePago)
             {
                 throw new Exception($"No se puede confirmar el pago. La reserva está en estado: {reserva.Estado}");

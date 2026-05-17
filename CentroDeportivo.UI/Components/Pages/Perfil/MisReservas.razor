@@ -156,15 +156,15 @@
     {
         try
         {
-            // Llamada al Caso de Uso. Devuelve si aplica devolución y el monto.
+            
             var (conDevolucion, monto) = await cancelarReservasUseCase.Ejecutar(idReserva);
 
-            // Informamos el resultado al usuario
+          
             error = conDevolucion
                 ? $"Reserva cancelada exitosamente. Se ha generado una devolución de: ${monto}"
-                : "Reserva cancelada exitosamente (No corresponde devolución por políticas de tiempo).";
+                : "Reserva cancelada exitosamente. No corresponde devolución.";
 
-            // Refrescamos la lista de reservas para que la cancelada ya no figure o cambie su estado
+            
             if (UsuarioSesion.UsuarioActual != null)
             {
                 var resultado = await listarReservasUseCase.Ejecutar(UsuarioSesion.UsuarioActual.Id);

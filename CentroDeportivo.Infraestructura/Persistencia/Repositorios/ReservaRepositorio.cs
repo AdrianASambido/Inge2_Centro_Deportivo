@@ -72,7 +72,7 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
                 .Include(r => r.Turno)
                     .ThenInclude(t => t!.Profesor)
                 .Include (r => r.Turno)
-                    .ThenInclude(t => t!.Cancha) ///AGREGA ESTO
+                    .ThenInclude(t => t!.Cancha) 
                 .Where(r => r.Id_Usuario == usuarioId)
                 .AsQueryable();
 
