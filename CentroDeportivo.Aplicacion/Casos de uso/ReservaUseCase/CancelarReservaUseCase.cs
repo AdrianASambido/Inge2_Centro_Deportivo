@@ -20,19 +20,23 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
                 throw new Exception("Error: reserva inexistente.");
             }
 
-            if (reserva.Estado == EstadoReserva.Cancelado || reserva.Turno.Estado == EstadoTurno.Finalizado)
-            {
-                throw new Exception("Error: no se puede cancelar esta reserva");
+            if (reserva.Turno.Estado == EstadoTurno.Finalizado) {
+                throw new Exception("Error: la clase ya transcurrio.");
             }
 
-
-
+            if (reserva.Estado == EstadoReserva.Cancelado)
+            {
+                throw new Exception("Error: la reserva ya se encuentra cancelada.");
+            }
+         
             var ahora = DateTime.Now;
             var fechaHoraTurno = reserva.Turno.Fecha.ToDateTime(reserva.Turno.HoraInicio);
             var diferencia = fechaHoraTurno - ahora;
 
             bool aplicaDevolucion = false;
             double montoADevolver = 0;
+
+            
 
             if (diferencia.TotalHours > 24 && reserva.Estado == EstadoReserva.Confirmado)
             {

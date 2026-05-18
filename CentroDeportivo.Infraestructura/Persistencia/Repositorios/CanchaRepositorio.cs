@@ -37,24 +37,21 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
 
         public async Task<IEnumerable<Cancha>> ObtenerDisponiblesAsync(DateOnly fecha, TimeOnly horarioInicio)
         {
-            // 1. Calculamos los límites afuera de la consulta LINQ
-            // Un turno de una hora que empiece a las 18:00 termina a las 19:00.
-            // Buscamos cualquier turno que empiece después de las 17:00 y antes de las 19:00.
-            var limiteInferior = horarioInicio.AddHours(-1);
-            var limiteSuperior = horarioInicio.AddHours(1);
+            
+            var horarioFin = horarioInicio.AddHours(1);
 
             var canchasOcupadas = await contexto.Turnos
                 .Where(t => t.Fecha == fecha &&
                            (t.Estado == EstadoTurno.Disponible || t.Estado == EstadoTurno.Lleno))
                 .Where(t =>
-                    // Ahora comparamos solo contra variables, esto SÍ se traduce a SQL
-                    t.HoraInicio > limiteInferior &&
-                    t.HoraInicio < limiteSuperior
+                    
+                    horarioInicio < t.HoraFin && horarioFin > t.HoraInicio
                 )
                 .Select(t => t.Id_Cancha)
                 .Distinct()
                 .ToListAsync();
 
+           
             return await contexto.Canchas
                 .Where(c => !canchasOcupadas.Contains(c.Id) && c.Existe)
                 .AsNoTracking()

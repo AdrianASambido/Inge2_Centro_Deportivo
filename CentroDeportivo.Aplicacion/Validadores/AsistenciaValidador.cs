@@ -10,39 +10,26 @@ namespace CentroDeportivo.Aplicacion.Validadores
 {
     public class AsistenciaValidador(IReservaRepositorio repoReserva)
     {
-        public async Task<(bool esValido, string mensaje)> ValidarAsistencia(int idReserva)
+        public async Task<(bool esValido, string mensaje)> ValidarAsistencia(Reserva reserva)
         {
+            
 
+            var fechaHoraClase = reserva.Turno!.Fecha.ToDateTime(reserva.Turno.HoraInicio);
+            var diferencia = fechaHoraClase - DateTime.Now;
+            if (diferencia.TotalMinutes > 15)
+                return (false, "Error: faltan más de 15 minutos para el comienzo de la clase.");
 
-            var reserva = await repoReserva.ObtenerPorIdAsync(idReserva);
-            if (reserva == null) {
-                return (false, "Error: reserva inexistente");
-            }
+            if (reserva.Turno!.Estado == EstadoTurno.Finalizado)
+                return (false, "Error: la clase ya finalizó.");
 
-            var turno = reserva.Turno;
+            if (reserva.Estado == EstadoReserva.Cancelado)
+                return (false, "Error: esta reserva se encuentra cancelada.");
 
-            if (turno == null) {
-                return (false, "Error: turno inexistente");
-            }
+            if (reserva.Estado == EstadoReserva.PendienteDePago)
+                return (false, "Error: la reserva se encuentra pendiente de pago.");
 
-            if (turno.Estado == EstadoTurno.Cancelado || turno.Estado == EstadoTurno.Finalizado)
-            {
-                return (false, "Error: este turno no esta disponible");
-            }
-
-            if (reserva.Estado != EstadoReserva.Confirmado)
-            {
-                return (false, "Error: debe pagar la reserva para poder generar el QR");
-            }
-
-            var ahora = DateTime.Now;
-            var inicioTurno = turno.Fecha.ToDateTime(turno.HoraInicio);
-            TimeSpan tiempoRestante = inicioTurno - ahora;
-
-            if (tiempoRestante.TotalMinutes  > 15)
-            {
-                return (false, "Error: puede generar el QR 15 minutos antes de la clase.");
-            }
+            if (reserva.Asistencia == Asistencia.Presente)
+                return (false, "Error: el inscripto ya registra asistencia en esta reserva.");
 
             return (true, "");
         }

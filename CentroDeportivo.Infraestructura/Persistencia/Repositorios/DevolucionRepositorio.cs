@@ -32,7 +32,7 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
                         .ThenInclude(r => r.Turno)
                         .ThenInclude(t => t.Actividad)
                         .Where(d => d.Estado == DevolucionEstado.Pendiente)
-                        .AsNoTracking() 
+                        .AsNoTracking()
                         .ToListAsync();
         }
 

@@ -57,7 +57,7 @@ else
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Hora inicio</label>
                             <select class="form-select" @bind="horaSeleccionada">
-                                @for (int h = 0; h < 24; h++)
+                                @for (int h = 18; h < 23; h++)
                                 {
                                     <option value="@h">@($"{h:D2}:00")</option>
                                 }
@@ -182,7 +182,8 @@ else
                         <th>Fecha</th>
                         <th>Hora inicio</th>
                         <th>Hora fin</th>
-                        <th>Cancha</th>
+                        <th>Estado</th>
+                        <th>Cancha</th>                        
                         <th class="text-center">Acciones</th>
                     </tr>
                 </thead>
@@ -198,6 +199,7 @@ else
                                 <td>@tu.Fecha.ToString("dd/MM/yyyy")</td>
                                 <td>@tu.HoraInicio</td>
                                 <td>@tu.HoraFin</td>
+                                <td>@tu.Estado</td>
                                 <td><span class="badge bg-info text-dark">N° @tu.Cancha.Numero</span></td>
                                 <td class="text-center">
                                     <button class="btn btn-sm btn-outline-primary" @onclick="() => MostrarInscriptos(tu.Id)">
@@ -426,15 +428,6 @@ else
         try
         {
             mensajeTurno = "";
-            var horaMinima = new TimeOnly(18, 0);
-            var horaMaxima = new TimeOnly(23, 0); 
-
-            if (t.HoraInicio < horaMinima || t.HoraInicio > horaMaxima)
-            {
-                mensajeTurno = "Error: El centro deportivo opera únicamente en el horario de 18:00 a 23:00 hs.";
-                mostrarDisponibles = false;
-                return;
-            }
             var (profesD, canchasD) = await ConsultarDisponibilidadUseCase.ejecutar(t.Fecha, t.HoraInicio);
             profesoresDispo = profesD.ToList();
             canchasDispo = canchasD.ToList();
@@ -483,7 +476,8 @@ else
 
         await InvokeAsync(StateHasChanged);
 
-        await Task.Delay(500);
+        // LLAMADA CLAVE: Activa la cámara físicamente
+        bool exito = await JS.InvokeAsync<bool>("iniciarCamara", "videoElementId");
 
         var dotNetRef = DotNetObjectReference.Create(this);
 
@@ -500,41 +494,49 @@ else
         }
     }
 
-
-    bool procesandoQr = false;
-    [JSInvokable]
-    public async Task ProcesarQrDetectado(string codigoQr)
+    private async Task IniciarBucleEscaneo(CancellationToken token)
     {
-        if (procesandoQr)
-            return;
+        while (!token.IsCancellationRequested)
+        {
+            var imagenBase64 = await JS.InvokeAsync<string>("capturarFoto", "videoElementId");
 
-        procesandoQr = true;
+            if (!string.IsNullOrEmpty(imagenBase64))
+            {
+                // Ahora 'DecodificarQr' ya existe en el contexto
+                var resultado = DecodificarQr(imagenBase64);
 
+                if (resultado != null)
+                {
+                    await ProcesarResultado(resultado);
+                    break;
+                }
+            }
+        
+            await Task.Delay(300, token);
+        }
+    }
+
+    private async Task ProcesarResultado(string codigoQr) // Ahora sí recibe un string
+    {
         try
         {
+            // Si el QR es el ID de la reserva o un hash
             await RegistrarAsistenciaQrUseCase.Ejecutar(codigoQr);
-
             mensaje = "¡Asistencia registrada con éxito!";
+            CerrarEscaner();
         }
         catch (Exception ex)
         {
-            mensaje = ex.Message;
+            mensaje = $"Error: {ex.Message}";
         }
-
-        await CerrarEscaner();
-
-        procesandoQr = false;
-
-        await InvokeAsync(StateHasChanged);
+        StateHasChanged();
     }
 
-    private async Task CerrarEscaner()
+    private void CerrarEscaner()
     {
-        await JS.InvokeVoidAsync("detenerEscaner", "videoFeed");
-
+        cts?.Cancel(); // Detiene el bucle while
         mostrarEscanner = false;
-
-        await InvokeAsync(StateHasChanged);
+        StateHasChanged();
     }
 
     void Cancelar()
