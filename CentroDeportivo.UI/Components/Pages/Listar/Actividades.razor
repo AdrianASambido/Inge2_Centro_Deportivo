@@ -71,11 +71,12 @@ else
         </div>
     </div>
 }
-
-@if (!string.IsNullOrEmpty(mensaje))
-{
-    <div class="alert alert-info mt-3">@mensaje</div>
-}
+<div>
+    @if (!string.IsNullOrEmpty(mensaje))
+    {
+        <div class="alert alert-info mt-3">@mensaje</div>
+    }
+</div>
 
 @if (mostrarDialog)
 {
@@ -111,9 +112,10 @@ else
     void CrearActividad() => quiereAgregar = true;
     public void Editar(int Id) => Navegador.NavigateTo($"/editar-actividad/{Id}");
     void ConfirmarEliminacion(int Id) { idAEliminar = Id; mostrarDialog = true; }
-    
+
     async Task Eliminar()
     {
+        mensaje = "";
         mostrarDialog = false;
         try
         {
@@ -126,13 +128,16 @@ else
 
     async Task Aceptar()
     {
+        mensaje = "";
         try
         {
             var acti = new Actividad(act.nombre, act.descripcion, act.precio ?? 0);
             await CrearActividadUseCase.ejecutar(acti);
             actividad = (await ListarActividadesUseCase.ejecutar()).ToList();
+            act = new Datos();
             quiereAgregar = false;
             mensaje = "";
+            StateHasChanged();
         }
         catch (Exception ex) { mensaje = ex.Message; }
     }

@@ -69,6 +69,7 @@ builder.Services.AddScoped<EditarUsuarioUseCase>();
 builder.Services.AddScoped<RegistrarAsistenciaManualUseCase>();
 builder.Services.AddScoped<EditarUsuarioUseCase>();
 
+builder.Services.AddScoped<RestablecerContraseniaUseCase>();
 
 
 builder.Services.AddScoped<CrearActividadUseCase>();

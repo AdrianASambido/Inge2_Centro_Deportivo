@@ -119,11 +119,13 @@ else
 
     async Task Aceptar()
     {
+        mensaje = "";
         try
         {
             var profe = new Profesor(pro.nombre, pro.apellido, pro.dni);
             await CrearProfesorUseCase.ejecutar(profe);
             profesor = (await ListarProfesoresUseCase.ejecutar()).ToList();
+            pro = new Datos();
             quiereAgregar = false;
             StateHasChanged();
         }

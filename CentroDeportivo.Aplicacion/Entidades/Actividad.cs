@@ -12,6 +12,7 @@ namespace CentroDeportivo.Aplicacion.Entidades
         public string Nombre { get; set; } = string.Empty;
         public string Descripcion { get; set; } = string.Empty;
         public double Precio { get; set; }
+        public bool Existe { get; set; } = true;
 
         public Actividad(string nombre, string descripcion, double precio)
         {

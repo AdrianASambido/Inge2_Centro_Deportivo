@@ -68,7 +68,6 @@ else
                             <td>@e.Apellido</td>
                             <td>@e.Dni</td>
                             <td class="text-center">
-                                <button class="btn btn-sm btn-primary" @onclick="() => Editar(e.Id)">Editar</button>
                                 <button class="btn btn-sm btn-danger" @onclick="() => ConfirmarEliminacion(e.Id)">Eliminar</button>
                             </td>
                         </tr>
@@ -116,6 +115,7 @@ else
 
     async Task Eliminar()
     {
+        mensaje = "";
         mostrarDialog = false;
         try
         {
@@ -129,6 +129,7 @@ else
 
     async Task Aceptar()
     {
+        mensaje = "";
         try
         {
 

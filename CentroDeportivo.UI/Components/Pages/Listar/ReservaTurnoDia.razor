@@ -52,7 +52,7 @@ else
                                     <div>
                                         <span class="fw-bold">@t.HoraInicio.ToString("HH:mm") – @t.HoraFin.ToString("HH:mm")</span>
                                         <div class="small d-block text-muted">Libres: @t.CupoDisponible / @t.CupoMaximo</div>
-                                        <div class="small d-block text-muted">Precio:"$" @t.Actividad.Precio</div>
+                                        <div class="small d-block text-muted">Precio:$@t.PrecioTurno</div>
                                     </div>
                                     <button type="button" class="btn btn-sm btn-success" disabled="@procesando" @onclick="() => Reservar(t.Id)">
                                         Reservar
@@ -128,15 +128,20 @@ else
         if (!parametrosOk || fechaElegida is null || ActividadId is null) return;
 
         var idUsuario = UsuarioSesion.UsuarioActual!.Id;
+
         
-        var todos = await ListarTurnosCalendarioUseCase.ejecutar(idUsuario,fechaElegida.Value, ActividadId.Value);
+        var todos = await ListarTurnosCalendarioUseCase.ejecutar(idUsuario, fechaElegida.Value, ActividadId.Value);
+
         var ahora = DateTime.Now;
         var fechaHoy = DateOnly.FromDateTime(ahora);
         var horaActual = TimeOnly.FromDateTime(ahora);
 
+        
         turnosFiltrados = todos
-            .Where(t => t.CupoDisponible > 0 && t.Estado != EstadoTurno.Cancelado && (t.Fecha > fechaHoy || (t.Fecha == fechaHoy && t.HoraInicio > horaActual)) && !t.Reservas.Any(r => r.Id_Usuario == idUsuario))
-            .OrderBy(t => t.HoraInicio)
+            .Where(t => t.CupoDisponible > 0
+                     && t.Estado != EstadoTurno.Cancelado
+                     && (t.Fecha > fechaHoy || (t.Fecha == fechaHoy && t.HoraInicio > horaActual)))
+            .OrderBy(t => t.HoraInicio) 
             .ToList();
     }
 

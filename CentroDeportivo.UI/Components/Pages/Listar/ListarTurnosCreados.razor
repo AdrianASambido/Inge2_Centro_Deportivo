@@ -1,11 +1,5 @@
 ﻿@page "/listar-turnos-creados"
-@using ZXing
-@using ZXing.QrCode
-@using System.Drawing
-@using System.IO
-@using ZXing.ImageSharp;
-@using SixLabors.ImageSharp;
-@using SixLabors.ImageSharp.PixelFormats;
+@using Microsoft.JSInterop;
 @inject IJSRuntime JS
 @using System.Globalization
 @inject Sesion UsuarioSesion
@@ -62,7 +56,12 @@ else
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Hora inicio</label>
-                            <input type="time" class="form-control" @bind="t.HoraInicio" />
+                            <select class="form-select" @bind="horaSeleccionada">
+                                @for (int h = 18; h < 23; h++)
+                                {
+                                    <option value="@h">@($"{h:D2}:00")</option>
+                                }
+                            </select>
                         </div>
                     </div>
 
@@ -183,7 +182,8 @@ else
                         <th>Fecha</th>
                         <th>Hora inicio</th>
                         <th>Hora fin</th>
-                        <th>Cancha</th>
+                        <th>Estado</th>
+                        <th>Cancha</th>                        
                         <th class="text-center">Acciones</th>
                     </tr>
                 </thead>
@@ -199,6 +199,7 @@ else
                                 <td>@tu.Fecha.ToString("dd/MM/yyyy")</td>
                                 <td>@tu.HoraInicio</td>
                                 <td>@tu.HoraFin</td>
+                                <td>@tu.Estado</td>
                                 <td><span class="badge bg-info text-dark">N° @tu.Cancha.Numero</span></td>
                                 <td class="text-center">
                                     <button class="btn btn-sm btn-outline-primary" @onclick="() => MostrarInscriptos(tu.Id)">
@@ -250,7 +251,7 @@ else
                                         <td>@r.Usuario.Nombre</td>
                                         <td>@r.Usuario.Apellido</td>
                                         <td>@r.Usuario.Dni</td>
-                                        <td>@t.Fecha.ToString("dd/MM/yyyy")</td>
+                                        <td>@t.Fecha.ToString("dd/MM/yyyy")</td>                                        
                                         <td class="text-center">
                                             <button class="btn btn-sm btn-outline-primary" @onclick="() => RegistrarAsistencia(r.Id)">
                                                 Registrar asistencia
@@ -270,7 +271,7 @@ else
                 <div class="modal-footer">
                     <button class="btn btn-secondary" @onclick="() => mostrarInscriptos = false">Cerrar</button>
                 </div>
-            </div
+            </div>
         </div>
     </div>
 }
@@ -342,6 +343,12 @@ else
     private List<Turno> turnosFiltrados = new();
 
     Cancha? canchaSeleccionada => canchasDispo.FirstOrDefault(c => c.Id == t.Id_Cancha);
+
+    private int horaSeleccionada
+    {
+        get => t.HoraInicio.Hour;
+        set => t.HoraInicio = new TimeOnly(value, 0);
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -450,6 +457,8 @@ else
             };
             await CrearTurnoUseCase.ejecutar(nuevoTurno);
             turnos = (await ListarTurnosUseCase.Ejecutar(null, null, null, null, null)).ToList();
+            t = new Datos();
+            StateHasChanged();
             AplicarFiltros();
             mensajeTurno = "Turno creado correctamente.";
             quiereAgregar = false;
@@ -458,27 +467,29 @@ else
     }
 
 
-    private CancellationTokenSource? cts;
 
     private async Task AbrirEscaner()
     {
         mensaje = "";
+
         mostrarEscanner = true;
-        StateHasChanged(); // Forzamos el renderizado del <video>
-    
-        await Task.Delay(500); // Espera mínima para que el DOM reconozca el ID del video
+
+        await InvokeAsync(StateHasChanged);
 
         // LLAMADA CLAVE: Activa la cámara físicamente
         bool exito = await JS.InvokeAsync<bool>("iniciarCamara", "videoElementId");
 
-        if (exito)
+        var dotNetRef = DotNetObjectReference.Create(this);
+
+        bool exito = await JS.InvokeAsync<bool>(
+            "escanearQR",
+            "videoFeed",
+            dotNetRef
+        );
+
+        if (!exito)
         {
-            cts = new CancellationTokenSource();
-            await IniciarBucleEscaneo(cts.Token);
-        }
-        else
-        {
-            mensaje = "No se pudo acceder a la cámara. Revisa los permisos del navegador.";
+            mensaje = "No se pudo acceder a la cámara";
             mostrarEscanner = false;
         }
     }
@@ -539,41 +550,12 @@ else
     {
         public int Id { get; set; }
         public DateOnly Fecha { get; set; } = DateOnly.FromDateTime(DateTime.Today);
-        public TimeOnly HoraInicio { get; set; } = TimeOnly.FromDateTime(DateTime.Now);
+        public TimeOnly HoraInicio { get; set; } = new TimeOnly(18, 0);
         public int CupoMaximo { get; set; }
         public int Id_Actividad { get; set; }
         public int Id_Profesor { get; set; }
         public int Id_Cancha { get; set; }
     }
 
-    private string? DecodificarQr(string base64Imagen)
-    {
-        try
-        {
-            // 1. Convertir Base64 a bytes
-            byte[] imageBytes = Convert.FromBase64String(base64Imagen);
-        
-            // 2. Cargar la imagen con ImageSharp
-            using var image = SixLabors.ImageSharp.Image.Load<SixLabors.ImageSharp.PixelFormats.L8>(imageBytes);
-        
-            // 3. Crear el lector GENÉRICO (esto evita el error CS8377)
-            var lector = new ZXing.BarcodeReaderGeneric();
-        
-            // 4. Crear la fuente de datos manualmente a partir de la imagen
-            var source = new ZXing.ImageSharp.ImageSharpLuminanceSource<SixLabors.ImageSharp.PixelFormats.L8>(image);
-        
-            // 5. Configurar opciones
-            lector.Options.PossibleFormats = new[] { ZXing.BarcodeFormat.QR_CODE };
-            lector.Options.TryHarder = true;
-
-            // 6. Decodificar usando la fuente manual
-            var resultado = lector.Decode(source);
-            return resultado?.Text;
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error de escaneo: {ex.Message}");
-            return null;
-        }
-    }
+    
 }

@@ -23,6 +23,7 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ActividadUseCase
                 throw new Exception(mensaje);
             }
 
+            actividad.Existe = true;
             await repo.AgregarAsync(actividad);
         }
     }

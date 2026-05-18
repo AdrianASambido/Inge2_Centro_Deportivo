@@ -10,19 +10,27 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
 {
     public class GenerarQrUseCase(IQrServicio repo, IReservaRepositorio repoReserva, AsistenciaValidador validador)
     {
-        public async Task<byte[]> Ejecutar(int idReserva) { 
-            var(esValido, mensaje) = await validador.ValidarAsistencia(idReserva);
+        public async Task<byte[]> Ejecutar(int idReserva) {
+            var reserva = await repoReserva.ObtenerPorIdAsync(idReserva);
+            if (reserva == null)
+            {
+                throw new Exception("Error: reserva inexistente");
+            }
+
+            var (esValido, mensaje) = await validador.ValidarAsistencia(reserva);
+
             if (!esValido) {
                 throw new Exception(mensaje);
             }
 
-            var reserva = await repoReserva.ObtenerPorIdAsync(idReserva);
+            
+
             string token = repo.GenerarToken();
             reserva!.TokenQr = token;
 
             await repoReserva.ActualizarAsync(reserva);
             
-           return repo.GenerarImagenQr(token);
+            return repo.GenerarImagenQr(token);
         }
     }
 }

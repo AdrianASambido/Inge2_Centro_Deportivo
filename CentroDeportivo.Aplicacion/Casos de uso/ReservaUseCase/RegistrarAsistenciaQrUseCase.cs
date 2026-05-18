@@ -5,13 +5,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using CentroDeportivo.Aplicacion.Validadores;
 
 namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
-{       public class RegistrarAsistenciaQrUseCase(IReservaRepositorio repoReserva)
+{       public class RegistrarAsistenciaQrUseCase(IReservaRepositorio repoReserva, AsistenciaValidador validador)
         {
             public async Task Ejecutar(string tokenEscaneado)
             {
-               
+            
                 var reserva = await repoReserva.ObtenerPorQrTokenAsync(tokenEscaneado);
 
                 if (reserva == null)
@@ -19,19 +20,12 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
                     throw new Exception ("Error: Código QR inválido o inexistente.");
                 }
 
-                
-                if (reserva.Asistencia == Asistencia.Presente)
-                {
-                    throw new Exception ("Error: Esta asistencia ya fue registrada anteriormente.");
+                var (esValido, mensaje) = await validador.ValidarAsistencia(reserva);
+                if (!esValido) {
+                    throw new Exception(mensaje);
                 }
-
+       
                 
-                if (reserva.Turno.Fecha != DateOnly.FromDateTime(DateTime.Now))
-                {
-                    throw new Exception ("Error: El QR corresponde a una reserva de otro día");
-                }
-
-               
                 reserva.Asistencia = Asistencia.Presente;
                 await repoReserva.ActualizarAsync(reserva);           
             }

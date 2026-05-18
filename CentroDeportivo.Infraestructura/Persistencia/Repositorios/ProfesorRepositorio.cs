@@ -36,54 +36,53 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
 
         public async Task<IEnumerable<Profesor>> ObtenerDisponiblesAsync(DateOnly fecha, TimeOnly horarioInicio)
         {
-            // 1. Calculamos los límites afuera para que EF los entienda como constantes
-            // Buscamos cualquier turno que empiece entre una hora antes y una hora después
-            var limiteInferior = horarioInicio.AddHours(-1);
-            var limiteSuperior = horarioInicio.AddHours(1);
+            
+            var horarioFin = horarioInicio.AddHours(1);
 
+            
             var profesOcupados = await contexto.Turnos
                 .Where(t => t.Fecha == fecha &&
                            (t.Estado == EstadoTurno.Disponible || t.Estado == EstadoTurno.Lleno))
                 .Where(t =>
-                    // Validamos el solapamiento de 1 hora
-                    t.HoraInicio > limiteInferior &&
-                    t.HoraInicio < limiteSuperior
+                    
+                    horarioInicio < t.HoraFin && horarioFin > t.HoraInicio
                 )
                 .Select(t => t.Id_Profesor)
                 .Distinct()
                 .ToListAsync();
 
+       
             return await contexto.Profesores
-                .Where(p => !profesOcupados.Contains(p.Id))
+                .Where(p => !profesOcupados.Contains(p.Id) && p.Existe)
                 .AsNoTracking()
                 .ToListAsync();
         }
 
         public async Task<Profesor?> ObtenerPorDniAsync(string dni)
         {
-            return await contexto.Profesores.FirstOrDefaultAsync(p => p.Dni == dni);
+            return await contexto.Profesores.FirstOrDefaultAsync(p => p.Dni == dni && p.Existe);
         }
 
         public async Task<Profesor?> ObtenerPorIdAsync(int id)
         {
-            return await contexto.Profesores.FirstOrDefaultAsync(p => p.Id == id);
+            return await contexto.Profesores.FirstOrDefaultAsync(p => p.Id == id && p.Existe);
         }
 
         public async Task<IEnumerable<Profesor>> ObtenerTodosAsync()
         {
-            return await contexto.Profesores.AsNoTracking().ToListAsync();
+            return await contexto.Profesores.Where(p => p.Existe).AsNoTracking().ToListAsync();
 
         }
 
         //al momento de dar de alta un profesor, ver que ya no este registrado
         public async Task<bool> YaExiste(string dni)
         {
-            return await contexto.Profesores.AnyAsync(p => p.Dni == dni);
+            return await contexto.Profesores.AnyAsync(p => p.Dni == dni && p.Existe);
         }
 
         public async Task<bool> YaExisteDniParaEditar(string dni, int idActual)
         {
-            return await contexto.Profesores.AnyAsync(p => p.Dni == dni && p.Id != idActual);
+            return await contexto.Profesores.AnyAsync(p => p.Dni == dni && p.Id != idActual && p.Existe);
         }
 
         //si tiene turnos asignados no se puede eliminar el profesor

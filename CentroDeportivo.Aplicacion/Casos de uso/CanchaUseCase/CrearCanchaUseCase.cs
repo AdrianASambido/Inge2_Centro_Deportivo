@@ -20,6 +20,7 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.CanchaUseCase
                 throw new Exception(mensaje);
             }
 
+            c.Existe = true;
             await repo.AgregarAsync(c);
         }
     }

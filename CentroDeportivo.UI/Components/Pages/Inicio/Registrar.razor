@@ -35,9 +35,6 @@
         <div class="mb-2">
             <input placeholder="Contraseña" @bind="usr.Contrasenia" class="form-control" type="password" autocomplete="new-password">
         </div>
-        <div class="mb-4">
-            <input placeholder="Repetir Contraseña" @bind="usr.Contrasenia2" class="form-control" type="password">
-        </div>
 
         <div class="d-grid gap-2">
             <button class="btn btn-primary" @onclick="Enviar">Registrar</button>
@@ -59,12 +56,6 @@
 
     async Task Enviar()
     {
-        if (usr.Contrasenia != usr.Contrasenia2)
-        {
-            mensaje = "Las contraseñas no coinciden.";
-            return;
-        }
-
         try
         {
             var usuario = new Usuario(usr.Nombre, usr.Apellido, usr.Domicilio, usr.DNI, usr.Contrasenia, usr.Correo, false, Rol.Cliente);
@@ -88,6 +79,5 @@
         public string Domicilio { get; set; } = "";
         public string Correo { get; set; } = "";
         public string Contrasenia { get; set; } = "";
-        public string Contrasenia2 { get; set; } = "";
     }
 }

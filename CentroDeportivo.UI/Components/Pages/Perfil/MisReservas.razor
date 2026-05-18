@@ -3,7 +3,8 @@
 @inject GenerarQrUseCase GenerarQRUseCase
 @inject IReservaRepositorio ReservaRepositorio
 @inject Sesion UsuarioSesion
-@inject ListarReservasUseCase ListarReservasUseCase
+@inject ListarReservasUseCase listarReservasUseCase
+@inject CancelarReservaUseCase cancelarReservasUseCase
 @inject NavigationManager Navigation
 @inject CancelarReservaUseCase CancelarReservaCase
 
@@ -11,7 +12,7 @@
 
 <div class="container-fluid p-0">
     <div class="p-5 mb-4 bg-light rounded-3 shadow-sm">
-        <h2 class="mb-1">Mis reservas</h2>
+            <h2 class="mb-1">Mis reservas</h2>
 
         
         <div class="table-responsive shadow-sm" style="background: white; border-radius: 8px;">
@@ -66,7 +67,7 @@
 
                                 <td>
                                     <button class="btn btn-primary btn-sm me-1"
-                                            @onclick="() => GenerarQr(r.Id)">
+                                    @onclick="() => GenerarQr(r.Id)">
                                         <i class="bi bi-qr-code"></i> Generar QR
                                     </button>
 
@@ -83,7 +84,7 @@
                                     }
 
                                     <button class="btn btn-danger btn-sm"
-                                            @onclick="() => Cancelar(r.Id)">
+                                    @onclick="() => Cancelar(r.Id)">
                                         Cancelar
                                     </button>
                                 </td>
@@ -93,14 +94,14 @@
                 </table>
             }
         </div>
-
-        @if (!string.IsNullOrEmpty(error))
-        {
-            <div class="alert alert-info mt-3 shadow-sm">@error</div>
-        }
+            
+            @if (!string.IsNullOrEmpty(error))
+            {
+                <div class="alert alert-info mt-3 shadow-sm">@error</div>
+            }
     </div>
 </div>
-
+    
     
 @code {
     List<Reserva>? reservas;
@@ -113,7 +114,7 @@
         error = "";
         try
         {
-            reservas = (await ListarReservasUseCase.Ejecutar(UsuarioSesion.UsuarioActual.Id)).ToList();
+            reservas = (await listarReservasUseCase.Ejecutar(UsuarioSesion.UsuarioActual.Id)).ToList();
         }
         catch (Exception ex)
         {
@@ -133,15 +134,13 @@
 
         try
         {
-            // Aquí se dispara tu lógica del Caso de Uso
             qrCode = await GenerarQRUseCase.Ejecutar(reservaId);
             reservaSeleccionadaId = reservaId;
         }
         catch (Exception ex)
         {
-            // Aquí capturamos la excepción del Validador (ej: "Faltan más de 15 min")
             error = ex.Message;
-            StateHasChanged(); // Forzamos el refresco para mostrar el alert rojo
+            StateHasChanged(); 
         }
     }
 
@@ -155,24 +154,24 @@
     {
         try
         {
-            Console.WriteLine($"CLICK CANCELAR: {idReserva}");
+            
+            var (conDevolucion, monto) = await cancelarReservasUseCase.Ejecutar(idReserva);
 
-
-            var (conDevolucion, monto) = await CancelarReservaCase.Ejecutar(idReserva);
-
+          
             error = conDevolucion
-                ? $"Reserva cancelada. Devolución: ${monto}"
-                : "Reserva cancelada sin devolución.";
+                ? $"Reserva cancelada exitosamente. Se ha generado una devolución de: ${monto}"
+                : "Reserva cancelada exitosamente. No corresponde devolución.";
 
-            reservas = (await ListarReservasUseCase.Ejecutar(
-                UsuarioSesion.UsuarioActual!.Id,
-                null,
-                null,
-                true
-            )).ToList();
+            
+            if (UsuarioSesion.UsuarioActual != null)
+            {
+                var resultado = await listarReservasUseCase.Ejecutar(UsuarioSesion.UsuarioActual.Id);
+                reservas = resultado.ToList();
+            }
         }
         catch (Exception ex)
         {
+            // Aquí capturamos tus "throw new Exception" del backend
             error = ex.Message;
         }
     }

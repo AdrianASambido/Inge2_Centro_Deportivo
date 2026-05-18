@@ -23,9 +23,9 @@ else
             <div class="col-auto">
                 <button class="btn btn-success" @onclick="CrearCancha">Crear cancha</button>
             </div>
-            <div class="col-md-4">
+            @*<div class="col-md-4">
                 <input type="text" class="form-control" placeholder="🔍 Buscar por número..." @bind="numeroBusquedaTexto" @bind:event="oninput" />
-            </div>
+            </div>*@
             <div class="col-auto ms-auto">
                 <button class="btn btn-danger" @onclick="CerrarSesion">Cerrar sesión</button>
             </div>
@@ -138,6 +138,7 @@ else
 
             // Si llega aquí, es porque se guardó con éxito
             cancha = (await ListarCanchasUseCase.ejecutar()).ToList();
+            can = new Datos();
             quiereAgregar = false;
             mensaje = "¡Cancha guardada con éxito!";
             can = new Datos(); // Limpiar campos

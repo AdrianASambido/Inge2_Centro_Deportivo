@@ -18,6 +18,7 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ProfesorUseCase
                 throw new Exception(mensaje);
             }
 
+            p.Existe = true;
             await repo.AgregarAsync(p);
         }
     }

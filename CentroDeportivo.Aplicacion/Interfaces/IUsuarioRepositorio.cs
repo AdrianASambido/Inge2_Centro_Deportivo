@@ -12,6 +12,7 @@ namespace CentroDeportivo.Aplicacion.Interfaces
         Task<Usuario?> ObtenerPorIdAsync(int id);
         Task<Usuario?> ObtenerPorDniAsync(string dni);
         Task<Usuario?> ObtenerPorEmail(string email);
+        Task<Usuario?> ObtenerPorToken(string token); 
         Task<IEnumerable<Usuario>> ObtenerTodosAsync();
         Task<IEnumerable<Usuario>> ObtenerEmpleadosAsync();
         Task<IEnumerable<Usuario>> ObtenerClientesAsync();

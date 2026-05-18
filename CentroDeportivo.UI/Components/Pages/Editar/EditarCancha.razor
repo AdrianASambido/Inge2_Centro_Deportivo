@@ -15,16 +15,22 @@
 }
 else
 {
-    <input placeholder="Numero de Cancha" @bind="numero" class="form-control">
-    <input placeholder="Capacidad" @bind="Capacidad" class="form-control">
-}
+    <div class="card shadow-sm border-0 rounded-4 p-4" style="max-width: 700px;">
+        <input placeholder="Numero de Cancha" @bind="numero" class="form-control mb-3">
+        <input placeholder="Capacidad" @bind="Capacidad" class="form-control mb- 3">
 
-<button class="btn btn-success" @onclick="GuardarDatos">Guardar datos</button>
-<button class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
+        <div class="d-flex gap-2 mt-3 justify-content-end">
 
-@if (!string.IsNullOrEmpty(mensaje))
-{
-    <div class="alert alert-danger">@mensaje</div>
+            <button class="btn btn-success mb-2" @onclick="GuardarDatos">Guardar datos</button>
+            <button class="btn btn-secondary mb-2" @onclick="Cancelar">Cancelar</button>
+
+        </div>
+        @if (!string.IsNullOrEmpty(mensaje))
+        {
+            <div class="alert alert-danger mt-3">@mensaje</div>
+        }
+    </div>
+   
 }
 
 
