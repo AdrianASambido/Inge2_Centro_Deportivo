@@ -16,7 +16,7 @@
 
         
         <div class="table-responsive shadow-sm" style="background: white; border-radius: 8px;">
-
+            @*
             @if (qrCode != null && qrCode.Length > 0)
             {
                 <div class="card mb-4 shadow-sm" style="max-width: 300px; margin: auto;">
@@ -28,6 +28,7 @@
                     </div>
                 </div>
             }
+            *@
 
             @if (!UsuarioSesion.EstaAutenticado())
             {
@@ -37,10 +38,6 @@
             else if (reservas == null)
             {
                 <p><em>Cargando reservas...</em></p>
-            }
-            else if (!reservas.Any())
-            {
-                <p>No tenés reservas registradas.</p>
             }
             else
             {
@@ -56,7 +53,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var r in reservas)
+                        @foreach (var r in reservasActivas)
                         {
                             <tr>
                                 <td>@r.Turno?.Actividad?.Nombre</td>
@@ -67,7 +64,8 @@
 
                                 <td>
                                     <button class="btn btn-primary btn-sm me-1"
-                                    @onclick="() => GenerarQr(r.Id)">
+                                    @onclick="() => GenerarQr(r.Id)" 
+                                    disabled="@(!PuedeGenerarQr(r))">
                                         <i class="bi bi-qr-code"></i> Generar QR
                                     </button>
 
@@ -84,26 +82,63 @@
                                     }
 
                                     <button class="btn btn-danger btn-sm"
-                                    @onclick="() => Cancelar(r.Id)">
+                                    @onclick="() => Cancelar(r.Id)"
+                                    disabled="@(!PuedeCancelar(r))">
                                         Cancelar
                                     </button>
                                 </td>
                             </tr>
                         }
-                    </tbody>
+                    </tbody
                 </table>
             }
         </div>
-            
-            @if (!string.IsNullOrEmpty(error))
-            {
-                <div class="alert alert-info mt-3 shadow-sm">@error</div>
-            }
     </div>
 </div>
-    
+
+
+@if (!string.IsNullOrEmpty(error))
+{
+    <div class="alert alert-info mt-3 shadow-sm">@error</div>
+}
+
+<div class="container-fluid p-0">
+    <div class="p-5 mb-4 bg-light rounded-3 shadow-sm">
+            <h2 class="mb-1">Reservas canceladas</h2>
+
+        
+        <div class="table-responsive shadow-sm" style="background: white; border-radius: 8px;">
+            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Actividad</th>
+                                        <th>Fecha</th>
+                                        <th>Horario</th>
+                                        <th>Cancha</th>
+                                        <th>Estado</th>
+                                        @*<th>Acciones</th>*@
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var r in reservas)
+                                    {
+                                        <tr>
+                                            <td>@r.Turno?.Actividad?.Nombre</td>
+                                            <td>@r.Turno?.Fecha.ToShortDateString()</td>
+                                            <td>@r.Turno?.HoraInicio</td>
+                                            <td>@r.Turno?.Cancha.Numero</td>
+                                            <td>@r.Estado</td
+                                        </tr>
+                                    }
+                                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
     
 @code {
+    List<Reserva>? reservasActivas;
     List<Reserva>? reservas;
     private int? reservaSeleccionadaId; 
     private byte[] qrCode = Array.Empty<byte>();
@@ -114,7 +149,8 @@
         error = "";
         try
         {
-            reservas = (await listarReservasUseCase.Ejecutar(UsuarioSesion.UsuarioActual.Id)).ToList();
+            reservasActivas = (await listarReservasUseCase.Ejecutar(UsuarioSesion.UsuarioActual.Id)).Where(r => r.Estado != EstadoReserva.Cancelado).ToList();
+            reservas = (await listarReservasUseCase.Ejecutar(UsuarioSesion.UsuarioActual.Id)).Where(r => r.Estado == EstadoReserva.Cancelado)?.ToList() ?? new List<Reserva>();
         }
         catch (Exception ex)
         {
@@ -154,25 +190,52 @@
     {
         try
         {
-            
+
             var (conDevolucion, monto) = await cancelarReservasUseCase.Ejecutar(idReserva);
 
-          
+
             error = conDevolucion
                 ? $"Reserva cancelada exitosamente. Se ha generado una devolución de: ${monto}"
                 : "Reserva cancelada exitosamente. No corresponde devolución.";
 
-            
+
             if (UsuarioSesion.UsuarioActual != null)
             {
-                var resultado = await listarReservasUseCase.Ejecutar(UsuarioSesion.UsuarioActual.Id);
-                reservas = resultado.ToList();
+                var resultado = (await listarReservasUseCase.Ejecutar(UsuarioSesion.UsuarioActual.Id)).Where(r => r.Estado != EstadoReserva.Cancelado);
+                reservasActivas = resultado.ToList();
+                reservas = (await listarReservasUseCase.Ejecutar(UsuarioSesion.UsuarioActual.Id)).Where(r => r.Estado == EstadoReserva.Cancelado).ToList();
             }
+            StateHasChanged();
         }
         catch (Exception ex)
         {
-            // Aquí capturamos tus "throw new Exception" del backend
             error = ex.Message;
         }
     }
+
+    private bool PuedeGenerarQr(Reserva r)
+    {
+        if (r.Estado != EstadoReserva.Confirmado)
+            return false;
+
+        if (r.Asistencia != Asistencia.Ausente)
+            return false;
+
+        var fechaHoraTurno = r.Turno.Fecha.ToDateTime(r.Turno.HoraInicio);
+
+        return DateTime.Now >= fechaHoraTurno.AddMinutes(-15);
+    }
+
+    private bool PuedeCancelar(Reserva r)
+    {
+        if (r.Asistencia != Asistencia.Ausente)
+        {
+            return false;
+        }
+
+        var fechaHoraTurno = r.Turno.Fecha.ToDateTime(r.Turno.HoraInicio);
+        return DateTime.Now < fechaHoraTurno;
+    }
+
+    
 }

@@ -100,7 +100,7 @@ else
 
     protected override async Task OnInitializedAsync() => empleado = (await ListarEmpleadosUseCase.ejecutar()).ToList();
     
-    void CerrarSesion() { UsuarioSesion.CerrarSesion(); Navegador.NavigateTo("/Login", true); }
+    void CerrarSesion() { UsuarioSesion.CerrarSesion(); UsuarioSesion.NotificarCambio(); Navegador.NavigateTo("/Login", true); }
     
     void CrearEmpleado()
     {

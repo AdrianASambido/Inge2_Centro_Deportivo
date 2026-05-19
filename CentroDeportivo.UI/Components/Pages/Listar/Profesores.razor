@@ -99,7 +99,7 @@ else
     List<Profesor> profesor = new List<Profesor>();
 
     protected override async Task OnInitializedAsync() => profesor = (await ListarProfesoresUseCase.ejecutar()).ToList();
-    void CerrarSesion() { UsuarioSesion.CerrarSesion(); Navegador.NavigateTo("/Login", true); }
+    void CerrarSesion() { UsuarioSesion.CerrarSesion(); UsuarioSesion.NotificarCambio(); Navegador.NavigateTo("/Login", true); }
     void CrearProfesor() => quiereAgregar = true;
     public void Editar(int Id) => Navegador.NavigateTo($"/editar-profesor/{Id}");
     void ConfirmarEliminacion(int Id) { idAEliminar = Id; mostrarDialog = true; }

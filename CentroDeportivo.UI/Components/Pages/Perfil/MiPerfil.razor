@@ -89,7 +89,6 @@
 
     void CerrarSesion()
     {
-        UsuarioSesion.CerrarSesion();
-        Navegador.NavigateTo("/Login", true);
+        UsuarioSesion.CerrarSesion(); UsuarioSesion.NotificarCambio(); Navegador.NavigateTo("/Login", true);
     }
 }

@@ -1,5 +1,9 @@
-﻿window.escanearQR = async (videoId, dotNetRef) => {
+﻿window.qrReader = null;
+
+window.escanearQR = async (videoId, dotNetRef) => {
+
     try {
+
         const video = document.getElementById(videoId);
 
         const stream = await navigator.mediaDevices.getUserMedia({
@@ -13,41 +17,47 @@
 
         await video.play();
 
-        // IMPORTANTE:
-        // devolver true INMEDIATAMENTE
-        // aunque ZXing falle después
+        window.qrReader = new ZXing.BrowserQRCodeReader();
 
-        setTimeout(() => {
-            iniciarScanner(video, dotNetRef);
-        }, 500);
+        window.qrReader.decodeFromVideoDevice(
+            null,
+            videoId,
+            (result, err) => {
+
+                if (result) {
+
+                    console.log("QR:", result.text);
+
+                    dotNetRef.invokeMethodAsync(
+                        "ProcesarQrDetectado",
+                        result.text
+                    );
+                }
+
+                if (err && !(err instanceof ZXing.NotFoundException)) {
+                    console.error(err);
+                }
+            }
+        );
 
         return true;
     }
     catch (e) {
+
         console.error("ERROR CAMARA:", e);
+
         return false;
     }
 };
 
-window.iniciarScanner = function (video, dotNetRef) {
+window.detenerEscaner = async function (videoId) {
 
-    const codeReader = new ZXing.BrowserQRCodeReader();
+    if (window.qrReader) {
 
-    codeReader.decodeFromVideoElement(video, (result, err) => {
+        await window.qrReader.reset();
 
-        if (result) {
-            dotNetRef.invokeMethodAsync(
-                'ProcesarQrDetectado',
-                result.text
-            );
-        }
-
-        // IGNORAR errores normales
-    });
-};
-
-
-window.detenerEscaner = function (videoId) {
+        window.qrReader = null;
+    }
 
     const video = document.getElementById(videoId);
 

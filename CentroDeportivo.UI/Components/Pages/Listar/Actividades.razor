@@ -108,7 +108,7 @@ else
     List<Actividad> actividad = new List<Actividad>();
 
     protected override async Task OnInitializedAsync() => actividad = (await ListarActividadesUseCase.ejecutar()).ToList();
-    void CerrarSesion() { UsuarioSesion.CerrarSesion(); Navegador.NavigateTo("/Login", true); }
+    void CerrarSesion() { UsuarioSesion.CerrarSesion(); UsuarioSesion.NotificarCambio(); Navegador.NavigateTo("/Login", true); }
     void CrearActividad() => quiereAgregar = true;
     public void Editar(int Id) => Navegador.NavigateTo($"/editar-actividad/{Id}");
     void ConfirmarEliminacion(int Id) { idAEliminar = Id; mostrarDialog = true; }
