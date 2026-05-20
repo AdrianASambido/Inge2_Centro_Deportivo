@@ -590,7 +590,7 @@ else
         if (r?.Turno == null)
             return true;
 
-        var fechaHoraTurno = r.Turno.Fecha.ToDateTime(r.Turno.HoraFin);
+        var fechaHoraTurno = r.Turno.Fecha.ToDateTime(r.Turno.HoraInicio);
 
         return DateTime.Now > fechaHoraTurno;
     }
