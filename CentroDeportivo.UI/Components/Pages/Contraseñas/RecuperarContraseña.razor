@@ -35,6 +35,7 @@
         try
         {
             await RecuperarContraseniaUseCase.Ejecutar(email);
+            error = "Se ha enviado un correo con las instrucciones para restablecer tu contraseña.";
             email = "";
         }
         catch (Exception ex)

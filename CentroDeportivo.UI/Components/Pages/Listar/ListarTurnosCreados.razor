@@ -439,6 +439,16 @@ else
         try
         {
             mensajeTurno = "";
+            var horaMinima = new TimeOnly(18, 0); // 18:00
+            var horaMaxima = new TimeOnly(23, 0); // 23:00
+
+            if (t.HoraInicio < horaMinima || t.HoraInicio > horaMaxima)
+            {
+                mensajeTurno = "Error: El centro deportivo opera únicamente en el horario de 18:00 a 23:00 hs.";
+                mostrarDisponibles = false;
+                return;
+            }
+
             var (profesD, canchasD) = await ConsultarDisponibilidadUseCase.ejecutar(t.Fecha, t.HoraInicio);
             profesoresDispo = profesD.ToList();
             canchasDispo = canchasD.ToList();
