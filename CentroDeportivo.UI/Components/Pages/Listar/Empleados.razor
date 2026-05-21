@@ -98,9 +98,15 @@ else
     string mensaje = ""; bool mostrarDialog = false; int idAEliminar; bool quiereAgregar = false; Datos emp = new Datos();
     List<Usuario> empleado = new List<Usuario>();
 
-    protected override async Task OnInitializedAsync() => empleado = (await ListarEmpleadosUseCase.ejecutar()).ToList();
+    protected override async Task OnInitializedAsync() {
+        empleado = (await ListarEmpleadosUseCase.ejecutar()).ToList(); 
+        if (empleado == null || !empleado.Any()) 
+        {
+            mensaje = "No existen empleados."; 
+        }
+    }
 
-    void CerrarSesion() { UsuarioSesion.CerrarSesion(); Navegador.NavigateTo("/Login", true); }
+    void CerrarSesion() { UsuarioSesion.CerrarSesion(); UsuarioSesion.NotificarCambio(); Navegador.NavigateTo("/Login", true); }
 
     void CrearEmpleado()
     {
@@ -109,7 +115,6 @@ else
         mensaje = "";
     }
 
-    public void Editar(int Id) => Navegador.NavigateTo($"/editar-empleado/{Id}");
 
     void ConfirmarEliminacion(int Id) { idAEliminar = Id; mostrarDialog = true; }
 
@@ -121,7 +126,9 @@ else
         {
             await EliminarEmpleadoUseCase.ejecutar(idAEliminar);
             empleado = (await ListarEmpleadosUseCase.ejecutar()).ToList();
-            mensaje = "Empleado eliminado.";
+            mensaje = "Empleado eliminado exitosamente.";
+            mensaje = "";
+            StateHasChanged();
         }
         catch (Exception ex) { mensaje = ex.Message; }
         StateHasChanged();
@@ -138,8 +145,7 @@ else
             await CrearEmpleadoUseCase.ejecutar(emple);
 
             empleado = (await ListarEmpleadosUseCase.ejecutar()).ToList();
-
-            mensaje = "Empleado creado exitosamente.";
+            emp = new Datos();
             quiereAgregar = false;
             StateHasChanged();
         }

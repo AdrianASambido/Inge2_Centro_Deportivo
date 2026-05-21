@@ -57,7 +57,7 @@ else
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Hora inicio</label>
                             <select class="form-select" @bind="horaSeleccionada">
-                                @for (int h = 18; h < 23; h++)
+                                @for (int h = 0; h < 24; h++)
                                 {
                                     <option value="@h">@($"{h:D2}:00")</option>
                                 }
@@ -182,8 +182,7 @@ else
                         <th>Fecha</th>
                         <th>Hora inicio</th>
                         <th>Hora fin</th>
-                        <th>Estado</th>
-                        <th>Cancha</th>                        
+                        <th>Cancha</th>
                         <th class="text-center">Acciones</th>
                     </tr>
                 </thead>
@@ -199,7 +198,6 @@ else
                                 <td>@tu.Fecha.ToString("dd/MM/yyyy")</td>
                                 <td>@tu.HoraInicio</td>
                                 <td>@tu.HoraFin</td>
-                                <td>@tu.Estado</td>
                                 <td><span class="badge bg-info text-dark">N° @tu.Cancha.Numero</span></td>
                                 <td class="text-center">
                                     <button class="btn btn-sm btn-outline-primary" @onclick="() => MostrarInscriptos(tu.Id)">
@@ -248,15 +246,17 @@ else
                                 @foreach (var r in reservas)
                                 {
                                     <tr>
-                                        <td>@r.Usuario.Nombre</td>
-                                        <td>@r.Usuario.Apellido</td>
-                                        <td>@r.Usuario.Dni</td>
-                                        <td>@t.Fecha.ToString("dd/MM/yyyy")</td>                                        
+                                        <td>@r?.Usuario?.Nombre</td>
+                                        <td>@r?.Usuario?.Apellido</td>
+                                        <td>@r?.Usuario?.Dni</td>
+                                        <td>@t.Fecha.ToString("dd/MM/yyyy")</td>
                                         <td class="text-center">
-                                            <button class="btn btn-sm btn-outline-primary" @onclick="() => RegistrarAsistencia(r.Id)">
+                                            <button class="btn btn-sm btn-outline-primary" @onclick="() => RegistrarAsistencia(r.Id)" 
+                                                disabled="@(!PuedeRegistrarAsistencia(r))">
                                                 Registrar asistencia
                                             </button>
-                                            <button class="btn btn-sm btn-outline-secondary" @onclick="() => RegistrarPago(r.Id)">Confirmar pago</button>
+                                            <button class="btn btn-sm btn-outline-secondary" @onclick="() => RegistrarPago(r.Id)"
+                                                disabled="@(r.Estado != EstadoReserva.PendienteDePago || !yaPasoLaHora(r))">Confirmar pago</button>
                                         </td>
                                     </tr>
                                 }
@@ -277,8 +277,8 @@ else
 }
 
 <button class="btn btn-info text-white mt-3" @onclick="AbrirEscaner">
-                <i class="bi bi-qr-code-scan"></i> Escanear Asistencia
-            </button>
+    <i class="bi bi-qr-code-scan"></i> Escanear Asistencia
+</button>
 
 @if (mostrarEscanner)
 {
@@ -298,7 +298,7 @@ else
                            muted
                            playsinline>
                     </video>
-                    
+
                     <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
                         width: 200px; height: 200px; border: 2px solid rgba(255,255,255,0.5);
                         border-radius: 15px; box-shadow: 0 0 0 4000px rgba(0,0,0,0.3);">
@@ -357,6 +357,10 @@ else
         todosLosProfesores = (await ListarProfesoresUseCase.ejecutar()).ToList();
         todasLasCanchas = (await ListarCanchasUseCase.ejecutar()).ToList();
         turnosFiltrados = turnos;
+        if (turnos == null || !turnos.Any())
+        {
+            mensaje = "No hay turnos programados.";
+        }
     }
 
     private void AplicarFiltros()
@@ -380,8 +384,7 @@ else
 
     void CerrarSesion()
     {
-        UsuarioSesion.CerrarSesion();
-        Navegador.NavigateTo("/Login", true);
+        UsuarioSesion.CerrarSesion(); UsuarioSesion.NotificarCambio(); Navegador.NavigateTo("/Login", true);
     }
 
     void CrearTurno() => quiereAgregar = true;
@@ -392,6 +395,7 @@ else
         {
             mensajeTabla = "";
             await ConfirmarPagoReservaUseCase.Ejecutar(idReserva);
+            StateHasChanged();
             mensajeTabla = "Pago confirmado correctamente.";
         }
         catch (Exception ex) { mensajeTabla = ex.Message; }
@@ -402,8 +406,18 @@ else
         try
         {
             mostrarInscriptos = true;
-            reservas = (await ListarInscriptosUseCase.Ejecutar(Id)).ToList();
-            mensajeTabla = "";
+
+            reservas = (await ListarInscriptosUseCase.Ejecutar(Id))?.ToList()
+                       ?? new List<Reserva>();
+
+            if (!reservas.Any())
+            {
+                mensajeTabla = "El turno no posee inscriptos";
+            }
+            else
+            {
+                mensajeTabla = "";
+            }
         }
         catch (Exception ex)
         {
@@ -418,6 +432,7 @@ else
         {
             mensajeTabla = "";
             await RegistrarAsistenciaManualUseCase.Ejecutar(idReserva);
+            StateHasChanged();
             mensajeTabla = "Asistencia manual registrada.";
         }
         catch (Exception ex) { mensajeTabla = ex.Message; }
@@ -428,6 +443,16 @@ else
         try
         {
             mensajeTurno = "";
+            var horaMinima = new TimeOnly(18, 0); // 18:00
+            var horaMaxima = new TimeOnly(23, 0); // 23:00
+
+            if (t.HoraInicio < horaMinima || t.HoraInicio > horaMaxima)
+            {
+                mensajeTurno = "Error: El centro deportivo opera únicamente en el horario de 18:00 a 23:00 hs.";
+                mostrarDisponibles = false;
+                return;
+            }
+
             var (profesD, canchasD) = await ConsultarDisponibilidadUseCase.ejecutar(t.Fecha, t.HoraInicio);
             profesoresDispo = profesD.ToList();
             canchasDispo = canchasD.ToList();
@@ -460,8 +485,9 @@ else
             t = new Datos();
             StateHasChanged();
             AplicarFiltros();
-            mensajeTurno = "Turno creado correctamente.";
+            mensajeTurno = $"El turno se ha creado exitosamente para la actividad {nuevoTurno.Actividad.Nombre} para la fecha {nuevoTurno.Fecha.ToShortDateString} {nuevoTurno.HoraInicio}.";
             quiereAgregar = false;
+            mensajeTurno = "";
         }
         catch (Exception ex) { mensajeTurno = ex.Message; }
     }
@@ -476,8 +502,7 @@ else
 
         await InvokeAsync(StateHasChanged);
 
-        // LLAMADA CLAVE: Activa la cámara físicamente
-        bool exito = await JS.InvokeAsync<bool>("iniciarCamara", "videoElementId");
+        await Task.Delay(500);
 
         var dotNetRef = DotNetObjectReference.Create(this);
 
@@ -494,49 +519,41 @@ else
         }
     }
 
-    private async Task IniciarBucleEscaneo(CancellationToken token)
+
+    bool procesandoQr = false;
+    [JSInvokable]
+    public async Task ProcesarQrDetectado(string codigoQr)
     {
-        while (!token.IsCancellationRequested)
-        {
-            var imagenBase64 = await JS.InvokeAsync<string>("capturarFoto", "videoElementId");
+        if (procesandoQr)
+            return;
 
-            if (!string.IsNullOrEmpty(imagenBase64))
-            {
-                // Ahora 'DecodificarQr' ya existe en el contexto
-                var resultado = DecodificarQr(imagenBase64);
+        procesandoQr = true;
 
-                if (resultado != null)
-                {
-                    await ProcesarResultado(resultado);
-                    break;
-                }
-            }
-        
-            await Task.Delay(300, token);
-        }
-    }
-
-    private async Task ProcesarResultado(string codigoQr) // Ahora sí recibe un string
-    {
         try
         {
-            // Si el QR es el ID de la reserva o un hash
             await RegistrarAsistenciaQrUseCase.Ejecutar(codigoQr);
+
             mensaje = "¡Asistencia registrada con éxito!";
-            CerrarEscaner();
         }
         catch (Exception ex)
         {
-            mensaje = $"Error: {ex.Message}";
+            mensaje = ex.Message;
         }
-        StateHasChanged();
+
+        await CerrarEscaner();
+
+        procesandoQr = false;
+
+        await InvokeAsync(StateHasChanged);
     }
 
-    private void CerrarEscaner()
+    private async Task CerrarEscaner()
     {
-        cts?.Cancel(); // Detiene el bucle while
+        await JS.InvokeVoidAsync("detenerEscaner", "videoFeed");
+
         mostrarEscanner = false;
-        StateHasChanged();
+
+        await InvokeAsync(StateHasChanged);
     }
 
     void Cancelar()
@@ -557,5 +574,29 @@ else
         public int Id_Cancha { get; set; }
     }
 
-    
+    private bool PuedeRegistrarAsistencia(Reserva r)
+    {
+        if (r?.Turno == null)
+            return false;
+
+        if (r.Estado != EstadoReserva.Confirmado)
+            return false;
+
+        if (r.Asistencia != Asistencia.Ausente)
+            return false;
+
+        var fechaHoraTurno = r.Turno.Fecha.ToDateTime(r.Turno.HoraInicio);
+
+        return DateTime.Now >= fechaHoraTurno.AddMinutes(-15);
+    }
+
+    private bool yaPasoLaHora(Reserva r)
+    {
+        if (r?.Turno == null)
+            return true;
+
+        var fechaHoraTurno = r.Turno.Fecha.ToDateTime(r.Turno.HoraInicio);
+
+        return DateTime.Now > fechaHoraTurno;
+    }
 }

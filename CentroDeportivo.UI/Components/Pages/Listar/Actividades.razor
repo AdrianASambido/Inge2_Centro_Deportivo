@@ -99,16 +99,22 @@ else
 }
 
 @code {
-    string mensaje = "";
-    bool mostrarDialog = false;
-    int idAEliminar;
-    bool quiereAgregar = false;
-    Datos act = new Datos();
+        string mensaje = "";
+        bool mostrarDialog = false;
+        int idAEliminar;
+        bool quiereAgregar = false;
+        Datos act = new Datos();
 
-    List<Actividad> actividad = new List<Actividad>();
+        List<Actividad> actividad = new List<Actividad>();
 
-    protected override async Task OnInitializedAsync() => actividad = (await ListarActividadesUseCase.ejecutar()).ToList();
-    void CerrarSesion() { UsuarioSesion.CerrarSesion(); Navegador.NavigateTo("/Login", true); }
+    protected override async Task OnInitializedAsync() {
+        actividad = (await ListarActividadesUseCase.ejecutar()).ToList();
+        if (actividad == null || !actividad.Any())
+        {
+            mensaje = "No hay actividades registradas."; 
+        }
+    }
+    void CerrarSesion() { UsuarioSesion.CerrarSesion(); UsuarioSesion.NotificarCambio(); Navegador.NavigateTo("/Login", true); }
     void CrearActividad() => quiereAgregar = true;
     public void Editar(int Id) => Navegador.NavigateTo($"/editar-actividad/{Id}");
     void ConfirmarEliminacion(int Id) { idAEliminar = Id; mostrarDialog = true; }
@@ -121,7 +127,9 @@ else
         {
             await EliminarActividadUseCase.Ejecutar(idAEliminar);
             actividad = (await ListarActividadesUseCase.ejecutar()).ToList();
-            mensaje = "Actividad eliminada.";
+            mensaje = "La actividad se ha eliminado con exito.";
+            mensaje = "";
+            StateHasChanged();
         }
         catch (Exception ex) { mensaje = ex.Message; }
     }
@@ -134,6 +142,7 @@ else
             var acti = new Actividad(act.nombre, act.descripcion, act.precio ?? 0);
             await CrearActividadUseCase.ejecutar(acti);
             actividad = (await ListarActividadesUseCase.ejecutar()).ToList();
+            mensaje = "Actividad creada con exito.";
             act = new Datos();
             quiereAgregar = false;
             mensaje = "";

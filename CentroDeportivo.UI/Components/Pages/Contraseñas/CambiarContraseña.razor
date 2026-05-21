@@ -70,13 +70,16 @@
         {
             await CambiarContraseniaUseCase.ejecutar(actual, nueva1, Id);
             var usuarioActualizado = await ObtenerUsuarioPorId.Ejecutar(Id);
-            
+            UsuarioSesion.NotificarCambio();
+
             if (UsuarioSesion.esEmpleado())
             {
+                StateHasChanged();
                 Navegador.NavigateTo("/listar-turnos-creados");
             }
             else
             {
+                StateHasChanged();
                 Navegador.NavigateTo("/MiPerfil");
             }
         }

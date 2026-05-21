@@ -19,16 +19,9 @@ else
         <h2 class="mb-1">Canchas</h2>
         <p class="text-muted mb-4">Bienvenido, @UsuarioSesion.UsuarioActual?.Nombre</p>
 
-        <div class="row mb-4 align-items-center">
-            <div class="col-auto">
-                <button class="btn btn-success" @onclick="CrearCancha">Crear cancha</button>
-            </div>
-            @*<div class="col-md-4">
-                <input type="text" class="form-control" placeholder="🔍 Buscar por número..." @bind="numeroBusquedaTexto" @bind:event="oninput" />
-            </div>*@
-            <div class="col-auto ms-auto">
-                <button class="btn btn-danger" @onclick="CerrarSesion">Cerrar sesión</button>
-            </div>
+        <div class="d-flex gap-2 mb-4">
+            <button class="btn btn-success" @onclick="CrearCancha">Crear cancha</button>
+            <button class="btn btn-danger" @onclick="CerrarSesion">Cerrar sesión</button>
         </div>
 
         @if (quiereAgregar)
@@ -110,8 +103,15 @@ else
     int idAEliminar;
     List<Cancha> cancha = new List<Cancha>();
 
-    protected override async Task OnInitializedAsync() => cancha = (await ListarCanchasUseCase.ejecutar()).ToList();
-    void CerrarSesion() { UsuarioSesion.CerrarSesion(); Navegador.NavigateTo("/Login", true); }
+    protected override async Task OnInitializedAsync()
+    {
+        cancha = (await ListarCanchasUseCase.ejecutar()).ToList();
+        if (cancha == null || !cancha.Any())
+        {
+            mensaje = "No hay canchas registradas.";
+        }
+    }
+    void CerrarSesion() { UsuarioSesion.CerrarSesion(); UsuarioSesion.NotificarCambio(); Navegador.NavigateTo("/Login", true); }
     public void Editar(int Id) => Navegador.NavigateTo($"/editar-cancha/{Id}");
     void ConfirmarEliminacion(int Id) { idAEliminar = Id; mostrarDialog = true; }
     void CrearCancha() => quiereAgregar = true;
@@ -138,6 +138,7 @@ else
 
             // Si llega aquí, es porque se guardó con éxito
             cancha = (await ListarCanchasUseCase.ejecutar()).ToList();
+            mensaje = "Cancha creada con exito."; 
             can = new Datos();
             quiereAgregar = false;
             mensaje = "¡Cancha guardada con éxito!";

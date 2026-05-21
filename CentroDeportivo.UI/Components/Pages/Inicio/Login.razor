@@ -51,6 +51,7 @@
         {
             var usuario = await IniciarSesionUseCase.ejecutar(datos.Correo, datos.Password);
             UsuarioSesion.IniciarSesion(usuario);
+            UsuarioSesion.NotificarCambio();
 
             if (UsuarioSesion.esAdministrador() || (UsuarioSesion.esEmpleado() && !UsuarioSesion.UsuarioActual.DebeCambiarPassword))
             {
