@@ -18,11 +18,12 @@
         </div>
         <button class="btn btn-outline-primary sm-2" @onclick="() => enviarMail(email)">Siguiente</button>
         <button class="btn btn-outline-ligth mt-1 mb-2" @onclick="() => Volver()">Volver</button>
+        @if (!string.IsNullOrEmpty(error))
+        {
+            <div class="alert alert-danger mt-3 mb-2 text-center">@error</div>
+        }
     </div>
-    @if (!string.IsNullOrEmpty(error))
-    {
-        <div class="alert alert-danger mt-3 mb-2 text-center">@error</div>
-    }
+    
 </div>
 
 @code {
@@ -35,7 +36,7 @@
         try
         {
             await RecuperarContraseniaUseCase.Ejecutar(email);
-            error = "Se ha enviado un correo con las instrucciones para restablecer tu contraseña.";
+            error = "Te enviamos un email con las instrucciones para recuperar tu contraseña.";
             email = "";
         }
         catch (Exception ex)

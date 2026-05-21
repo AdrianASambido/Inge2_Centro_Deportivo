@@ -95,23 +95,30 @@ else
 
 
 @code {
-    string mensaje = ""; bool mostrarDialog = false; int idAEliminar; bool quiereAgregar = false; Datos pro = new Datos();
-    List<Profesor> profesor = new List<Profesor>();
+        string mensaje = ""; bool mostrarDialog = false; int idAEliminar; bool quiereAgregar = false; Datos pro = new Datos();
+        List<Profesor> profesor = new List<Profesor>();
 
-    protected override async Task OnInitializedAsync() => profesor = (await ListarProfesoresUseCase.ejecutar()).ToList();
-    void CerrarSesion() { UsuarioSesion.CerrarSesion(); UsuarioSesion.NotificarCambio(); Navegador.NavigateTo("/Login", true); }
+    protected override async Task OnInitializedAsync() {
+        profesor = (await ListarProfesoresUseCase.ejecutar()).ToList();
+        if (profesor == null || !profesor.Any())
+        {
+            mensaje = "No hay profesores registrados.";
+        }
+    }
+        void CerrarSesion() { UsuarioSesion.CerrarSesion(); UsuarioSesion.NotificarCambio(); Navegador.NavigateTo("/Login", true); }
     void CrearProfesor() => quiereAgregar = true;
     public void Editar(int Id) => Navegador.NavigateTo($"/editar-profesor/{Id}");
     void ConfirmarEliminacion(int Id) { idAEliminar = Id; mostrarDialog = true; }
 
     async Task Eliminar()
     {
+        mensaje = "";
         mostrarDialog = false;
         try
         {
             await EliminarProfesorUseCase.ejecutar(idAEliminar);
             profesor = (await ListarProfesoresUseCase.ejecutar()).ToList();
-            mensaje = "Profesor eliminado correctamente";
+            mensaje = "Eliminacion exitosa";
             StateHasChanged();
         }
         catch (Exception ex) { mensaje = ex.Message; }
@@ -125,6 +132,7 @@ else
             var profe = new Profesor(pro.nombre, pro.apellido, pro.dni);
             await CrearProfesorUseCase.ejecutar(profe);
             profesor = (await ListarProfesoresUseCase.ejecutar()).ToList();
+            mensaje = "Profesor creado con exito."; 
             pro = new Datos();
             quiereAgregar = false;
             StateHasChanged();

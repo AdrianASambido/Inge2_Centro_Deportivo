@@ -103,7 +103,14 @@ else
     int idAEliminar;
     List<Cancha> cancha = new List<Cancha>();
 
-    protected override async Task OnInitializedAsync() => cancha = (await ListarCanchasUseCase.ejecutar()).ToList();
+    protected override async Task OnInitializedAsync()
+    {
+        cancha = (await ListarCanchasUseCase.ejecutar()).ToList();
+        if (cancha == null || !cancha.Any())
+        {
+            mensaje = "No hay canchas registradas.";
+        }
+    }
     void CerrarSesion() { UsuarioSesion.CerrarSesion(); UsuarioSesion.NotificarCambio(); Navegador.NavigateTo("/Login", true); }
     public void Editar(int Id) => Navegador.NavigateTo($"/editar-cancha/{Id}");
     void ConfirmarEliminacion(int Id) { idAEliminar = Id; mostrarDialog = true; }
@@ -129,6 +136,7 @@ else
             var c = new Cancha(can.numero ?? 0, can.capacidad ?? 0);
             await CrearCanchaUseCase.ejecutar(c);
             cancha = (await ListarCanchasUseCase.ejecutar()).ToList();
+            mensaje = "Cancha creada con exito."; 
             can = new Datos();
             quiereAgregar = false;
             mensaje = "";

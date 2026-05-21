@@ -357,6 +357,10 @@ else
         todosLosProfesores = (await ListarProfesoresUseCase.ejecutar()).ToList();
         todasLasCanchas = (await ListarCanchasUseCase.ejecutar()).ToList();
         turnosFiltrados = turnos;
+        if (turnos == null || !turnos.Any())
+        {
+            mensaje = "No hay turnos programados.";
+        }
     }
 
     private void AplicarFiltros()
@@ -481,8 +485,9 @@ else
             t = new Datos();
             StateHasChanged();
             AplicarFiltros();
-            mensajeTurno = "Turno creado correctamente.";
+            mensajeTurno = $"El turno se ha creado exitosamente para la actividad {nuevoTurno.Actividad.Nombre} para la fecha {nuevoTurno.Fecha.ToShortDateString} {nuevoTurno.HoraInicio}.";
             quiereAgregar = false;
+            mensajeTurno = "";
         }
         catch (Exception ex) { mensajeTurno = ex.Message; }
     }
