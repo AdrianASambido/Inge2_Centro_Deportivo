@@ -77,8 +77,14 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
 
         public async Task<bool> YaExisteParaEditar(string nombre, int idActual)
         {
-            // Devuelve true solo si hay otra actividad con ese nombre, pero que NO sea la que estamos editando
-            return await context.Actividades.AnyAsync(a => a.Nombre == nombre && a.Id != idActual && a.Existe);
+            var nombreNormalizado = Normalizar(nombre);
+
+            var nombresExistentes = await context.Actividades
+                .Where(a => a.Existe && a.Id != idActual)
+                .Select(a => a.Nombre)
+                .ToListAsync();
+
+            return nombresExistentes.Any(n => Normalizar(n) == nombreNormalizado);
         }
     }
 }

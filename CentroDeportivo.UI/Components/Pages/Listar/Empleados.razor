@@ -67,8 +67,7 @@ else
                             <td>@e.Nombre</td>
                             <td>@e.Apellido</td>
                             <td>@e.Dni</td>
-                            <td class="text-center">
-                                <button class="btn btn-sm btn-primary" @onclick="() => Editar(e.Id)">Editar</button>
+                            <td class="text-center">                               
                                 <button class="btn btn-sm btn-danger" @onclick="() => ConfirmarEliminacion(e.Id)">Eliminar</button>
                             </td>
                         </tr>
@@ -110,7 +109,7 @@ else
         mensaje = "";
     }
     
-    public void Editar(int Id) => Navegador.NavigateTo($"/editar-empleado/{Id}");
+    
     
     void ConfirmarEliminacion(int Id) { idAEliminar = Id; mostrarDialog = true; }
 

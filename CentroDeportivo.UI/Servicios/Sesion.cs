@@ -21,4 +21,10 @@ public class Sesion
     public bool EstaAutenticado()
         => UsuarioActual != null;
 
+    public event Action OnChange;
+
+    public void NotificarCambio() => OnChange?.Invoke();
+
+
+
 }

@@ -22,7 +22,7 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.UsuarioUseCase
 
             if (!repoHash.Verificar(contraVieja, usuario.Password))
             {
-                throw new Exception("La contraseña actual es incorrecta");
+                throw new Exception("Error contraseña actual invalida");
             }
 
             var (esValido, mensaje) = UsuarioValidadorBase.ValidarFormatoPassword(contraNueva);

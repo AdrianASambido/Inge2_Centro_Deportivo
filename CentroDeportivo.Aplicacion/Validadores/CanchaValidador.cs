@@ -25,7 +25,7 @@ namespace CentroDeportivo.Aplicacion.Validadores
 
                 if (await repo.YaExiste(c.Numero))
                 {
-                    mensaje += "El número de cancha ya existe.\n";
+                    mensaje += "Error: ya existe una cancha con ese numero.\n";
                 }
             }
             if (c.Capacidad < 1)
@@ -44,7 +44,7 @@ namespace CentroDeportivo.Aplicacion.Validadores
             }
             if (await repo.TieneTurnosAsignadosAsync(id))
             {
-                return (false, "Error al eliminar, la cancha tiene turnos asignados");
+                return (false, "Error al eliminar, esta cancha posee turnos activos");
             }
             return (true, "");
         }

@@ -258,10 +258,12 @@ else
                                         <td>@r.Usuario.Dni</td>
                                         <td>@t.Fecha.ToString("dd/MM/yyyy")</td>                                        
                                         <td class="text-center">
-                                            <button class="btn btn-sm btn-outline-primary" @onclick="() => RegistrarAsistencia(r.Id)">
+                                            <button class="btn btn-sm btn-outline-primary" @onclick="() => RegistrarAsistencia(r.Id)" 
+                                                disabled="@(!PuedeRegistrarAsistencia(r))">
                                                 Registrar asistencia
                                             </button>
-                                            <button class="btn btn-sm btn-outline-secondary" @onclick="() => RegistrarPago(r.Id)">Confirmar pago</button>
+                                            <button class="btn btn-sm btn-outline-secondary" @onclick="() => RegistrarPago(r.Id)"
+                                                disabled="@(r.Estado != EstadoReserva.PendienteDePago || yaPasoLaHora(r))">Confirmar pago</button>
                                         </td>
                                     </tr>
                                 }
@@ -303,7 +305,7 @@ else
                            muted
                            playsinline>
                     </video>
-                    
+
                     <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
                         width: 200px; height: 200px; border: 2px solid rgba(255,255,255,0.5);
                         border-radius: 15px; box-shadow: 0 0 0 4000px rgba(0,0,0,0.3);">
@@ -368,6 +370,8 @@ else
         ).ToList();
     }
 
+
+
     private void LimpiarFiltros()
     {
         filtroActividadId = 0;
@@ -382,6 +386,7 @@ else
         UsuarioSesion.CerrarSesion();
         Navegador.NavigateTo("/Login", true);
     }
+
 
     void CrearTurno() => quiereAgregar = true;
 
@@ -401,8 +406,18 @@ else
         try
         {
             mostrarInscriptos = true;
-            reservas = (await ListarInscriptosUseCase.Ejecutar(Id)).ToList();
-            mensajeTabla = "";
+
+            reservas = (await ListarInscriptosUseCase.Ejecutar(Id))?.ToList()
+                       ?? new List<Reserva>();
+
+            if (!reservas.Any())
+            {
+                mensajeTabla = "El turno no posee inscriptos";
+            }
+            else
+            {
+                mensajeTabla = "";
+            }
         }
         catch (Exception ex)
         {
@@ -423,33 +438,33 @@ else
     }
 
     async Task BuscarPorDisponibilidad()
-{
-    try
     {
-        mensajeTurno = "";
-
-        var horaMinima = new TimeOnly(18, 0); // 18:00
-        var horaMaxima = new TimeOnly(23, 0); // 23:00
-
-        if (t.HoraInicio < horaMinima || t.HoraInicio > horaMaxima)
+        try
         {
-            mensajeTurno = "Error: El centro deportivo opera únicamente en el horario de 18:00 a 23:00 hs.";
-            mostrarDisponibles = false;
-            return; 
-        }
+            mensajeTurno = "";
 
-    
-        var (profesD, canchasD) = await ConsultarDisponibilidadUseCase.ejecutar(t.Fecha, t.HoraInicio);
-        profesoresDispo = profesD.ToList();
-        canchasDispo = canchasD.ToList();
-        mostrarDisponibles = true;
+            var horaMinima = new TimeOnly(18, 0); // 18:00
+            var horaMaxima = new TimeOnly(23, 0); // 23:00
+
+         /**  if (t.HoraInicio < horaMinima || t.HoraInicio > horaMaxima)
+            {
+                mensajeTurno = "Horario incorrecto: El centro deportivo opera únicamente en el horario de 18:00 a 23:00 hs.";
+                mostrarDisponibles = false;
+                return; 
+            }**/
+
+
+            var (profesD, canchasD) = await ConsultarDisponibilidadUseCase.ejecutar(t.Fecha, t.HoraInicio);
+            profesoresDispo = profesD.ToList();
+            canchasDispo = canchasD.ToList();
+            mostrarDisponibles = true;
+        }
+        catch (Exception ex)
+        {
+            mensajeTurno = ex.Message;
+            mostrarDisponibles = false;
+        }
     }
-    catch (Exception ex)
-    {
-        mensajeTurno = ex.Message;
-        mostrarDisponibles = false;
-    }
-}
 
     async Task Aceptar()
     {
@@ -478,94 +493,67 @@ else
 
 
     private CancellationTokenSource? cts;
-
-    private async Task AbrirEscaner()
+   private async Task AbrirEscaner()
     {
         mensaje = "";
+
         mostrarEscanner = true;
-        StateHasChanged(); // Forzamos el renderizado del <video>
-    
-        await Task.Delay(500); // Espera mínima para que el DOM reconozca el ID del video
 
-        // LLAMADA CLAVE: Activa la cámara físicamente
-        bool exito = await JS.InvokeAsync<bool>("iniciarCamara", "videoFeed");
+        await InvokeAsync(StateHasChanged);
 
-        if (exito)
+        await Task.Delay(500);
+
+        var dotNetRef = DotNetObjectReference.Create(this);
+
+        bool exito = await JS.InvokeAsync<bool>(
+            "escanearQR",
+            "videoFeed",
+            dotNetRef
+        );
+
+        if (!exito)
         {
-            cts = new CancellationTokenSource();
-            await IniciarBucleEscaneo(cts.Token);
-        }
-        else
-        {
-            mensaje = "No se pudo acceder a la cámara. Revisa los permisos del navegador.";
+            mensaje = "No se pudo acceder a la cámara";
             mostrarEscanner = false;
         }
     }
 
-    private async Task IniciarBucleEscaneo(CancellationToken token)
-{
-    try 
+
+    bool procesandoQr = false;
+    [JSInvokable]
+    public async Task ProcesarQrDetectado(string codigoQr)
     {
-        while (!token.IsCancellationRequested)
+        if (procesandoQr)
+            return;
+
+        procesandoQr = true;
+
+        try
         {
-            // Capturamos la imagen desde el JS mejorado
-            var imagenBase64 = await JS.InvokeAsync<string>("capturarFoto", "videoFeed");
+            await RegistrarAsistenciaQrUseCase.Ejecutar(codigoQr);
 
-            if (!string.IsNullOrEmpty(imagenBase64))
-            {
-                var resultado = DecodificarQr(imagenBase64);
-
-                if (resultado != null)
-                {
-                    // Si encontramos un QR, detenemos el bucle y procesamos
-                    await ProcesarResultado(resultado);
-                    break; 
-                }
-            }
-            // 500ms es un buen equilibrio para no saturar el procesador
-            await Task.Delay(500, token); 
+            mensaje = "¡Asistencia registrada con éxito!";
         }
-    }
-    catch (OperationCanceledException) { /* Cierre normal */ }
-}
+        catch (Exception ex)
+        {
+            mensaje = ex.Message;
+        }
 
-    private async Task ProcesarResultado(string codigoQr)
-{
-    try
-    {
-        // IMPORTANTE: Aquí puedes limpiar el código si viene con espacios
-        string qrLimpio = codigoQr.Trim();
-        
-        await RegistrarAsistenciaQrUseCase.Ejecutar(qrLimpio);
-        
-        // Seteamos el mensaje general para que se vea en el alert de la página principal
-        mensaje = "¡Asistencia registrada con éxito!";
-        
-        // Cerramos el modal
         await CerrarEscaner();
+
+        procesandoQr = false;
+
+        await InvokeAsync(StateHasChanged);
     }
-    catch (Exception ex)
-    {
-        // Si el QR no es válido para el sistema, lo mostramos en el mensaje de error
-        mensaje = $"Error en QR: {ex.Message}";
-        await CerrarEscaner();
-    }
-    StateHasChanged();
-}
 
     private async Task CerrarEscaner()
-{
-    if (cts != null)
     {
-        cts.Cancel();
-        cts.Dispose();
-        cts = null;
+        await JS.InvokeVoidAsync("detenerEscaner", "videoFeed");
+
+        mostrarEscanner = false;
+
+        await InvokeAsync(StateHasChanged);
     }
-    
-    await JS.InvokeVoidAsync("detenerCamara");
-    mostrarEscanner = false;
-    StateHasChanged();
-}
 
     void Cancelar()
     {
@@ -585,34 +573,51 @@ else
         public int Id_Cancha { get; set; }
     }
 
-    private string? DecodificarQr(string base64Imagen)
-    {
-        try
-        {
-            // 1. Convertir Base64 a bytes
-            byte[] imageBytes = Convert.FromBase64String(base64Imagen);
-        
-            // 2. Cargar la imagen con ImageSharp
-            using var image = SixLabors.ImageSharp.Image.Load<SixLabors.ImageSharp.PixelFormats.L8>(imageBytes);
-        
-            // 3. Crear el lector GENÉRICO (esto evita el error CS8377)
-            var lector = new ZXing.BarcodeReaderGeneric();
-        
-            // 4. Crear la fuente de datos manualmente a partir de la imagen
-            var source = new ZXing.ImageSharp.ImageSharpLuminanceSource<SixLabors.ImageSharp.PixelFormats.L8>(image);
-        
-            // 5. Configurar opciones
-            lector.Options.PossibleFormats = new[] { ZXing.BarcodeFormat.QR_CODE };
-            lector.Options.TryHarder = true;
+    
 
-            // 6. Decodificar usando la fuente manual
-            var resultado = lector.Decode(source);
-            return resultado?.Text;
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error de escaneo: {ex.Message}");
-            return null;
-        }
-    }
+   private bool PuedeRegistrarAsistencia(Reserva r)
+{
+    if (r?.Turno == null)
+        return false;
+
+    if (r.Estado != EstadoReserva.Confirmado)
+        return false;
+
+    if (r.Turno.Estado == EstadoTurno.Finalizado)
+        return false;
+
+    if (r.Asistencia != Asistencia.Ausente)
+        return false;
+
+    var fechaHoraInicio = r.Turno.Fecha.ToDateTime(r.Turno.HoraInicio);
+    var fechaHoraFin = r.Turno.Fecha.ToDateTime(r.Turno.HoraFin);
+
+    
+    return DateTime.Now >= fechaHoraInicio.AddMinutes(-15) && DateTime.Now <= fechaHoraFin;
+}
+
+    private bool yaPasoLaHora(Reserva r)
+{
+    
+    if (r?.Turno == null)
+        return true;
+
+    
+    DateOnly fechaDelTurno = r.Turno.Fecha;
+    TimeOnly horaInicioDelTurno = r.Turno.HoraInicio;
+
+    
+    DateOnly hoy = DateOnly.FromDateTime(DateTime.Now);
+    TimeOnly ahora = TimeOnly.FromDateTime(DateTime.Now);
+
+    if (fechaDelTurno < hoy)
+        return true;
+
+    
+    if (fechaDelTurno == hoy && ahora > horaInicioDelTurno)
+        return true;
+
+    
+    return false;
+}
 }

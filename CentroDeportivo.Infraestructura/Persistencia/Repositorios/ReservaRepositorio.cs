@@ -49,6 +49,7 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
         {
             var query = contexto.Reservas
                         .Include(r => r.Usuario)
+                        .Include(r => r.Turno) 
                         .Where(r => r.Id_Turno == turnoId && r.Estado != EstadoReserva.Cancelado)
                         .AsQueryable();
 

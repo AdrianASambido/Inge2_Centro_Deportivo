@@ -14,7 +14,7 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.UsuarioUseCase
             var usuario = await repo.ObtenerPorEmail(email);
 
             if (usuario == null) {
-                throw new Exception("Email incorrecto.");
+                throw new Exception("El email ingresado no existe.");
             }
 
             var token = Guid.NewGuid().ToString();

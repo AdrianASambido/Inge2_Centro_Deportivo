@@ -27,7 +27,9 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
        
                 
                 reserva.Asistencia = Asistencia.Presente;
-                await repoReserva.ActualizarAsync(reserva);           
+                reserva.TokenQr = null;
+                await repoReserva.ActualizarAsync(reserva);
+            
             }
         }
     }

@@ -18,6 +18,11 @@ public class RegistrarUsuarioUseCase (IUsuarioRepositorio repo, UsuarioClienteVa
             throw new Exception(mensaje);
         }
 
+        var (esValido2, mensaje2) = UsuarioClienteValidador.ValidarFormatoPassword(u.Password);
+        if (!esValido2) {
+            throw new Exception(mensaje2);
+        }
+
         u.Password = repoHash.Hashear(u.Password);
         u.Rol = Rol.Cliente;
 

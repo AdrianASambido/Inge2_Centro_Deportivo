@@ -30,6 +30,7 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
             reserva.Estado = EstadoReserva.PendienteDePago;
             reserva.Asistencia = Asistencia.Ausente;
             reserva.FechaReserva = DateOnly.FromDateTime(DateTime.Today);
+            reserva.PrecioPagado = turno.PrecioTurno;
 
             await repoReserva.AgregarAsync(reserva);
             await repoTurno.ActualizarAsync(turno);

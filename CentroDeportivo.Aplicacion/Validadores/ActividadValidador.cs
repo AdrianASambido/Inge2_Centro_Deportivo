@@ -35,7 +35,7 @@ namespace CentroDeportivo.Aplicacion.Validadores
                 // El Repo ahora buscade indiferente a mayúsculas y acentos
                 if (await repo.YaExiste(nombreLimpio))
                 {
-                    mensaje += $"Error: La actividad '{actividad.Nombre}' ya existe (o una similar).\n";
+                    mensaje += $"Error: ya existe una actividad con ese nombre.\n";
                 }
             }
 
@@ -69,7 +69,7 @@ namespace CentroDeportivo.Aplicacion.Validadores
 
             if (await repo.TieneInscriptosAsync(idActividad))
             {
-                return (false, "Error: la actividad posee turnos programados.");
+                return (false, "Error: esta actividad registra turnos activos, no puede eliminarse");
             }
 
             return (true, "");
@@ -95,12 +95,12 @@ namespace CentroDeportivo.Aplicacion.Validadores
             if (!string.IsNullOrWhiteSpace(actividad.Nombre))
             {
                 
-                string nombreNormalizado = NormalizarTexto(actividad.Nombre);
+                
 
              
-                if (await repo.YaExisteParaEditar(nombreNormalizado, idActividad))
+                if (await repo.YaExisteParaEditar(actividad.Nombre, idActividad))
                 {
-                    mensaje += $"Error: Ya existe otra actividad con el nombre '{actividad.Nombre}'\n";
+                    mensaje += $"Error: ya existe una actividad con ese nombre.'\n";
                 }
             }
 
