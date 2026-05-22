@@ -76,7 +76,7 @@ namespace CentroDeportivo.Infraestructura.Servicios
             <p>Recibimos una solicitud para restablecer tu contraseña.</p>
             <p>Hacé click en el siguiente link para continuar:</p>
             <a href='{link}'>Restablecer contraseña</a>
-            <p>Este link vence en 1 hora.</p>
+            <p>Este link vence en 10 minutos.</p>
             <p>Si no solicitaste este cambio, ignorá este mensaje.</p>"
             };
             mensaje.Body = bodyBuilder.ToMessageBody();

@@ -18,7 +18,7 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.UsuarioUseCase
             }
 
             var token = Guid.NewGuid().ToString();
-            var vencimiento = DateTime.Now.AddHours(1);
+            var vencimiento = DateTime.Now.AddMinutes(10);
 
             usuario.TokenRecuperacion = token;
             usuario.TokenRecuperacionVencimiento = vencimiento;
