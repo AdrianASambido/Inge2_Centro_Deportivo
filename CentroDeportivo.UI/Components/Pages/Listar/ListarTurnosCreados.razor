@@ -245,7 +245,8 @@ else
                                     <th>Nombre</th>
                                     <th>Apellido</th>
                                     <th>DNI</th>
-                                    <th>Fecha</th>
+                                    <th>Estado</th>
+                                    <th>Asistencia</th>
                                     <th class="text-center">Acciones</th>
                                 </tr>
                             </thead>
@@ -256,7 +257,8 @@ else
                                         <td>@r.Usuario.Nombre</td>
                                         <td>@r.Usuario.Apellido</td>
                                         <td>@r.Usuario.Dni</td>
-                                        <td>@t.Fecha.ToString("dd/MM/yyyy")</td>                                        
+                                        <td>@r.Estado</td>
+                                        <td>@r.Asistencia</td>                                      
                                         <td class="text-center">
                                             <button class="btn btn-sm btn-outline-primary" @onclick="() => RegistrarAsistencia(r.Id)" 
                                                 disabled="@(!PuedeRegistrarAsistencia(r))">
@@ -446,12 +448,12 @@ else
             var horaMinima = new TimeOnly(18, 0); // 18:00
             var horaMaxima = new TimeOnly(23, 0); // 23:00
 
-         /**  if (t.HoraInicio < horaMinima || t.HoraInicio > horaMaxima)
+           if (t.HoraInicio < horaMinima || t.HoraInicio > horaMaxima)
             {
                 mensajeTurno = "Horario incorrecto: El centro deportivo opera únicamente en el horario de 18:00 a 23:00 hs.";
                 mostrarDisponibles = false;
                 return; 
-            }**/
+            }
 
 
             var (profesD, canchasD) = await ConsultarDisponibilidadUseCase.ejecutar(t.Fecha, t.HoraInicio);

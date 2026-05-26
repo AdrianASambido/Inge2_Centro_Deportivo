@@ -15,9 +15,9 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
             
                 var reserva = await repoReserva.ObtenerPorQrTokenAsync(tokenEscaneado);
 
-                if (reserva == null)
+                if (reserva == null || reserva.Asistencia == Asistencia.Presente)
                 {
-                    throw new Exception ("Error: Código QR inválido o inexistente.");
+                    throw new Exception ("Error al registrar asistencia: Código QR inválido");
                 }
 
                 var (esValido, mensaje) = await validador.ValidarAsistencia(reserva);

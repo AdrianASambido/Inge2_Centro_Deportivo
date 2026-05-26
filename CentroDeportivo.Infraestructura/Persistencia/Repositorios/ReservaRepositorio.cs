@@ -65,29 +65,36 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
 
         public async Task<IEnumerable<Reserva>> ObtenerPorUsuarioAsync(int usuarioId, int? actividadId = null, EstadoReserva? estado = null, bool incluirPasadas = false)
         {
-            var hoy = DateOnly.FromDateTime(DateTime.Today);
-
             var query = contexto.Reservas
                 .Include(r => r.Turno)
                     .ThenInclude(t => t!.Actividad)
                 .Include(r => r.Turno)
                     .ThenInclude(t => t!.Profesor)
-                .Include (r => r.Turno)
-                    .ThenInclude(t => t!.Cancha) 
+                .Include(r => r.Turno)
+                    .ThenInclude(t => t!.Cancha)
                 .Where(r => r.Id_Usuario == usuarioId)
                 .AsQueryable();
 
-            // Por defecto solo muestra reservas activas 
+            
             if (!incluirPasadas)
-                query = query.Where(r => r.Turno!.Fecha >= hoy);
+            {
+                query = query.Where(r =>
+                    r.Turno!.Estado != EstadoTurno.Finalizado &&
+                    r.Estado != EstadoReserva.Cancelado
+                );
+            }
 
-            // Filtro por estado (pendienteDePago, confirmado, cancelado) .
+            
             if (estado.HasValue)
+            {
                 query = query.Where(r => r.Estado == estado.Value);
+            }
 
-            // Filtro por actividadr
+           
             if (actividadId.HasValue)
+            {
                 query = query.Where(r => r.Turno!.Id_Actividad == actividadId.Value);
+            }
 
             return await query
                 .OrderBy(r => r.Turno!.Fecha)
