@@ -11,8 +11,9 @@ namespace CentroDeportivo.Aplicacion.Validadores
 {
     public class LoginValidador(IUsuarioRepositorio repoUsuario, IHashServicio repoHash)
     {
-        public async Task<(bool esValido, string mensaje, Usuario? usuario)> Validar(string email, string contra) {
-            
+        public async Task<(bool esValido, string mensaje, Usuario? usuario)> Validar(string email, string contra)
+        {
+
 
             var usuario = await repoUsuario.ObtenerPorEmail(email);
             if (usuario == null) {
@@ -22,7 +23,7 @@ namespace CentroDeportivo.Aplicacion.Validadores
             if (!repoHash.Verificar(contra,usuario.Password)) {
                 return (false, "Error: contraseña incorrecta.", null);
             }
-            
+
             return (true, string.Empty, usuario);
         }
     }

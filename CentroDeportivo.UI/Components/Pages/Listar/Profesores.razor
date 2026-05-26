@@ -29,9 +29,9 @@ else
             <div class="card shadow-sm mb-4" style="max-width: 500px;">
                 <div class="card-body">
                     <h4 class="card-title mb-3">Datos del profesor</h4>
-                    <input placeholder="Nombre" @bind="pro.nombre" class="form-control mb-2" />
-                    <input placeholder="Apellido" @bind="pro.apellido" class="form-control mb-2" />
-                    <input placeholder="DNI" @bind="pro.dni" class="form-control mb-3" />
+                    <input placeholder="Nombre" @bind="pro.nombre" type="text" class="form-control mb-2" />
+                    <input placeholder="Apellido" @bind="pro.apellido" type="text" class="form-control mb-2" />
+                    <input placeholder="DNI" @bind="pro.dni" type="number" class="form-control mb-3" />
                     <div class="d-flex gap-2">
                         <button class="btn btn-primary flex-grow-1" @onclick="Aceptar">Guardar</button>
                         <button class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
@@ -98,20 +98,27 @@ else
     string mensaje = ""; bool mostrarDialog = false; int idAEliminar; bool quiereAgregar = false; Datos pro = new Datos();
     List<Profesor> profesor = new List<Profesor>();
 
-    protected override async Task OnInitializedAsync() => profesor = (await ListarProfesoresUseCase.ejecutar()).ToList();
-    void CerrarSesion() { UsuarioSesion.CerrarSesion(); Navegador.NavigateTo("/Login", true); }
+    protected override async Task OnInitializedAsync() {
+        profesor = (await ListarProfesoresUseCase.ejecutar()).ToList();
+        if (profesor == null || !profesor.Any())
+        {
+            mensaje = "No hay profesores registrados.";
+        }
+    }
+    void CerrarSesion() { UsuarioSesion.CerrarSesion(); UsuarioSesion.NotificarCambio(); Navegador.NavigateTo("/Login", true); }
     void CrearProfesor() => quiereAgregar = true;
     public void Editar(int Id) => Navegador.NavigateTo($"/editar-profesor/{Id}");
     void ConfirmarEliminacion(int Id) { idAEliminar = Id; mostrarDialog = true; }
 
     async Task Eliminar()
     {
+        mensaje = "";
         mostrarDialog = false;
         try
         {
             await EliminarProfesorUseCase.ejecutar(idAEliminar);
             profesor = (await ListarProfesoresUseCase.ejecutar()).ToList();
-            mensaje = "Profesor eliminado correctamente";
+            mensaje = "Eliminacion exitosa";
             StateHasChanged();
         }
         catch (Exception ex) { mensaje = ex.Message; }
@@ -119,11 +126,13 @@ else
 
     async Task Aceptar()
     {
+        mensaje = "";
         try
         {
             var profe = new Profesor(pro.nombre, pro.apellido, pro.dni);
             await CrearProfesorUseCase.ejecutar(profe);
             profesor = (await ListarProfesoresUseCase.ejecutar()).ToList();
+            mensaje = "Profesor creado con exito."; 
             pro = new Datos();
             quiereAgregar = false;
             StateHasChanged();
@@ -131,6 +140,6 @@ else
         catch (Exception ex) { mensaje = ex.Message; }
     }
 
-    void Cancelar() { quiereAgregar = false; }
+    void Cancelar() { quiereAgregar = false; pro = new Datos(); }
     public class Datos { public string nombre { get; set; } = ""; public string apellido { get; set; } = ""; public string dni { get; set; } }
 }

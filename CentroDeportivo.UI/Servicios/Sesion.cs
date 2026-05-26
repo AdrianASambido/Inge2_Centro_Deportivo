@@ -25,6 +25,6 @@ public class Sesion
 
     public void NotificarCambio() => OnChange?.Invoke();
 
-
+    
 
 }

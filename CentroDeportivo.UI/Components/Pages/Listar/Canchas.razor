@@ -19,16 +19,9 @@ else
         <h2 class="mb-1">Canchas</h2>
         <p class="text-muted mb-4">Bienvenido, @UsuarioSesion.UsuarioActual!.Nombre</p>
 
-        <div class="row mb-4 align-items-center">
-            <div class="col-auto">
-                <button class="btn btn-success" @onclick="CrearCancha">Crear cancha</button>
-            </div>
-            <div class="col-md-4">
-                <input type="text" class="form-control" placeholder="🔍 Buscar por número..." @bind="numeroBusquedaTexto" @bind:event="oninput" />
-            </div>
-            <div class="col-auto ms-auto">
-                <button class="btn btn-danger" @onclick="CerrarSesion">Cerrar sesión</button>
-            </div>
+        <div class="d-flex gap-2 mb-4">
+            <button class="btn btn-success" @onclick="CrearCancha">Crear cancha</button>
+            <button class="btn btn-danger" @onclick="CerrarSesion">Cerrar sesión</button>
         </div>
 
         @if (quiereAgregar)
@@ -36,8 +29,8 @@ else
             <div class="card shadow-sm mb-4 border-success" style="max-width: 400px;">
                 <div class="card-body">
                     <h4 class="card-title mb-3">Nueva Cancha</h4>
-                    <input placeholder="Número de cancha" @bind="can.numero" class="form-control mb-2" />
-                    <input placeholder="Capacidad" @bind="can.capacidad" class="form-control mb-3" />
+                    <input placeholder="Número de cancha" @bind="can.numero" type="number" class="form-control mb-2" />
+                    <input placeholder="Capacidad" @bind="can.capacidad" type="number" class="form-control mb-3" />
                     <div class="d-flex gap-2">
                         <button class="btn btn-primary flex-grow-1" @onclick="Aceptar">Guardar</button>
                         <button class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
@@ -110,8 +103,15 @@ else
     int idAEliminar;
     List<Cancha> cancha = new List<Cancha>();
 
-    protected override async Task OnInitializedAsync() => cancha = (await ListarCanchasUseCase.ejecutar()).ToList();
-    void CerrarSesion() { UsuarioSesion.CerrarSesion(); Navegador.NavigateTo("/Login", true); }
+    protected override async Task OnInitializedAsync()
+    {
+        cancha = (await ListarCanchasUseCase.ejecutar()).ToList();
+        if (cancha == null || !cancha.Any())
+        {
+            mensaje = "No hay canchas registradas.";
+        }
+    }
+    void CerrarSesion() { UsuarioSesion.CerrarSesion(); UsuarioSesion.NotificarCambio(); Navegador.NavigateTo("/Login", true); }
     public void Editar(int Id) => Navegador.NavigateTo($"/editar-cancha/{Id}");
     void ConfirmarEliminacion(int Id) { idAEliminar = Id; mostrarDialog = true; }
     void CrearCancha() => quiereAgregar = true;
@@ -136,13 +136,15 @@ else
             var c = new Cancha(can.numero ?? 0, can.capacidad ?? 0);
             await CrearCanchaUseCase.ejecutar(c);
             cancha = (await ListarCanchasUseCase.ejecutar()).ToList();
-            c = new Cancha();
+            mensaje = "Cancha creada con exito."; 
+            can = new Datos();
             quiereAgregar = false;
             mensaje = "";
+            StateHasChanged();
         }
         catch (Exception ex) { mensaje = ex.Message; }
     }
 
-    void Cancelar() { quiereAgregar = false; mensaje = ""; }
+    void Cancelar() { quiereAgregar = false; mensaje = ""; can = new Datos(); }
     public class Datos { public int? numero { get; set; } public int? capacidad { get; set; } }
 }

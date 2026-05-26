@@ -27,10 +27,10 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
         public async Task<IEnumerable<Devolucion>> ObtenerPendientesAsync()
         {
             return await contexto.Devoluciones
-                        .Include(d => d.Usuario) // datos del socio
-                        .Include(d => d.Reserva) // datos de la reserva
-                            .ThenInclude(r => r.Turno) // De la reserva traigoel turno
-                                .ThenInclude(t => t.Actividad) // Del turno traigo la actividad
+                        .Include(d => d.Usuario) // Trae l9s datos personales del socio
+                        .Include(d => d.Reserva) // Trae los datos de la reserva 
+                        .ThenInclude(r => r.Turno)
+                        .ThenInclude(t => t.Actividad)
                         .Where(d => d.Estado == DevolucionEstado.Pendiente)
                         .AsNoTracking()
                         .ToListAsync();

@@ -31,7 +31,7 @@ else
                     <h4 class="card-title mb-3">Datos de la actividad</h4>
                     <input placeholder="Nombre de actividad" @bind="act.nombre" class="form-control mb-2" />
                     <input placeholder="Descripción" @bind="act.descripcion" class="form-control mb-2" />
-                    <input placeholder="Precio" @bind="act.precio" class="form-control mb-3" />
+                    <input placeholder="Precio" @bind="act.precio" type="number" class="form-control mb-3" />
                     
                     <div class="d-flex gap-2">
                         <button class="btn btn-primary flex-grow-1" @onclick="Aceptar">Aceptar</button>
@@ -71,11 +71,12 @@ else
         </div>
     </div>
 }
-
-@if (!string.IsNullOrEmpty(mensaje))
-{
-    <div class="alert alert-info mt-3">@mensaje</div>
-}
+<div>
+    @if (!string.IsNullOrEmpty(mensaje))
+    {
+        <div class="alert alert-info mt-3">@mensaje</div>
+    }
+</div>
 
 @if (mostrarDialog)
 {
@@ -106,39 +107,51 @@ else
 
     List<Actividad> actividad = new List<Actividad>();
 
-    protected override async Task OnInitializedAsync() => actividad = (await ListarActividadesUseCase.ejecutar()).ToList();
-    void CerrarSesion() { UsuarioSesion.CerrarSesion(); Navegador.NavigateTo("/Login", true); }
+    protected override async Task OnInitializedAsync() {
+        actividad = (await ListarActividadesUseCase.ejecutar()).ToList();
+        if (actividad == null || !actividad.Any())
+        {
+            mensaje = "No hay actividades registradas."; 
+        }
+    }
+    void CerrarSesion() { UsuarioSesion.CerrarSesion(); UsuarioSesion.NotificarCambio(); Navegador.NavigateTo("/Login", true); }
     void CrearActividad() => quiereAgregar = true;
     public void Editar(int Id) => Navegador.NavigateTo($"/editar-actividad/{Id}");
     void ConfirmarEliminacion(int Id) { idAEliminar = Id; mostrarDialog = true; }
-    
+
     async Task Eliminar()
     {
+        mensaje = "";
         mostrarDialog = false;
         try
         {
             await EliminarActividadUseCase.Ejecutar(idAEliminar);
             actividad = (await ListarActividadesUseCase.ejecutar()).ToList();
-            mensaje = "Actividad eliminada.";
+            mensaje = "La actividad se ha eliminado con exito.";
+            mensaje = "";
+            StateHasChanged();
         }
         catch (Exception ex) { mensaje = ex.Message; }
     }
 
     async Task Aceptar()
     {
+        mensaje = "";
         try
         {
             var acti = new Actividad(act.nombre, act.descripcion, act.precio ?? 0);
             await CrearActividadUseCase.ejecutar(acti);
             actividad = (await ListarActividadesUseCase.ejecutar()).ToList();
+            mensaje = "Actividad creada con exito.";
             act = new Datos();
             quiereAgregar = false;
             mensaje = "";
+            StateHasChanged();
         }
         catch (Exception ex) { mensaje = ex.Message; }
     }
 
-    void Cancelar() { quiereAgregar = false; mensaje = ""; }
+    void Cancelar() { quiereAgregar = false; mensaje = ""; act = new Datos(); }
 
     public class Datos
     {

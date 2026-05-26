@@ -14,17 +14,17 @@
 
         <div class="mb-3">
             <label class="form-label">Contraseña actual</label>
-            <input placeholder="••••••••" @bind="actual" class="form-control" type="password" autocomplete="new-password" />
+            <input placeholder="*********" @bind="actual" class="form-control" type="password" autocomplete="new-password" />
         </div>
 
         <div class="mb-3">
             <label class="form-label">Contraseña nueva</label>
-            <input placeholder="••••••••" @bind="nueva1" class="form-control" type="password" autocomplete="new-password">
+            <input placeholder="*********" @bind="nueva1" class="form-control" type="password" autocomplete="new-password">
         </div>
 
         <div class="mb-3">
             <label class="form-label">Repetir contraseña</label>
-            <input placeholder="••••••••" @bind="nueva2" class="form-control" type="password" autocomplete="new-password">
+            <input placeholder="*********" @bind="nueva2" class="form-control" type="password" autocomplete="new-password">
         </div>
 
         <div class="text-center">
@@ -68,15 +68,24 @@
 
         try
         {
+            if (nueva1 != nueva2)
+            {
+                error = "Las contraseñas no coinciden.";
+                return;
+            }
+
             await CambiarContraseniaUseCase.ejecutar(actual, nueva1, Id);
             var usuarioActualizado = await ObtenerUsuarioPorId.Ejecutar(Id);
-            
+            UsuarioSesion.NotificarCambio();
+
             if (UsuarioSesion.esEmpleado())
             {
+                StateHasChanged();
                 Navegador.NavigateTo("/listar-turnos-creados");
             }
             else
             {
+                StateHasChanged();
                 Navegador.NavigateTo("/MiPerfil");
             }
         }

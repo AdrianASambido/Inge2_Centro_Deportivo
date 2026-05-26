@@ -1,6 +1,8 @@
 ﻿@inject Sesion UsuarioSesion
+@implements IDisposable
 
-@if (UsuarioSesion.EstaAutenticado() && !UsuarioSesion.esCliente() && !UsuarioSesion.UsuarioActual.DebeCambiarPassword)
+
+@if (UsuarioSesion.EstaAutenticado() && UsuarioSesion.esAdministrador() && !UsuarioSesion.UsuarioActual.DebeCambiarPassword)
 {
     <div class="nav-list">
         <div class="nav-item">
@@ -41,6 +43,41 @@
     </div>
 }
 
+@if (UsuarioSesion.EstaAutenticado() && UsuarioSesion.esEmpleado() && !UsuarioSesion.UsuarioActual.DebeCambiarPassword)
+{
+    <div class="nav-list">
+        <div class="nav-item">
+            <NavLink href="/listar-turnos-creados" class="nav-link" Match="NavLinkMatch.All">
+                <span class="bi bi-calendar-event me-2"></span> Turnos
+            </NavLink>
+        </div>
+        <div class="nav-item">
+            <NavLink href="/Canchas" class="nav-link">
+                <span class="bi bi-grid-3x3 me-2"></span> Canchas
+            </NavLink>
+        </div>
+        <div class="nav-item">
+            <NavLink href="/Profesores" class="nav-link">
+                <span class="bi bi-person-badge me-2"></span> Profesores
+            </NavLink>
+        </div>
+        <div class="nav-item">
+            <NavLink href="/Actividades" class="nav-link">
+                <span class="bi bi-activity me-2"></span> Actividades
+            </NavLink>
+        </div>
+        <div class="nav-item">
+            <NavLink href="/Devoluciones" class="nav-link">
+                <span class="bi bi-cash me-2"></span> Devoluciones
+            </NavLink>
+        </div>
+        <div class="nav-item">
+            <NavLink href="/MiPerfil" class="nav-link">
+                <span class="bi bi-person-vcard me-2"></span> Mi perfil
+            </NavLink>
+        </div>
+    </div>
+}
 
 @if (UsuarioSesion.EstaAutenticado() && UsuarioSesion.esCliente())
 {
@@ -61,4 +98,16 @@
             </NavLink>
         </div>
     </div>
+}
+
+@code{
+    protected override void OnInitialized()
+    {
+        UsuarioSesion.OnChange += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        UsuarioSesion.OnChange -= StateHasChanged;
+    }
 }

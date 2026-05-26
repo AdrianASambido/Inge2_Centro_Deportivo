@@ -14,12 +14,12 @@
      
         <div class="mb-3">
             <label class="form-label">Correo Electrónico</label>
-            <input placeholder="ejemplo@correo.com" @bind="datos.Correo" class="form-control" />
+            <input placeholder="ejemplo@correo.com" @bind="datos.Correo" type="email" class="form-control" />
         </div>
 
         <div class="mb-3">
             <label class="form-label">Contraseña</label>
-            <input placeholder="••••••••" @bind="datos.Password" class="form-control" type="password" />
+            <input placeholder="********" @bind="datos.Password" class="form-control" type="password" />
         </div>
 
         <div class="d-grid gap-2 mb-3">
@@ -51,6 +51,7 @@
         {
             var usuario = await IniciarSesionUseCase.ejecutar(datos.Correo, datos.Password);
             UsuarioSesion.IniciarSesion(usuario);
+            UsuarioSesion.NotificarCambio();
 
             if (UsuarioSesion.esAdministrador() || (UsuarioSesion.esEmpleado() && !UsuarioSesion.UsuarioActual.DebeCambiarPassword))
             {

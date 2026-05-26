@@ -11,7 +11,8 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
 {
     public class RegistrarAsistenciaManualUseCase(IReservaRepositorio repo, AsistenciaValidador validador)
     {
-        public async Task Ejecutar(int idReserva) {
+        public async Task Ejecutar(int idReserva)
+        {
 
             var reserva = await repo.ObtenerPorIdAsync(idReserva);
             if (reserva == null)
@@ -26,7 +27,7 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
 
             
 
-                    
+
             reserva.Asistencia = Asistencia.Presente;
             await repo.ActualizarAsync(reserva);
         }

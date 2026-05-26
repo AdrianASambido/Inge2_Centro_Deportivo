@@ -10,7 +10,8 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.UsuarioUseCase
 {
     public class RecuperarContraseniaUseCase(IUsuarioRepositorio repo, IEmailServicio repoEmail)
     {
-        public async Task Ejecutar(string email) { 
+        public async Task Ejecutar(string email)
+        {
             var usuario = await repo.ObtenerPorEmail(email);
 
             if (usuario == null) {

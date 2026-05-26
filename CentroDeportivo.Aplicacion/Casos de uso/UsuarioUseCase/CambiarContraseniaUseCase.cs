@@ -31,7 +31,7 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.UsuarioUseCase
                 throw new Exception(mensaje);
             }
 
-            
+
             if (usuario.Rol == Rol.Empleado && usuario.DebeCambiarPassword)
             {
                 usuario.DebeCambiarPassword = false;

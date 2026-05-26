@@ -9,12 +9,14 @@ using CentroDeportivo.Aplicacion.Validadores;
 
 namespace CentroDeportivo.Aplicacion.Casos_de_uso.UsuarioUseCase;
 
-public class RegistrarUsuarioUseCase (IUsuarioRepositorio repo, UsuarioClienteValidador validador, IHashServicio repoHash)
+public class RegistrarUsuarioUseCase(IUsuarioRepositorio repo, UsuarioClienteValidador validador, IHashServicio repoHash)
 {
-    public async Task ejecutar(Usuario u) {
+    public async Task ejecutar(Usuario u)
+    {
         var (esValido, mensaje) = await validador.ValidarDatosComunes(u);
 
-        if (!esValido) {
+        if (!esValido)
+        {
             throw new Exception(mensaje);
         }
 
@@ -26,6 +28,6 @@ public class RegistrarUsuarioUseCase (IUsuarioRepositorio repo, UsuarioClienteVa
         u.Password = repoHash.Hashear(u.Password);
         u.Rol = Rol.Cliente;
 
-       await repo.AgregarAsync(u);
+        await repo.AgregarAsync(u);
     }
 }

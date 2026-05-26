@@ -14,13 +14,13 @@ namespace CentroDeportivo.Aplicacion.Validadores
         {
             string mensaje = "";
 
-            
+
             if (string.IsNullOrWhiteSpace(actividad.Nombre) || string.IsNullOrWhiteSpace(actividad.Descripcion))
             {
                 mensaje += "Error: Debe completar todos los campos.\n";
             }
 
-            
+
             if (actividad.Precio <= 0)
             {
                 mensaje += "Error: El precio debe ser mayor a 0.\n";
@@ -78,20 +78,20 @@ namespace CentroDeportivo.Aplicacion.Validadores
         {
             string mensaje = "";
 
-           
+
             if (string.IsNullOrWhiteSpace(actividad.Nombre) ||
                 string.IsNullOrWhiteSpace(actividad.Descripcion))
             {
                 mensaje += "Error: Debe completar todos los campos.\n";
             }
 
-           
+
             if (actividad.Precio <= 0)
             {
                 mensaje += "Error: El precio debe ser mayor a 0.\n";
             }
 
-            
+
             if (!string.IsNullOrWhiteSpace(actividad.Nombre))
             {
                 

@@ -8,12 +8,13 @@ using System.Threading.Tasks;
 using CentroDeportivo.Aplicacion.Validadores;
 
 namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
-{       public class RegistrarAsistenciaQrUseCase(IReservaRepositorio repoReserva, AsistenciaValidador validador)
+{
+    public class RegistrarAsistenciaQrUseCase(IReservaRepositorio repoReserva, AsistenciaValidador validador)
+    {
+        public async Task Ejecutar(string tokenEscaneado)
         {
-            public async Task Ejecutar(string tokenEscaneado)
-            {
-            
-                var reserva = await repoReserva.ObtenerPorQrTokenAsync(tokenEscaneado);
+
+            var reserva = await repoReserva.ObtenerPorQrTokenAsync(tokenEscaneado);
 
                 if (reserva == null || reserva.Asistencia == Asistencia.Presente)
                 {

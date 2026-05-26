@@ -1,11 +1,5 @@
 ﻿@page "/listar-turnos-creados"
-@using ZXing
-@using ZXing.QrCode
-@using System.Drawing
-@using System.IO
-@using ZXing.ImageSharp;
-@using SixLabors.ImageSharp;
-@using SixLabors.ImageSharp.PixelFormats;
+@using Microsoft.JSInterop;
 @inject IJSRuntime JS
 @using System.Globalization
 @inject Sesion UsuarioSesion
@@ -61,12 +55,12 @@ else
                             <input type="date" class="form-control" min="@DateTime.Today.ToString("yyyy-MM-dd")" @bind="t.Fecha" />
                         </div>
                         <div class="col-md-6 mb-3">
-                        <label class="form-label">Hora de inicio</label>
-                        <input type="time" 
-                            class="form-control" 
-                            min="18:00" 
-                            max="23:00" 
-                            @bind="t.HoraInicio" />
+                            <label class="form-label">Hora inicio</label>
+                            <input type="time"
+                                   class="form-control"
+                                   min="18:00"
+                                   max="23:00"
+                                   @bind="t.HoraInicio" />
                         </div>
                     </div>
 
@@ -187,8 +181,7 @@ else
                         <th>Fecha</th>
                         <th>Hora inicio</th>
                         <th>Hora fin</th>
-                        <th>Estado</th>
-                        <th>Cancha</th>                        
+                        <th>Cancha</th>
                         <th class="text-center">Acciones</th>
                     </tr>
                 </thead>
@@ -204,7 +197,6 @@ else
                                 <td>@tu.Fecha.ToString("dd/MM/yyyy")</td>
                                 <td>@tu.HoraInicio</td>
                                 <td>@tu.HoraFin</td>
-                                <td>@tu.Estado</td>
                                 <td><span class="badge bg-info text-dark">N° @tu.Cancha.Numero</span></td>
                                 <td class="text-center">
                                     <button class="btn btn-sm btn-outline-primary" @onclick="() => MostrarInscriptos(tu.Id)">
@@ -254,11 +246,10 @@ else
                                 @foreach (var r in reservas)
                                 {
                                     <tr>
-                                        <td>@r.Usuario.Nombre</td>
-                                        <td>@r.Usuario.Apellido</td>
-                                        <td>@r.Usuario.Dni</td>
-                                        <td>@r.Estado</td>
-                                        <td>@r.Asistencia</td>                                      
+                                        <td>@r?.Usuario?.Nombre</td>
+                                        <td>@r?.Usuario?.Apellido</td>
+                                        <td>@r?.Usuario?.Dni</td>
+                                        <td>@t.Fecha.ToString("dd/MM/yyyy")</td>
                                         <td class="text-center">
                                             <button class="btn btn-sm btn-outline-primary" @onclick="() => RegistrarAsistencia(r.Id)" 
                                                 disabled="@(!PuedeRegistrarAsistencia(r))">
@@ -280,14 +271,14 @@ else
                 <div class="modal-footer">
                     <button class="btn btn-secondary" @onclick="() => mostrarInscriptos = false">Cerrar</button>
                 </div>
-            </div
+            </div>
         </div>
     </div>
 }
 
 <button class="btn btn-info text-white mt-3" @onclick="AbrirEscaner">
-                <i class="bi bi-qr-code-scan"></i> Escanear Asistencia
-            </button>
+    <i class="bi bi-qr-code-scan"></i> Escanear Asistencia
+</button>
 
 @if (mostrarEscanner)
 {
@@ -353,13 +344,23 @@ else
 
     Cancha? canchaSeleccionada => canchasDispo.FirstOrDefault(c => c.Id == t.Id_Cancha);
 
+    private int horaSeleccionada
+    {
+        get => t.HoraInicio.Hour;
+        set => t.HoraInicio = new TimeOnly(value, 0);
+    }
+
     protected override async Task OnInitializedAsync()
     {
-        turnos = (await ListarTurnosUseCase.Ejecutar(null, null, null, null, null)).ToList();
+        turnos = (await ListarTurnosUseCase.Ejecutar(null, null, null, null, EstadoTurno.Disponible)).ToList();
         actividades = (await ListarActividadesUseCase.ejecutar()).ToList();
         todosLosProfesores = (await ListarProfesoresUseCase.ejecutar()).ToList();
         todasLasCanchas = (await ListarCanchasUseCase.ejecutar()).ToList();
         turnosFiltrados = turnos;
+        if (turnos == null || !turnos.Any())
+        {
+            mensaje = "No hay turnos programados.";
+        }
     }
 
     private void AplicarFiltros()
@@ -385,8 +386,7 @@ else
 
     void CerrarSesion()
     {
-        UsuarioSesion.CerrarSesion();
-        Navegador.NavigateTo("/Login", true);
+        UsuarioSesion.CerrarSesion(); UsuarioSesion.NotificarCambio(); Navegador.NavigateTo("/Login", true);
     }
 
 
@@ -398,6 +398,7 @@ else
         {
             mensajeTabla = "";
             await ConfirmarPagoReservaUseCase.Ejecutar(idReserva);
+            StateHasChanged();
             mensajeTabla = "Pago confirmado correctamente.";
         }
         catch (Exception ex) { mensajeTabla = ex.Message; }
@@ -434,6 +435,7 @@ else
         {
             mensajeTabla = "";
             await RegistrarAsistenciaManualUseCase.Ejecutar(idReserva);
+            StateHasChanged();
             mensajeTabla = "Asistencia manual registrada.";
         }
         catch (Exception ex) { mensajeTabla = ex.Message; }
@@ -444,17 +446,15 @@ else
         try
         {
             mensajeTurno = "";
-
             var horaMinima = new TimeOnly(18, 0); // 18:00
             var horaMaxima = new TimeOnly(23, 0); // 23:00
 
-           if (t.HoraInicio < horaMinima || t.HoraInicio > horaMaxima)
+            if (t.HoraInicio < horaMinima || t.HoraInicio > horaMaxima)
             {
-                mensajeTurno = "Horario incorrecto: El centro deportivo opera únicamente en el horario de 18:00 a 23:00 hs.";
+                mensajeTurno = "Error: El centro deportivo opera únicamente en el horario de 18:00 a 23:00 hs.";
                 mostrarDisponibles = false;
-                return; 
+                return;
             }
-
 
             var (profesD, canchasD) = await ConsultarDisponibilidadUseCase.ejecutar(t.Fecha, t.HoraInicio);
             profesoresDispo = profesD.ToList();
@@ -486,16 +486,20 @@ else
             await CrearTurnoUseCase.ejecutar(nuevoTurno);
             turnos = (await ListarTurnosUseCase.Ejecutar(null, null, null, null, null)).ToList();
             t = new Datos();
+            StateHasChanged();
             AplicarFiltros();
-            mensajeTurno = "Turno creado correctamente.";
+            mensajeTurno = $"El turno se ha creado exitosamente para la actividad {nuevoTurno.Actividad.Nombre} para la fecha {nuevoTurno.Fecha.ToShortDateString} {nuevoTurno.HoraInicio}.";
             quiereAgregar = false;
+            mostrarDisponibles = false;
+            mensajeTurno = "";
         }
         catch (Exception ex) { mensajeTurno = ex.Message; }
     }
 
 
-    private CancellationTokenSource? cts;
-   private async Task AbrirEscaner()
+
+    private async Task AbrirEscaner()
+    private async Task AbrirEscaner()
     {
         mensaje = "";
 
@@ -568,58 +572,56 @@ else
     {
         public int Id { get; set; }
         public DateOnly Fecha { get; set; } = DateOnly.FromDateTime(DateTime.Today);
-        public TimeOnly HoraInicio { get; set; } = TimeOnly.FromDateTime(DateTime.Now);
+        public TimeOnly HoraInicio { get; set; } = new TimeOnly(18, 0);
         public int CupoMaximo { get; set; }
         public int Id_Actividad { get; set; }
         public int Id_Profesor { get; set; }
         public int Id_Cancha { get; set; }
     }
+    private bool PuedeRegistrarAsistencia(Reserva r)
+    {
+        if (r?.Turno == null)
+            return false;
+
+        if (r.Estado != EstadoReserva.Confirmado)
+            return false;
+
+        if (r.Turno.Estado == EstadoTurno.Finalizado)
+            return false;
+
+        if (r.Asistencia != Asistencia.Ausente)
+            return false;
+
+        var fechaHoraInicio = r.Turno.Fecha.ToDateTime(r.Turno.HoraInicio);
+        var fechaHoraFin = r.Turno.Fecha.ToDateTime(r.Turno.HoraFin);
 
     
-
-   private bool PuedeRegistrarAsistencia(Reserva r)
-{
-    if (r?.Turno == null)
-        return false;
-
-    if (r.Estado != EstadoReserva.Confirmado)
-        return false;
-
-    if (r.Turno.Estado == EstadoTurno.Finalizado)
-        return false;
-
-    if (r.Asistencia != Asistencia.Ausente)
-        return false;
-
-    var fechaHoraInicio = r.Turno.Fecha.ToDateTime(r.Turno.HoraInicio);
-    var fechaHoraFin = r.Turno.Fecha.ToDateTime(r.Turno.HoraFin);
-
-    
-    return DateTime.Now >= fechaHoraInicio.AddMinutes(-15) && DateTime.Now <= fechaHoraFin;
-}
+        return DateTime.Now >= fechaHoraInicio.AddMinutes(-15) && DateTime.Now <= fechaHoraFin;
+    }
 
     private bool yaPasoLaHora(Reserva r)
-{
-    
-    if (r?.Turno == null)
-        return true;
+    {
+
+        if (r?.Turno == null)
+            return true;
 
     
-    DateOnly fechaDelTurno = r.Turno.Fecha;
-    TimeOnly horaInicioDelTurno = r.Turno.HoraInicio;
+        DateOnly fechaDelTurno = r.Turno.Fecha;
+        TimeOnly horaInicioDelTurno = r.Turno.HoraInicio;
 
     
-    DateOnly hoy = DateOnly.FromDateTime(DateTime.Now);
-    TimeOnly ahora = TimeOnly.FromDateTime(DateTime.Now);
+        DateOnly hoy = DateOnly.FromDateTime(DateTime.Now);
+        TimeOnly ahora = TimeOnly.FromDateTime(DateTime.Now);
 
-    if (fechaDelTurno < hoy)
-        return true;
-
-    
-    if (fechaDelTurno == hoy && ahora > horaInicioDelTurno)
-        return true;
+        if (fechaDelTurno < hoy)
+            return true;
 
     
-    return false;
+        if (fechaDelTurno == hoy && ahora > horaInicioDelTurno)
+            return true;
+
+    
+        return false;
+    }
 }
 }

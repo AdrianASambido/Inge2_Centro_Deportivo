@@ -26,22 +26,17 @@
 
             <h5 class="mb-3">Información personal</h5>
 
-            <input placeholder="Nombre" @bind="nombre" class="form-control mb-2">
-            <input placeholder="Apellido" @bind="apellido" class="form-control mb-2">
-            <input placeholder="DNI" @bind="dni" class="form-control mb-2">
+            <input placeholder="Nombre" @bind="nombre" type="text" class="form-control mb-2">
+            <input placeholder="Apellido" @bind="apellido" type="text" class="form-control mb-2">
+            <input placeholder="DNI" @bind="dni" type="number" class="form-control mb-2">
             <input placeholder="Domicilio" @bind="domicilio" class="form-control mb-2">
-            <input placeholder="Correo" @bind="correo" class="form-control mb-2">
+            <input placeholder="Correo" @bind="correo"type="email" class="form-control mb-2">
 
             <div class="d-flex gap-2 mt-3 justify-content-end">
 
                 <button class="btn btn-outline-primary"
                         @onclick="GuardarDatos">
                     Guardar cambios
-                </button>
-
-                <button class="btn btn-outline-warning"
-                        @onclick="CambiarContrasenia">
-                    Cambiar contraseña
                 </button>
 
                 <button class="btn btn-outline-secondary"

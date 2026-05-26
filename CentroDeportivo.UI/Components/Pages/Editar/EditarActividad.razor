@@ -15,20 +15,25 @@
 }
 else
 {
-    <input placeholder="Nombre" @bind="nombre" class="form-control mb-2" />
-    <input placeholder="Descripción" @bind="descripcion" class="form-control mb-2" />
-    <input placeholder="Precio" @bind="precio" class="form-control mb-3" type="number" step="0.01" />
+    <div class="card shadow-sm border-0 rounded-4 p-4" style="max-width: 700px;">
+        <input placeholder="Nombre" @bind="nombre" type="text" class="form-control mb-2" />
+        <input placeholder="Descripción" @bind="descripcion" type="text" class="form-control mb-2" />
+        <input placeholder="Precio" @bind="precio" class="form-control mb-3" type="number" step="0.01" />
+        
+        <div class="d-flex gap-2 mt-3 justify-content-end">
 
-    <div class="d-flex gap-2">
-        <button class="btn btn-success" @onclick="GuardarDatos">Guardar cambios</button>
-        <button class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
+            <button class="btn btn-success" @onclick="GuardarDatos">Guardar cambios</button>
+            <button class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
+
+        </div>
+        @if (!string.IsNullOrEmpty(mensaje))
+        {
+            <div class="alert alert-danger mt-3">@mensaje</div>
+        }
     </div>
+    
 }
 
-@if (!string.IsNullOrEmpty(mensaje))
-{
-    <div class="alert alert-danger mt-3">@mensaje</div>
-}
 
 @code {
     [Parameter] public int Id { get; set; }
@@ -54,12 +59,13 @@ else
     async Task GuardarDatos()
     {  
         if (actividad == null) return;
-
+        mensaje = "";
         try
         {
             var acti = new Actividad(nombre, descripcion, precio);
             await EditarActividadCase.Ejecutar(acti, Id);
-            Navegador.NavigateTo("/Actividades");
+            mensaje = "Cambios guardados con exito.";
+            StateHasChanged();
         }
         catch (Exception ex)
         {

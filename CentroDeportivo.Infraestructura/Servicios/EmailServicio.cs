@@ -16,12 +16,12 @@ namespace CentroDeportivo.Infraestructura.Servicios
             
             private readonly string _host = "sandbox.smtp.mailtrap.io";
             private readonly int _port = 587;
-            private readonly string _username = "cc40ec27feb855";
-            private readonly string _password = "64dd5d2e21eb4a"; 
+            private readonly string _username = "9aeacbca401b67";
+            private readonly string _password = "7363cde37d7caf";
 
-   
-            public async Task EnviarContraseniaTemporalAsync(string emailDestino, string contraseniaTemporal)
-            {
+
+        public async Task EnviarContraseniaTemporalAsync(string emailDestino, string contraseniaTemporal)
+        {
             //  Crea mensaje con MimeKit
             var mensaje = new MimeMessage();
             mensaje.From.Add(new MailboxAddress("Centro Deportivo", "admin@centrodeportivo.com"));
@@ -38,17 +38,17 @@ namespace CentroDeportivo.Infraestructura.Servicios
             };
             mensaje.Body = bodyBuilder.ToMessageBody();
 
-         
+
             using var client = new SmtpClient();
             try
             {
-                
+
                 await client.ConnectAsync(_host, _port, SecureSocketOptions.StartTls);
 
-              
+
                 await client.AuthenticateAsync(_username, _password);
 
-            
+
                 await client.SendAsync(mensaje);
 
                 await client.DisconnectAsync(true);

@@ -11,7 +11,8 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.UsuarioUseCase
 {
     public class RestablecerContraseniaUseCase(IUsuarioRepositorio repoUsuario, IHashServicio repoHash)
     {
-        public async Task Ejecutar(string contra, string token) {
+        public async Task Ejecutar(string contra, string token)
+        {
             var usuario = await repoUsuario.ObtenerPorToken(token);
 
             if (usuario == null) {
@@ -23,7 +24,8 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.UsuarioUseCase
             }
 
             var (esValido, mensaje) = UsuarioValidadorBase.ValidarFormatoPassword(contra);
-            if (!esValido) {
+            if (!esValido)
+            {
                 throw new Exception(mensaje);
             }
 

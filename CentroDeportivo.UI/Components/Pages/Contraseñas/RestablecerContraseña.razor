@@ -16,7 +16,7 @@
         </div>
 
         <div class="mb-4">
-            <label class="form-control">Repita la contraseña</label>
+            <label class="form-label">Repita la contraseña</label>
             <input placeholder="********" @bind="nueva2" class="form-control" type="password" autocomplete="new-password" />
         </div>
 
@@ -36,15 +36,14 @@
     string error = "";
     string nueva1 = "";
     string nueva2 = "";
-
+    
     [Parameter]
     [SupplyParameterFromQuery(Name = "token")]
+    
     public string? Token { get; set; }
-
-    // Este método se ejecuta apenas carga la página
-    protected override void OnInitialized()
+    
+    protected override async Task OnInitializedAsync()
     {
-        // Si por algún motivo SupplyParameterFromQuery falla, lo pescamos manualmente
         if (string.IsNullOrEmpty(Token))
         {
             var uri = Navegador.ToAbsoluteUri(Navegador.Uri);
@@ -56,7 +55,7 @@
             }
         }
     }
-
+    
     async Task Redirigir()
     {
         error = "";
@@ -74,7 +73,6 @@
                 return;
             }
 
-            // Ahora Token ya debería tener el valor desde el OnInitialized
             if (string.IsNullOrEmpty(Token))
             {
                 error = "El link de recuperación no es válido o ha expirado.";
@@ -93,4 +91,4 @@
         }
     }
 }
-}
+

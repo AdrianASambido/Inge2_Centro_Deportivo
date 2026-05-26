@@ -31,8 +31,8 @@ else
                     <h4 class="card-title mb-3">Datos del empleado</h4>
                     <input placeholder="Nombre" @bind="emp.nombre" class="form-control mb-3" />
                     <input placeholder="Apellido" @bind="emp.apellido" class="form-control mb-3" />
-                    <input placeholder="DNI" @bind="emp.dni" class="form-control mb-3" />
-                    <input placeholder="Email" @bind="emp.email" class="form-control mb-3" />
+                    <input placeholder="DNI" @bind="emp.dni" type="number" class="form-control mb-3" />
+                    <input placeholder="Email" @bind="emp.email" type="email" class="form-control mb-3" />
                     <div class="d-flex gap-2">
                         <button type="button" class="btn btn-primary flex-grow-1" @onclick="Aceptar">Guardar</button>
                         <button type="button" class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
@@ -67,13 +67,23 @@ else
                             <td>@e.Nombre</td>
                             <td>@e.Apellido</td>
                             <td>@e.Dni</td>
-                            <td class="text-center">                               
+                            <td class="text-center">
+                                <button class="btn btn-sm btn-primary" @onclick="() => Editar(e.Id)">Editar</button>
+                                <button class="btn btn-sm btn-primary" @onclick="() => Editar(e.Id)">Editar</button>
+                                <button class="btn btn-sm btn-primary" @onclick="() => Editar(e.Id)">Editar</button>
+                                <button class="btn btn-sm btn-primary" @onclick="() => Editar(e.Id)">Editar</button>
                                 <button class="btn btn-sm btn-danger" @onclick="() => ConfirmarEliminacion(e.Id)">Eliminar</button>
                             </td>
                         </tr>
                     }
                 </tbody>
             </table>
+            @if (!string.IsNullOrEmpty(mensaje))
+            {
+                <div class="alert alert-info alert-dismissible fade show mb-4" role="alert">
+                    @mensaje
+                </div>
+            }
         </div>
     </div>
 }
@@ -98,16 +108,21 @@ else
     string mensaje = ""; bool mostrarDialog = false; int idAEliminar; bool quiereAgregar = false; Datos emp = new Datos();
     List<Usuario> empleado = new List<Usuario>();
 
-    protected override async Task OnInitializedAsync() => empleado = (await ListarEmpleadosUseCase.ejecutar()).ToList();
-    
-    void CerrarSesion() { UsuarioSesion.CerrarSesion(); Navegador.NavigateTo("/Login", true); }
-    
+    protected override async Task OnInitializedAsync() {
+        empleado = (await ListarEmpleadosUseCase.ejecutar()).ToList(); 
+        if (empleado == null || !empleado.Any()) 
+        {
+            mensaje = "No existen empleados."; 
+        }
+    }
+
+    void CerrarSesion() { UsuarioSesion.CerrarSesion(); UsuarioSesion.NotificarCambio(); Navegador.NavigateTo("/Login", true); }
+
     void CrearEmpleado()
     {
-        emp = new Datos(); 
-        quiereAgregar = true;
-        mensaje = "";
-    }
+
+
+    
     
     
     
@@ -115,12 +130,15 @@ else
 
     async Task Eliminar()
     {
+        mensaje = "";
         mostrarDialog = false;
         try
         {
             await EliminarEmpleadoUseCase.ejecutar(idAEliminar);
             empleado = (await ListarEmpleadosUseCase.ejecutar()).ToList();
-            mensaje = "Empleado eliminado.";
+            mensaje = "Empleado eliminado exitosamente.";
+            mensaje = "";
+            StateHasChanged();
         }
         catch (Exception ex) { mensaje = ex.Message; }
         StateHasChanged();
@@ -128,16 +146,16 @@ else
 
     async Task Aceptar()
     {
+        mensaje = "";
         try
         {
 
             var emple = new Usuario(emp.nombre, emp.apellido, "a", emp.dni, "A123456789", emp.email, false, Rol.Empleado);
-            
+
             await CrearEmpleadoUseCase.ejecutar(emple);
-            
+
             empleado = (await ListarEmpleadosUseCase.ejecutar()).ToList();
-            
-            mensaje = "Empleado creado exitosamente.";
+            emp = new Datos();
             quiereAgregar = false;
             StateHasChanged();
         }
@@ -148,7 +166,7 @@ else
         }
     }
 
-    void Cancelar() { quiereAgregar = false; mensaje = ""; }
+    void Cancelar() { quiereAgregar = false; mensaje = ""; emp = new Datos(); }
 
     public class Datos
     {

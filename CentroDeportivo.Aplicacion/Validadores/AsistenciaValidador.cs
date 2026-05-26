@@ -12,7 +12,7 @@ namespace CentroDeportivo.Aplicacion.Validadores
     {
         public async Task<(bool esValido, string mensaje)> ValidarAsistencia(Reserva reserva)
         {
-            
+
 
             var fechaHoraClase = reserva.Turno!.Fecha.ToDateTime(reserva.Turno.HoraInicio);
             var diferencia = fechaHoraClase - DateTime.Now;

@@ -20,15 +20,16 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
 
         public async Task AgregarAsync(Actividad actividad)
         {
-           await context.Actividades.AddAsync(actividad);
-           await context.SaveChangesAsync();
+            await context.Actividades.AddAsync(actividad);
+            await context.SaveChangesAsync();
 
         }
 
         public async Task EliminarAsync(int id)
         {
             var actividad = await ObtenerPorIdAsync(id);
-            if (actividad != null) {
+            if (actividad != null)
+            {
                 context.Actividades.Remove(actividad);
                 await context.SaveChangesAsync();
             }

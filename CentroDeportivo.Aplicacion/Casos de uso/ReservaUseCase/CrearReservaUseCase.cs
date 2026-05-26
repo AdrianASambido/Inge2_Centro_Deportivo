@@ -9,20 +9,22 @@ using CentroDeportivo.Aplicacion.Entidades;
 
 namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
 {
-    public class CrearReservaUseCase (IReservaRepositorio repoReserva, ITurnoRepositorio repoTurno,ReservaValidador validador)
+    public class CrearReservaUseCase(IReservaRepositorio repoReserva, ITurnoRepositorio repoTurno, ReservaValidador validador)
     {
-        public async Task Ejecutar(Reserva reserva) {
+        public async Task Ejecutar(Reserva reserva)
+        {
             var (esValido, mensaje) = await validador.ValidarReserva(reserva);
 
-            if (!esValido) {
+            if (!esValido)
+            {
                 throw new Exception(mensaje);
             }
 
             var turno = await repoTurno.ObtenerPorIdAsync(reserva.Id_Turno);
 
             turno!.CupoDisponible--;///
-            
-            if(turno.CupoDisponible == 0)
+
+            if (turno.CupoDisponible == 0)
             {
                 turno.Estado = EstadoTurno.Lleno;
             }
