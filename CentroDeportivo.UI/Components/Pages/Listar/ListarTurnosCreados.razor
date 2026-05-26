@@ -486,6 +486,7 @@ else
             AplicarFiltros();
             mensajeTurno = $"El turno se ha creado exitosamente para la actividad {nuevoTurno.Actividad.Nombre} para la fecha {nuevoTurno.Fecha.ToShortDateString} {nuevoTurno.HoraInicio}.";
             quiereAgregar = false;
+            mostrarDisponibles = false;
             mensajeTurno = "";
         }
         catch (Exception ex) { mensajeTurno = ex.Message; }
