@@ -95,8 +95,8 @@ else
 
 
 @code {
-        string mensaje = ""; bool mostrarDialog = false; int idAEliminar; bool quiereAgregar = false; Datos pro = new Datos();
-        List<Profesor> profesor = new List<Profesor>();
+    string mensaje = ""; bool mostrarDialog = false; int idAEliminar; bool quiereAgregar = false; Datos pro = new Datos();
+    List<Profesor> profesor = new List<Profesor>();
 
     protected override async Task OnInitializedAsync() {
         profesor = (await ListarProfesoresUseCase.ejecutar()).ToList();
@@ -105,7 +105,7 @@ else
             mensaje = "No hay profesores registrados.";
         }
     }
-        void CerrarSesion() { UsuarioSesion.CerrarSesion(); UsuarioSesion.NotificarCambio(); Navegador.NavigateTo("/Login", true); }
+    void CerrarSesion() { UsuarioSesion.CerrarSesion(); UsuarioSesion.NotificarCambio(); Navegador.NavigateTo("/Login", true); }
     void CrearProfesor() => quiereAgregar = true;
     public void Editar(int Id) => Navegador.NavigateTo($"/editar-profesor/{Id}");
     void ConfirmarEliminacion(int Id) { idAEliminar = Id; mostrarDialog = true; }
@@ -140,6 +140,6 @@ else
         catch (Exception ex) { mensaje = ex.Message; }
     }
 
-    void Cancelar() { quiereAgregar = false; }
+    void Cancelar() { quiereAgregar = false; pro = new Datos(); }
     public class Datos { public string nombre { get; set; } = ""; public string apellido { get; set; } = ""; public string dni { get; set; } }
 }

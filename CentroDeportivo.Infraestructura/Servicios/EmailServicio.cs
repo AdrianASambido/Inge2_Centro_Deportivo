@@ -17,11 +17,11 @@ namespace CentroDeportivo.Infraestructura.Servicios
             private readonly string _host = "sandbox.smtp.mailtrap.io";
             private readonly int _port = 587;
             private readonly string _username = "9aeacbca401b67";
-            private readonly string _password = "7363cde37d7caf"; 
+            private readonly string _password = "7363cde37d7caf";
 
-   
-            public async Task EnviarContraseniaTemporalAsync(string emailDestino, string contraseniaTemporal)
-            {
+
+        public async Task EnviarContraseniaTemporalAsync(string emailDestino, string contraseniaTemporal)
+        {
             //  Crea mensaje con MimeKit
             var mensaje = new MimeMessage();
             mensaje.From.Add(new MailboxAddress("Centro Deportivo", "admin@centrodeportivo.com"));
@@ -38,17 +38,17 @@ namespace CentroDeportivo.Infraestructura.Servicios
             };
             mensaje.Body = bodyBuilder.ToMessageBody();
 
-         
+
             using var client = new SmtpClient();
             try
             {
-                
+
                 await client.ConnectAsync(_host, _port, SecureSocketOptions.StartTls);
 
-              
+
                 await client.AuthenticateAsync(_username, _password);
 
-            
+
                 await client.SendAsync(mensaje);
 
                 await client.DisconnectAsync(true);
@@ -76,7 +76,7 @@ namespace CentroDeportivo.Infraestructura.Servicios
             <p>Recibimos una solicitud para restablecer tu contraseña.</p>
             <p>Hacé click en el siguiente link para continuar:</p>
             <a href='{link}'>Restablecer contraseña</a>
-            <p>Este link vence en 1 hora.</p>
+            <p>Este link vence en 10 minutos.</p>
             <p>Si no solicitaste este cambio, ignorá este mensaje.</p>"
             };
             mensaje.Body = bodyBuilder.ToMessageBody();

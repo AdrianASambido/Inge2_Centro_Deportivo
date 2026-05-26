@@ -20,15 +20,16 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
 
         public async Task AgregarAsync(Actividad actividad)
         {
-           await context.Actividades.AddAsync(actividad);
-           await context.SaveChangesAsync();
+            await context.Actividades.AddAsync(actividad);
+            await context.SaveChangesAsync();
 
         }
 
         public async Task EliminarAsync(int id)
         {
             var actividad = await ObtenerPorIdAsync(id);
-            if (actividad != null) {
+            if (actividad != null)
+            {
                 context.Actividades.Remove(actividad);
                 await context.SaveChangesAsync();
             }
@@ -77,8 +78,14 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
 
         public async Task<bool> YaExisteParaEditar(string nombre, int idActual)
         {
-            // Devuelve true solo si hay otra actividad con ese nombre, pero que NO sea la que estamos editando
-            return await context.Actividades.AnyAsync(a => a.Nombre == nombre && a.Id != idActual && a.Existe);
+            var nombreNormalizado = Normalizar(nombre);
+
+            var nombresExistentes = await context.Actividades
+                .Where(a => a.Existe && a.Id != idActual)
+                .Select(a => a.Nombre)
+                .ToListAsync();
+
+            return nombresExistentes.Any(n => Normalizar(n) == nombreNormalizado);
         }
     }
 }

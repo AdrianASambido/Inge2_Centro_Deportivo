@@ -35,7 +35,7 @@ else
 
 
 @code {
-    
+
     [Parameter]
     public int Id { get; set; }
     public int idCanchaAEditar;
@@ -43,7 +43,7 @@ else
     public int Capacidad;
 
     public Cancha? cancha;
-    
+
     public string mensaje = "";
     protected override async Task OnInitializedAsync()
     {
@@ -76,8 +76,7 @@ else
             await EditarCanchaCase.Ejecutar(cancha);
 
             mensaje = "Edición exitosa";
-
-            Navegador.NavigateTo("/canchas");
+            StateHasChanged();
         }
         catch (Exception ex)
         {

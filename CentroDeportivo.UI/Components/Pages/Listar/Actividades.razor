@@ -99,13 +99,13 @@ else
 }
 
 @code {
-        string mensaje = "";
-        bool mostrarDialog = false;
-        int idAEliminar;
-        bool quiereAgregar = false;
-        Datos act = new Datos();
+    string mensaje = "";
+    bool mostrarDialog = false;
+    int idAEliminar;
+    bool quiereAgregar = false;
+    Datos act = new Datos();
 
-        List<Actividad> actividad = new List<Actividad>();
+    List<Actividad> actividad = new List<Actividad>();
 
     protected override async Task OnInitializedAsync() {
         actividad = (await ListarActividadesUseCase.ejecutar()).ToList();
@@ -151,7 +151,7 @@ else
         catch (Exception ex) { mensaje = ex.Message; }
     }
 
-    void Cancelar() { quiereAgregar = false; mensaje = ""; }
+    void Cancelar() { quiereAgregar = false; mensaje = ""; act = new Datos(); }
 
     public class Datos
     {

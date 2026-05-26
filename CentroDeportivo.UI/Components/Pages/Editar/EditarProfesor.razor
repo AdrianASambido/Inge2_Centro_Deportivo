@@ -78,7 +78,7 @@ else
             var profesorNuevo = new Profesor(nombre, apellido, dni);
             await EditarProfesorCase.Ejecutar(profesorNuevo, idProfesorAEditar);
             mensaje = "Profesor editado con exito.";
-            Navegador.NavigateTo("/profesores");
+            StateHasChanged();
         }
         catch (Exception ex)
         {

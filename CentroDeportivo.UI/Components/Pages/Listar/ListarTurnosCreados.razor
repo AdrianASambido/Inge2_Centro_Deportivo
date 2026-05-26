@@ -56,12 +56,11 @@ else
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Hora inicio</label>
-                            <select class="form-select" @bind="horaSeleccionada">
-                                @for (int h = 0; h < 24; h++)
-                                {
-                                    <option value="@h">@($"{h:D2}:00")</option>
-                                }
-                            </select>
+                            <input type="time"
+                                   class="form-control"
+                                   min="18:00"
+                                   max="23:00"
+                                   @bind="t.HoraInicio" />
                         </div>
                     </div>
 
@@ -256,7 +255,7 @@ else
                                                 Registrar asistencia
                                             </button>
                                             <button class="btn btn-sm btn-outline-secondary" @onclick="() => RegistrarPago(r.Id)"
-                                                disabled="@(r.Estado != EstadoReserva.PendienteDePago || !yaPasoLaHora(r))">Confirmar pago</button>
+                                                disabled="@(r.Estado != EstadoReserva.PendienteDePago || yaPasoLaHora(r))">Confirmar pago</button>
                                         </td>
                                     </tr>
                                 }
@@ -352,7 +351,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        turnos = (await ListarTurnosUseCase.Ejecutar(null, null, null, null, null)).ToList();
+        turnos = (await ListarTurnosUseCase.Ejecutar(null, null, null, null, EstadoTurno.Disponible)).ToList();
         actividades = (await ListarActividadesUseCase.ejecutar()).ToList();
         todosLosProfesores = (await ListarProfesoresUseCase.ejecutar()).ToList();
         todasLasCanchas = (await ListarCanchasUseCase.ejecutar()).ToList();
@@ -582,21 +581,41 @@ else
         if (r.Estado != EstadoReserva.Confirmado)
             return false;
 
+        if (r.Turno.Estado == EstadoTurno.Finalizado)
+            return false;
+
         if (r.Asistencia != Asistencia.Ausente)
             return false;
 
-        var fechaHoraTurno = r.Turno.Fecha.ToDateTime(r.Turno.HoraInicio);
+        var fechaHoraInicio = r.Turno.Fecha.ToDateTime(r.Turno.HoraInicio);
+        var fechaHoraFin = r.Turno.Fecha.ToDateTime(r.Turno.HoraFin);
 
-        return DateTime.Now >= fechaHoraTurno.AddMinutes(-15);
+    
+        return DateTime.Now >= fechaHoraInicio.AddMinutes(-15) && DateTime.Now <= fechaHoraFin;
     }
 
     private bool yaPasoLaHora(Reserva r)
     {
+
         if (r?.Turno == null)
             return true;
 
-        var fechaHoraTurno = r.Turno.Fecha.ToDateTime(r.Turno.HoraInicio);
+    
+        DateOnly fechaDelTurno = r.Turno.Fecha;
+        TimeOnly horaInicioDelTurno = r.Turno.HoraInicio;
 
-        return DateTime.Now > fechaHoraTurno;
+    
+        DateOnly hoy = DateOnly.FromDateTime(DateTime.Now);
+        TimeOnly ahora = TimeOnly.FromDateTime(DateTime.Now);
+
+        if (fechaDelTurno < hoy)
+            return true;
+
+    
+        if (fechaDelTurno == hoy && ahora > horaInicioDelTurno)
+            return true;
+
+    
+        return false;
     }
 }

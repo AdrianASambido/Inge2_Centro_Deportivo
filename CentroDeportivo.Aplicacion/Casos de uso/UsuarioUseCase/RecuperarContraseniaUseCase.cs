@@ -10,15 +10,17 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.UsuarioUseCase
 {
     public class RecuperarContraseniaUseCase(IUsuarioRepositorio repo, IEmailServicio repoEmail)
     {
-        public async Task Ejecutar(string email) { 
+        public async Task Ejecutar(string email)
+        {
             var usuario = await repo.ObtenerPorEmail(email);
 
-            if (usuario == null) {
-                throw new Exception("Email incorrecto.");
+            if (usuario == null)
+            {
+                throw new Exception("El email ingresado no existe.");
             }
 
             var token = Guid.NewGuid().ToString();
-            var vencimiento = DateTime.Now.AddHours(1);
+            var vencimiento = DateTime.Now.AddMinutes(10);
 
             usuario.TokenRecuperacion = token;
             usuario.TokenRecuperacionVencimiento = vencimiento;

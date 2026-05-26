@@ -74,6 +74,12 @@ else
                     }
                 </tbody>
             </table>
+            @if (!string.IsNullOrEmpty(mensaje))
+            {
+                <div class="alert alert-info alert-dismissible fade show mb-4" role="alert">
+                    @mensaje
+                </div>
+            }
         </div>
     </div>
 }
@@ -141,9 +147,9 @@ else
         {
 
             var emple = new Usuario(emp.nombre, emp.apellido, "a", emp.dni, "A123456789", emp.email, false, Rol.Empleado);
-            
+
             await CrearEmpleadoUseCase.ejecutar(emple);
-            
+
             empleado = (await ListarEmpleadosUseCase.ejecutar()).ToList();
             emp = new Datos();
             quiereAgregar = false;
@@ -156,7 +162,7 @@ else
         }
     }
 
-    void Cancelar() { quiereAgregar = false; mensaje = ""; }
+    void Cancelar() { quiereAgregar = false; mensaje = ""; emp = new Datos(); }
 
     public class Datos
     {

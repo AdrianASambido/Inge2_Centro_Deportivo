@@ -65,7 +65,7 @@ else
             var acti = new Actividad(nombre, descripcion, precio);
             await EditarActividadCase.Ejecutar(acti, Id);
             mensaje = "Cambios guardados con exito.";
-            Navegador.NavigateTo("/Actividades");
+            StateHasChanged();
         }
         catch (Exception ex)
         {

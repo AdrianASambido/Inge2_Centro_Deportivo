@@ -12,12 +12,12 @@ namespace CentroDeportivo.Aplicacion.Validadores
     {
         public async Task<(bool esValido, string mensaje)> ValidarAsistencia(Reserva reserva)
         {
-            
+
 
             var fechaHoraClase = reserva.Turno!.Fecha.ToDateTime(reserva.Turno.HoraInicio);
             var diferencia = fechaHoraClase - DateTime.Now;
             if (diferencia.TotalMinutes > 15)
-                return (false, "Error: faltan más de 15 minutos para el comienzo de la clase.");
+                return (false, "Error: la generación de QR se habilita 15 minutos antes del comienzo de la clase.");
 
             if (reserva.Turno!.Estado == EstadoTurno.Finalizado)
                 return (false, "Error: la clase ya finalizó.");

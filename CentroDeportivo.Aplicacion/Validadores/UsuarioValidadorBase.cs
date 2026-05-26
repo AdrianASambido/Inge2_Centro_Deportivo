@@ -37,13 +37,13 @@ namespace CentroDeportivo.Aplicacion.Validadores
             var (camposOk, msg) = await ValidarCamposObligatorios(u);
 
             if (!string.IsNullOrWhiteSpace(u.Dni) && await _repo.YaExiste(u.Dni))
-                msg += "El DNI pertenece a un usuario registrado.\n";
+                msg += "Error el DNI ingresado ya existe.\n";
 
             if (!string.IsNullOrWhiteSpace(u.Dni) && await _repoProfesor.YaExiste(u.Dni))
-                msg += "El DNI pertenece a un usuario registrado.\n";
+                msg += "Error: el DNI ingresado ya existe.\n";
 
             if (!string.IsNullOrWhiteSpace(u.Email) && await _repo.YaExisteEmail(u.Email))
-                msg += "El correo ingresado pertenece a un usuario registrado.\n";
+                msg += "Error: el email ingresado ya existe.\n";
 
             return (string.IsNullOrEmpty(msg), msg);
         }
@@ -54,10 +54,10 @@ namespace CentroDeportivo.Aplicacion.Validadores
             var (camposOk, msg) = await ValidarCamposObligatorios(u);
 
             if (!string.IsNullOrWhiteSpace(u.Dni) && await _repo.YaExisteDniParaEditar(u.Dni, u.Id))
-                msg += "El DNI ingresado ya se encuentra registrado en otro usuario.\n";
+                msg += "Error: el DNI ingresado ya existe.\n";
 
             if (!string.IsNullOrWhiteSpace(u.Email) && await _repo.YaExisteEmailParaEditar(u.Email, u.Id))
-                msg += "El correo ingresado ya se encuentra registrado en otro usuario.\n";
+                msg += "Error: el DNI ingresado ya existe.\n";
 
             return (string.IsNullOrEmpty(msg), msg);
         }
@@ -69,7 +69,7 @@ namespace CentroDeportivo.Aplicacion.Validadores
 
             if (!Regex.IsMatch(password, @"^(?=.*[A-Z])(?=.*\d).{8,}$"))
             {
-                return (false, "La contraseña debe tener al menos 8 caracteres, una mayúscula y un número. \n");
+                return (false, "Error: La contraseña debe tener al menos 8 caracteres, una mayúscula y un número. \n");
             }
             return (true, "");
         }
