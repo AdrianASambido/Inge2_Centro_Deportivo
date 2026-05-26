@@ -31,8 +31,8 @@ else
                     <h4 class="card-title mb-3">Datos del empleado</h4>
                     <input placeholder="Nombre" @bind="emp.nombre" class="form-control mb-3" />
                     <input placeholder="Apellido" @bind="emp.apellido" class="form-control mb-3" />
-                    <input placeholder="DNI" @bind="emp.dni" class="form-control mb-3" />
-                    <input placeholder="Email" @bind="emp.email" class="form-control mb-3" />
+                    <input placeholder="DNI" @bind="emp.dni" type="number" class="form-control mb-3" />
+                    <input placeholder="Email" @bind="emp.email" type="email" class="form-control mb-3" />
                     <div class="d-flex gap-2">
                         <button type="button" class="btn btn-primary flex-grow-1" @onclick="Aceptar">Guardar</button>
                         <button type="button" class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>

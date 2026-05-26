@@ -29,8 +29,8 @@ else
             <div class="card shadow-sm mb-4 border-success" style="max-width: 400px;">
                 <div class="card-body">
                     <h4 class="card-title mb-3">Nueva Cancha</h4>
-                    <input placeholder="Número de cancha" @bind="can.numero" class="form-control mb-2" />
-                    <input placeholder="Capacidad" @bind="can.capacidad" class="form-control mb-3" />
+                    <input placeholder="Número de cancha" @bind="can.numero" type="number" class="form-control mb-2" />
+                    <input placeholder="Capacidad" @bind="can.capacidad" type="number" class="form-control mb-3" />
                     <div class="d-flex gap-2">
                         <button class="btn btn-primary flex-grow-1" @onclick="Aceptar">Guardar</button>
                         <button class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>

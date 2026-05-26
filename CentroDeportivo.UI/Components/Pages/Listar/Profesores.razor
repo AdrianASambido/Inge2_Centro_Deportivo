@@ -29,9 +29,9 @@ else
             <div class="card shadow-sm mb-4" style="max-width: 500px;">
                 <div class="card-body">
                     <h4 class="card-title mb-3">Datos del profesor</h4>
-                    <input placeholder="Nombre" @bind="pro.nombre" class="form-control mb-2" />
-                    <input placeholder="Apellido" @bind="pro.apellido" class="form-control mb-2" />
-                    <input placeholder="DNI" @bind="pro.dni" class="form-control mb-3" />
+                    <input placeholder="Nombre" @bind="pro.nombre" type="text" class="form-control mb-2" />
+                    <input placeholder="Apellido" @bind="pro.apellido" type="text" class="form-control mb-2" />
+                    <input placeholder="DNI" @bind="pro.dni" type="number" class="form-control mb-3" />
                     <div class="d-flex gap-2">
                         <button class="btn btn-primary flex-grow-1" @onclick="Aceptar">Guardar</button>
                         <button class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
