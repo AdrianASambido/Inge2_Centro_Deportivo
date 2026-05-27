@@ -35,10 +35,6 @@
                 <p>No estás logueado.</p>
                 <NavLink href="/login" class="btn btn-primary">Iniciar sesión</NavLink>
             }
-            else if (reservas == null)
-            {
-                <p><em>Cargando reservas...</em></p>
-            }
             else
             {
                 <table class="table table-hover">
@@ -48,11 +44,14 @@
                             <th>Fecha</th>
                             <th>Horario</th>
                             <th>Cancha</th>
+                            <th>Asistencia</th>
                             <th>Estado</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
+                        @if (reservasActivas.Any())
+                        {
                             @foreach (var r in reservasActivas)
                             {
                                 <tr>
@@ -60,6 +59,7 @@
                                     <td>@r.Turno?.Fecha.ToShortDateString()</td>
                                     <td>@r.Turno?.HoraInicio</td>
                                     <td>@r.Turno?.Cancha.Numero</td>
+                                    <td>@r.Asistencia</td>
                                     <td>@r.Estado</td>
 
                                     <td>
@@ -89,6 +89,13 @@
                                     </td>
                                 </tr>
                             }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="8" class="text-center py-4 text-muted">No registra reservas.</td>
+                            </tr>
+                        }
                     </tbody
                 </table>
             }
@@ -102,44 +109,12 @@
     <div class="alert alert-info mt-3 shadow-sm">@error</div>
 }
 
-<div class="container-fluid p-0">
-    <div class="p-5 mb-4 bg-light rounded-3 shadow-sm">
-            <h2 class="mb-1">Reservas canceladas</h2>
 
-        
-        <div class="table-responsive shadow-sm" style="background: white; border-radius: 8px;">
-            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>Actividad</th>
-                                        <th>Fecha</th>
-                                        <th>Horario</th>
-                                        <th>Cancha</th>
-                                        <th>Estado</th>
-                                        @*<th>Acciones</th>*@
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var r in reservas)
-                                    {
-                                        <tr>
-                                            <td>@r.Turno?.Actividad?.Nombre</td>
-                                            <td>@r.Turno?.Fecha.ToShortDateString()</td>
-                                            <td>@r.Turno?.HoraInicio</td>
-                                            <td>@r.Turno?.Cancha.Numero</td>
-                                            <td>@r.Estado</td
-                                        </tr>
-                                    }
-                                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
 
     
 @code {
     List<Reserva>? reservasActivas;
-    List<Reserva>? reservas;
+
     private int? reservaSeleccionadaId; 
     private byte[] qrCode = Array.Empty<byte>();
     private string error = "";
@@ -150,11 +125,6 @@
         try
         {
             reservasActivas = (await listarReservasUseCase.Ejecutar(UsuarioSesion.UsuarioActual.Id)).Where(r => r.Estado != EstadoReserva.Cancelado).ToList();
-            reservas = (await listarReservasUseCase.Ejecutar(UsuarioSesion.UsuarioActual.Id)).Where(r => r.Estado == EstadoReserva.Cancelado)?.ToList() ?? new List<Reserva>();
-            if (reservasActivas == null || reservasActivas.Count == 0)
-            {
-                error = "No registra reservas.";
-            }
         }
         catch (Exception ex)
         {
@@ -207,7 +177,6 @@
             {
                 var resultado = (await listarReservasUseCase.Ejecutar(UsuarioSesion.UsuarioActual.Id)).Where(r => r.Estado != EstadoReserva.Cancelado);
                 reservasActivas = resultado.ToList();
-                reservas = (await listarReservasUseCase.Ejecutar(UsuarioSesion.UsuarioActual.Id)).Where(r => r.Estado == EstadoReserva.Cancelado).ToList();
             }
             StateHasChanged();
         }
@@ -223,6 +192,9 @@
             return false;
 
         if (r.Asistencia != Asistencia.Ausente)
+            return false;
+
+        if (r.Turno!.Estado == EstadoTurno.Finalizado)
             return false;
 
         var fechaHoraTurno = r.Turno.Fecha.ToDateTime(r.Turno.HoraInicio);

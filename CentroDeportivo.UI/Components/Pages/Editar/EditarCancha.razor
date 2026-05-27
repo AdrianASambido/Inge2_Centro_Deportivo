@@ -60,6 +60,7 @@ else
     {
         mensaje = msj;
     }
+
     async Task GuardarDatos()
     {
         if (cancha == null)
@@ -70,17 +71,19 @@ else
         try
         {
             mensaje = "";
-
-            cancha.Numero = numero;
-            cancha.Capacidad = Capacidad;
-
-            await EditarCanchaCase.Ejecutar(cancha);
-
+            var canchaEditada = new Cancha
+            {
+                Numero = numero,
+                Capacidad = Capacidad
+            };
+            await EditarCanchaCase.Ejecutar(canchaEditada, idCanchaAEditar);
+            cancha = canchaEditada;
             mensaje = "Edición exitosa";
-            StateHasChanged();
         }
         catch (Exception ex)
         {
+            numero = cancha.Numero;
+            Capacidad = cancha.Capacidad;
             mensaje = ex.Message;
         }
         MostrarMensaje(mensaje);
