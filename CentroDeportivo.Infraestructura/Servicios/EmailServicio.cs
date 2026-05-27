@@ -14,17 +14,17 @@ namespace CentroDeportivo.Infraestructura.Servicios
     public class EmailServicio : IEmailServicio
     {
             
-            private readonly string _host = "sandbox.smtp.mailtrap.io";
+            private readonly string _host = "smtp.gmail.com";
             private readonly int _port = 587;
-            private readonly string _username = "9aeacbca401b67";
-            private readonly string _password = "7363cde37d7caf";
+            private readonly string _username = "nelsonpi1999@gmail.com";
+            private readonly string _password = "byul fiot fyae pvtn";
 
 
         public async Task EnviarContraseniaTemporalAsync(string emailDestino, string contraseniaTemporal)
         {
             //  Crea mensaje con MimeKit
             var mensaje = new MimeMessage();
-            mensaje.From.Add(new MailboxAddress("Centro Deportivo", "admin@centrodeportivo.com"));
+            mensaje.From.Add(new MailboxAddress("Centro Deportivo",_username));
             mensaje.To.Add(new MailboxAddress("", emailDestino));
             mensaje.Subject = "Bienvenido - Tu contraseña temporal";
 
@@ -52,11 +52,11 @@ namespace CentroDeportivo.Infraestructura.Servicios
                 await client.SendAsync(mensaje);
 
                 await client.DisconnectAsync(true);
-                Console.WriteLine("Correo enviado exitosamente con MailKit.");
+                Console.WriteLine("Correo enviado exitosamente con Gmail.");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error con MailKit: {ex.Message}");
+                Console.WriteLine($"Error con Gmail: {ex.Message}");
                 throw;
             }
         }
@@ -65,7 +65,7 @@ namespace CentroDeportivo.Infraestructura.Servicios
         public async Task EnviarLinkRecuperacionAsync(string emailDestino, string link)
         {
             var mensaje = new MimeMessage();
-            mensaje.From.Add(new MailboxAddress("Centro Deportivo", "admin@centrodeportivo.com"));
+            mensaje.From.Add(new MailboxAddress("Centro Deportivo", _username));
             mensaje.To.Add(new MailboxAddress("", emailDestino));
             mensaje.Subject = "Recuperación de contraseña";
 
