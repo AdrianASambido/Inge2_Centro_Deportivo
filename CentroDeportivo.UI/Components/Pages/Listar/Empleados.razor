@@ -68,10 +68,6 @@ else
                             <td>@e.Apellido</td>
                             <td>@e.Dni</td>
                             <td class="text-center">
-                                <button class="btn btn-sm btn-primary" @onclick="() => Editar(e.Id)">Editar</button>
-                                <button class="btn btn-sm btn-primary" @onclick="() => Editar(e.Id)">Editar</button>
-                                <button class="btn btn-sm btn-primary" @onclick="() => Editar(e.Id)">Editar</button>
-                                <button class="btn btn-sm btn-primary" @onclick="() => Editar(e.Id)">Editar</button>
                                 <button class="btn btn-sm btn-danger" @onclick="() => ConfirmarEliminacion(e.Id)">Eliminar</button>
                             </td>
                         </tr>
@@ -108,11 +104,12 @@ else
     string mensaje = ""; bool mostrarDialog = false; int idAEliminar; bool quiereAgregar = false; Datos emp = new Datos();
     List<Usuario> empleado = new List<Usuario>();
 
-    protected override async Task OnInitializedAsync() {
-        empleado = (await ListarEmpleadosUseCase.ejecutar()).ToList(); 
-        if (empleado == null || !empleado.Any()) 
+    protected override async Task OnInitializedAsync()
+    {
+        empleado = (await ListarEmpleadosUseCase.ejecutar()).ToList();
+        if (empleado == null || !empleado.Any())
         {
-            mensaje = "No existen empleados."; 
+            mensaje = "No existen empleados.";
         }
     }
 
@@ -120,12 +117,12 @@ else
 
     void CrearEmpleado()
     {
+        emp = new Datos();
+        quiereAgregar = true;
+        mensaje = "";
+    }
 
 
-    
-    
-    
-    
     void ConfirmarEliminacion(int Id) { idAEliminar = Id; mostrarDialog = true; }
 
     async Task Eliminar()

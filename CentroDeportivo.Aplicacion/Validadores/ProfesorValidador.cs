@@ -29,7 +29,7 @@ namespace CentroDeportivo.Aplicacion.Validadores
                 }
                 if (await _repo.YaExiste(p.Dni))
                 {
-                    mensaje += "Error: el DNI ingresado ya existe..\n";
+                    mensaje += "Error: el DNI ingresado ya existe.\n";
                 }
             }
             return (string.IsNullOrEmpty(mensaje), mensaje);
@@ -44,6 +44,10 @@ namespace CentroDeportivo.Aplicacion.Validadores
             if (!string.IsNullOrWhiteSpace(p.Dni))
             {
                 if (await _repoProfe.YaExisteDniParaEditar(p.Dni, id))
+                {
+                    mensaje += "Error: el DNI ingresado ya existe.\n";
+                }
+                if (await _repo.YaExiste(p.Dni))
                 {
                     mensaje += "Error: el DNI ingresado ya existe.\n";
                 }
