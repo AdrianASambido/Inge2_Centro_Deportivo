@@ -55,6 +55,7 @@ else
             Capacidad = cancha.Capacidad;
         }
     }
+
     void MostrarMensaje(string msj)
     {
         mensaje = msj;
@@ -83,10 +84,11 @@ else
             mensaje = ex.Message;
         }
         MostrarMensaje(mensaje);
-     }
+    }
 
     void Cancelar()
     {
+        cancha = new Cancha();
         Navegador.NavigateTo("/canchas");
         mensaje = "";
     }

@@ -24,12 +24,16 @@
     {
         <div class="card shadow-sm border-0 rounded-4 p-4" style="max-width: 700px;">
 
-            <h5 class="mb-3">Información personal</h5>
-
+            <h4 class="mb-3">Información personal</h4>
+            <label class="form-label">Nombre</label>
             <input placeholder="Nombre" @bind="nombre" type="text" class="form-control mb-2">
+            <label class="form-label">Apellido</label>
             <input placeholder="Apellido" @bind="apellido" type="text" class="form-control mb-2">
+            <label class="form-label">DNI</label>
             <input placeholder="DNI" @bind="dni" type="number" class="form-control mb-2">
+            <label class="form-label">Domicilio</label>
             <input placeholder="Domicilio" @bind="domicilio" class="form-control mb-2">
+            <label class="form-label">Correo</label>
             <input placeholder="Correo" @bind="correo"type="email" class="form-control mb-2">
 
             <div class="d-flex gap-2 mt-3 justify-content-end">
@@ -72,10 +76,6 @@
     public string domicilio = "";
     public string correo = "";
 
-    void CambiarContrasenia()
-    {
-        Navegador.NavigateTo("/cambiar-contraseña");
-    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -91,29 +91,30 @@
         }
     }
 
-async Task GuardarDatos()
-{
-    if (usuario == null)
-        return;
-
-    try
+    async Task GuardarDatos()
     {
-        usuario.Nombre = nombre;
-        usuario.Apellido = apellido;
-        usuario.Dni = dni;
-        usuario.Domicilio = domicilio;
-        usuario.Email = correo;
+        mensaje = "";
+        if (usuario == null)
+            return;
 
-        await EditarUsuarioCase.Ejecutar(usuario, usuario.Id);
+        try
+        {
+            usuario.Nombre = nombre;
+            usuario.Apellido = apellido;
+            usuario.Dni = dni;
+            usuario.Domicilio = domicilio;
+            usuario.Email = correo;
 
-        mensaje = "Los datos se han modificado correctamente.";
-        Navegador.NavigateTo("/MiPerfil");
+            await EditarUsuarioCase.Ejecutar(usuario, usuario.Id);
+
+            mensaje = "Los datos se han modificado correctamente.";
+            Navegador.NavigateTo("/MiPerfil");
+        }
+        catch (Exception ex)
+        {
+            mensaje = ex.Message;
+        }
     }
-    catch (Exception ex)
-    {
-        mensaje = ex.Message;
-    }
-}
 
     void Cancelar()
     {

@@ -52,17 +52,26 @@ else
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var p in profesor)
+                    @if (profesor.Any())
+                    {
+                        @foreach (var p in profesor)
+                        {
+                            <tr>
+                                <td>@p.Id</td>
+                                <td>@p.Nombre</td>
+                                <td>@p.Apellido</td>
+                                <td>@p.Dni</td>
+                                <td class="text-center">
+                                    <button class="btn btn-sm btn-primary" @onclick="() => Editar(p.Id)">Editar</button>
+                                    <button class="btn btn-sm btn-danger" @onclick="() => ConfirmarEliminacion(p.Id)">Eliminar</button>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
                     {
                         <tr>
-                            <td>@p.Id</td>
-                            <td>@p.Nombre</td>
-                            <td>@p.Apellido</td>
-                            <td>@p.Dni</td>
-                            <td class="text-center">
-                                <button class="btn btn-sm btn-primary" @onclick="() => Editar(p.Id)">Editar</button>
-                                <button class="btn btn-sm btn-danger" @onclick="() => ConfirmarEliminacion(p.Id)">Eliminar</button>
-                            </td>
+                            <td colspan="8" class="text-center py-4 text-muted">No hay profesores registrados.</td>
                         </tr>
                     }
                 </tbody>
@@ -100,10 +109,6 @@ else
 
     protected override async Task OnInitializedAsync() {
         profesor = (await ListarProfesoresUseCase.ejecutar()).ToList();
-        if (profesor == null || !profesor.Any())
-        {
-            mensaje = "No hay profesores registrados.";
-        }
     }
     void CerrarSesion() { UsuarioSesion.CerrarSesion(); UsuarioSesion.NotificarCambio(); Navegador.NavigateTo("/Login", true); }
     void CrearProfesor() => quiereAgregar = true;
@@ -132,7 +137,7 @@ else
             var profe = new Profesor(pro.nombre, pro.apellido, pro.dni);
             await CrearProfesorUseCase.ejecutar(profe);
             profesor = (await ListarProfesoresUseCase.ejecutar()).ToList();
-            mensaje = "Profesor creado con exito."; 
+            mensaje = "Profesor registrado con exito."; 
             pro = new Datos();
             quiereAgregar = false;
             StateHasChanged();

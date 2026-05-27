@@ -60,16 +60,24 @@ else
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var e in empleado)
+                    @if (empleado.Any()){
+                        @foreach (var e in empleado)
+                        {
+                            <tr>
+                                <td>@e.Id</td>
+                                <td>@e.Nombre</td>
+                                <td>@e.Apellido</td>
+                                <td>@e.Dni</td>
+                                <td class="text-center">
+                                    <button class="btn btn-sm btn-danger" @onclick="() => ConfirmarEliminacion(e.Id)">Eliminar</button>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
                     {
                         <tr>
-                            <td>@e.Id</td>
-                            <td>@e.Nombre</td>
-                            <td>@e.Apellido</td>
-                            <td>@e.Dni</td>
-                            <td class="text-center">
-                                <button class="btn btn-sm btn-danger" @onclick="() => ConfirmarEliminacion(e.Id)">Eliminar</button>
-                            </td>
+                            <td colspan="8" class="text-center py-4 text-muted">No existen empleados.</td>
                         </tr>
                     }
                 </tbody>
@@ -106,10 +114,7 @@ else
 
     protected override async Task OnInitializedAsync() {
         empleado = (await ListarEmpleadosUseCase.ejecutar()).ToList(); 
-        if (empleado == null || !empleado.Any()) 
-        {
-            mensaje = "No existen empleados."; 
-        }
+        
     }
 
     void CerrarSesion() { UsuarioSesion.CerrarSesion(); UsuarioSesion.NotificarCambio(); Navegador.NavigateTo("/Login", true); }
@@ -157,7 +162,7 @@ else
         }
         catch (Exception ex)
         {
-            mensaje = "Error: " + ex.Message;
+            mensaje = ex.Message;
             StateHasChanged();
         }
     }

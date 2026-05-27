@@ -125,7 +125,7 @@ else
                 </div>
             </div>
         }
-
+        @*
         <div class="card shadow-sm mb-4">
             <div class="card-body">
                 <div class="row g-3 align-items-end">
@@ -170,7 +170,7 @@ else
                 </div>
             </div>
         </div>
-
+        *@
         <div class="table-responsive shadow-sm" style="background: white; border-radius: 8px;">
             <table class="table table-hover mb-0">
                 <thead class="table-light">
@@ -209,7 +209,7 @@ else
                     else
                     {
                         <tr>
-                            <td colspan="8" class="text-center py-4 text-muted">No se encontraron turnos con los filtros seleccionados.</td>
+                            <td colspan="8" class="text-center py-4 text-muted">No hay turnos programados.</td>
                         </tr>
                     }
                 </tbody>
@@ -356,10 +356,7 @@ else
         todosLosProfesores = (await ListarProfesoresUseCase.ejecutar()).ToList();
         todasLasCanchas = (await ListarCanchasUseCase.ejecutar()).ToList();
         turnosFiltrados = turnos;
-        if (turnos == null || !turnos.Any())
-        {
-            mensaje = "No hay turnos programados.";
-        }
+
     }
 
     private void AplicarFiltros()
@@ -558,6 +555,7 @@ else
 
     void Cancelar()
     {
+        mensajeTurno = "";
         quiereAgregar = false;
         mostrarDisponibles = false;
         t = new Datos();

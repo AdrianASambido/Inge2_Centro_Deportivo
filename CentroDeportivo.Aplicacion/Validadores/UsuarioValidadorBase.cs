@@ -37,13 +37,21 @@ namespace CentroDeportivo.Aplicacion.Validadores
             var (camposOk, msg) = await ValidarCamposObligatorios(u);
 
             if (!string.IsNullOrWhiteSpace(u.Dni) && await _repo.YaExiste(u.Dni))
-                msg += "Error el DNI ingresado ya existe.\n";
+                msg += "Error: el DNI ingresado ya existe.\n";
 
             if (!string.IsNullOrWhiteSpace(u.Dni) && await _repoProfesor.YaExiste(u.Dni))
                 msg += "Error: el DNI ingresado ya existe.\n";
 
-            if (!string.IsNullOrWhiteSpace(u.Email) && await _repo.YaExisteEmail(u.Email))
+
+            if (!string.IsNullOrWhiteSpace(u.Email) && !EsEmailValidoEstructuralmente(u.Email))
+            {
+                msg += "Error: el formato de email no es válido.\n";
+            }
+
+            else if (!string.IsNullOrWhiteSpace(u.Email) && await _repo.YaExisteEmail(u.Email))
+            {
                 msg += "Error: el email ingresado ya existe.\n";
+            }
 
             return (string.IsNullOrEmpty(msg), msg);
         }
@@ -56,8 +64,15 @@ namespace CentroDeportivo.Aplicacion.Validadores
             if (!string.IsNullOrWhiteSpace(u.Dni) && await _repo.YaExisteDniParaEditar(u.Dni, u.Id))
                 msg += "Error: el DNI ingresado ya existe.\n";
 
-            if (!string.IsNullOrWhiteSpace(u.Email) && await _repo.YaExisteEmailParaEditar(u.Email, u.Id))
-                msg += "Error: el DNI ingresado ya existe.\n";
+            // NUEVA VALIDACIÓN: Estructura y dominio permitido
+            if (!string.IsNullOrWhiteSpace(u.Email) && !EsEmailValidoEstructuralmente(u.Email))
+            {
+                msg += "Error: el formato de email no es válido.\n";
+            }
+            else if (!string.IsNullOrWhiteSpace(u.Email) && await _repo.YaExisteEmailParaEditar(u.Email, u.Id))
+            {
+                msg += "Error: el email ingresado ya existe.\n";
+            }
 
             return (string.IsNullOrEmpty(msg), msg);
         }
@@ -72,6 +87,16 @@ namespace CentroDeportivo.Aplicacion.Validadores
                 return (false, "Error: La contraseña debe tener al menos 8 caracteres, una mayúscula y un número. \n");
             }
             return (true, "");
+        }
+
+        private bool EsEmailValidoEstructuralmente(string email)
+        {
+            if (string.IsNullOrWhiteSpace(email)) return false;
+
+            // Esta expresión regular valida formato de email y restringe el dominio a gmail u outlook
+            string patron = @"^[a-zA-Z0-9._%+-]+@(gmail|outlook)\.[a-zA-Z]{2,}(?:\.[a-zA-Z]{2,})?$";
+
+            return Regex.IsMatch(email, patron, RegexOptions.IgnoreCase);
         }
 
         protected abstract (bool esValidoPass, string mensajePass) ValidarPassword(Usuario u);
