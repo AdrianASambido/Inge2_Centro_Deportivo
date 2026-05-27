@@ -1,23 +1,33 @@
 ﻿using CentroDeportivo.Aplicacion.Entidades;
 using CentroDeportivo.Aplicacion.Interfaces;
+using MailKit.Net.Smtp;
+using MailKit.Security;
+using Microsoft.Extensions.Configuration;
+using MimeKit;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using MailKit.Net.Smtp;
-using MailKit.Security;
-using MimeKit;
 
 namespace CentroDeportivo.Infraestructura.Servicios
 {
     public class EmailServicio : IEmailServicio
     {
-            
-            private readonly string _host = "smtp.gmail.com";
-            private readonly int _port = 587;
-            private readonly string _username = "nelsonpi1999@gmail.com";
-            private readonly string _password = "byul fiot fyae pvtn";
+
+        private readonly string _host;
+        private readonly int _port;
+        private readonly string _username;
+        private readonly string _password;
+
+        // Inyectamos IConfiguration en el constructor
+        public EmailServicio(IConfiguration configuration)
+        {
+            _host = configuration["EmailSettings:Host"] ?? "smtp.gmail.com";
+            _port = int.Parse(configuration["EmailSettings:Port"] ?? "587");
+            _username = configuration["EmailSettings:Username"] ?? "";
+            _password = configuration["EmailSettings:Password"] ?? "";
+        }
 
 
         public async Task EnviarContraseniaTemporalAsync(string emailDestino, string contraseniaTemporal)
