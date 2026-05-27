@@ -70,10 +70,17 @@ else
         {
             mensaje = "";
 
+            var canchaModificada = new Cancha
+            {
+                
+                Numero = numero, 
+                Capacidad = Capacidad
+            };
+            
+            await EditarCanchaCase.Ejecutar(canchaModificada,idCanchaAEditar);
+
             cancha.Numero = numero;
             cancha.Capacidad = Capacidad;
-
-            await EditarCanchaCase.Ejecutar(cancha);
 
             mensaje = "Edición exitosa";
             StateHasChanged();

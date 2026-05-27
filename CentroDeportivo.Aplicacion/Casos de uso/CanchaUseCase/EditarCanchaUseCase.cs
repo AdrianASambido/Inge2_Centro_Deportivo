@@ -18,9 +18,9 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.CanchaUseCase
             this.repo = repo;
         }
 
-        public async Task Ejecutar(Cancha canchaEditada)
+        public async Task Ejecutar(Cancha canchaEditada, int idCancha)
         {
-            var canchaExistente = await repo.ObtenerPorIdAsync(canchaEditada.Id);
+            var canchaExistente = await repo.ObtenerPorIdAsync(idCancha);
 
             if (canchaExistente == null)
             {
@@ -39,7 +39,7 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.CanchaUseCase
             // Validar número repetido
             if (await repo.YaExisteNumeroParaEditar(
                     canchaEditada.Numero,
-                    canchaEditada.Id))
+                    idCancha))
             {
                 throw new Exception(
                     "Edición fallida. El número de cancha ingresado ya existe"
