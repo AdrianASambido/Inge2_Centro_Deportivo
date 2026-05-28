@@ -20,7 +20,7 @@ namespace CentroDeportivo.Infraestructura.Servicios
         private readonly string _username;
         private readonly string _password;
 
-        // Inyectamos IConfiguration en el constructor
+        
         public EmailServicio(IConfiguration configuration)
         {
             _host = configuration["EmailSettings:Host"] ?? "smtp.gmail.com";

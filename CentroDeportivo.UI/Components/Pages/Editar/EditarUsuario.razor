@@ -67,6 +67,7 @@
     public Usuario? usuario;
 
     public string nombre = "";
+    public int idUsuario;
     public string apellido = "";
     public string dni = "";
     public string domicilio = "";
@@ -84,6 +85,7 @@
         if (usuario != null)
         {
             nombre = usuario.Nombre;
+            idUsuario = usuario.Id;
             apellido = usuario.Apellido;
             dni = usuario.Dni;
             domicilio = usuario.Domicilio;
@@ -98,13 +100,19 @@ async Task GuardarDatos()
 
     try
     {
-        usuario.Nombre = nombre;
-        usuario.Apellido = apellido;
-        usuario.Dni = dni;
-        usuario.Domicilio = domicilio;
-        usuario.Email = correo;
+       
 
-        await EditarUsuarioCase.Ejecutar(usuario, usuario.Id);
+            
+            var usuarioModificado = new Usuario
+            {
+                Nombre = nombre,
+                Apellido = apellido,
+                Dni = dni,
+                Domicilio = domicilio,
+                Email = correo
+            };
+
+        await EditarUsuarioCase.Ejecutar(usuarioModificado,idUsuario);
 
         mensaje = "Los datos se han modificado correctamente.";
         Navegador.NavigateTo("/MiPerfil");

@@ -56,25 +56,43 @@ namespace CentroDeportivo.Aplicacion.Validadores
             return (string.IsNullOrEmpty(msg), msg);
         }
 
-        // Validacion para editar
-        public async Task<(bool esValido, string mensaje)> ValidarEdicionBase(Usuario u)
+        public async Task<(bool esValido, string mensaje)> ValidarEdicion(Usuario u, int idUsuario)
         {
-            var (camposOk, msg) = await ValidarCamposObligatorios(u);
+            string mensaje = "";
 
-            if (!string.IsNullOrWhiteSpace(u.Dni) && await _repo.YaExisteDniParaEditar(u.Dni, u.Id))
-                msg += "Error: el DNI ingresado ya existe.\n";
+            
+            var (camposOk, msgCampos) = await ValidarCamposObligatorios(u);
+            if (!camposOk) mensaje += msgCampos;
 
-            // NUEVA VALIDACIÓN: Estructura y dominio permitido
-            if (!string.IsNullOrWhiteSpace(u.Email) && !EsEmailValidoEstructuralmente(u.Email))
+            
+            if (!string.IsNullOrWhiteSpace(u.Dni))
             {
-                msg += "Error: el formato de email no es válido.\n";
-            }
-            else if (!string.IsNullOrWhiteSpace(u.Email) && await _repo.YaExisteEmailParaEditar(u.Email, u.Id))
-            {
-                msg += "Error: el email ingresado ya existe.\n"; 
+                if (await _repo.YaExisteDniParaEditar(u.Dni, idUsuario))
+                {
+                    mensaje += "Error: el DNI ingresado ya se encuentra registrado.\n";
+                }
+
+                
+                if (await _repoProfesor.YaExiste(u.Dni))
+                {
+                    mensaje += "Error: el DNI ingresado ya se encuentra registrado.\n";
+                }
             }
 
-            return (string.IsNullOrEmpty(msg), msg);
+            // 3. Validar Email (Excluyendo al usuario actual)
+            if (!string.IsNullOrWhiteSpace(u.Email))
+            {
+                if (!EsEmailValidoEstructuralmente(u.Email))
+                {
+                    mensaje += "Error: el formato de email no es válido.\n";
+                }
+                else if (await _repo.YaExisteEmailParaEditar(u.Email, idUsuario))
+                {
+                    mensaje += "Error: el email ya se encuentra registrado.\n";
+                }
+            }
+
+            return (string.IsNullOrEmpty(mensaje), mensaje.Trim());
         }
 
         // Método estático para que el Caso de Uso lo use directamente

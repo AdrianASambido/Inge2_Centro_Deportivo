@@ -66,6 +66,7 @@ builder.Services.AddScoped<RecuperarContraseniaUseCase>();
 builder.Services.AddScoped<ListarEmpleadosUseCase>();
 builder.Services.AddScoped<RestablecerContraseniaUseCase>();
 
+builder.Services.AddScoped<UsuarioValidadorBase, UsuarioEmpleadoValidador>();
 
 builder.Services.AddScoped<CrearActividadUseCase>();
 builder.Services.AddScoped<ListarActividadesUseCase>();

@@ -37,7 +37,7 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
         //para el empleado 
         public async Task<IEnumerable<Turno>> BuscarTurnosAsync(DateOnly? fecha, int? actividadId, int? profeId, int? canchaId,EstadoTurno? estado)
         {
-            var query = contexto.Turnos
+            var query = contexto.Turnos.Where(t => t.Estado != EstadoTurno.Finalizado)
                 .Include(t => t.Actividad)
                 .Include(t => t.Profesor)
                 .Include(t => t.Cancha)
