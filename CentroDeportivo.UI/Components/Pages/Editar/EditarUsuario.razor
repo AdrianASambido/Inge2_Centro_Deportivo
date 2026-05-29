@@ -99,19 +99,26 @@
 
         try
         {
-            usuario.Nombre = nombre;
-            usuario.Apellido = apellido;
-            usuario.Dni = dni;
-            usuario.Domicilio = domicilio;
-            usuario.Email = correo;
-
-            await EditarUsuarioCase.Ejecutar(usuario, usuario.Id);
-
+            var usrEditado = new Usuario
+                {
+                    Nombre = nombre,
+                    Apellido = apellido,
+                    Dni = dni,
+                    Domicilio = domicilio,
+                    Email = correo,
+                };
+            await EditarUsuarioCase.Ejecutar(usrEditado, usuario.Id);
+            usuario = usrEditado;
             mensaje = "Los datos se han modificado correctamente.";
             Navegador.NavigateTo("/MiPerfil");
         }
         catch (Exception ex)
         {
+            nombre = usuario.Nombre;
+            apellido = usuario.Apellido;
+            dni = usuario.Dni;
+            domicilio = usuario.Domicilio;
+            correo = usuario.Email;
             mensaje = ex.Message;
         }
     }

@@ -327,6 +327,7 @@ else
     bool quiereAgregar = false;
     string mensaje = "";
     Datos t = new Datos();
+    private int turnoActualId;
 
     private int filtroActividadId = 0;
     private int filtroCanchaId = 0;
@@ -351,12 +352,11 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        turnos = (await ListarTurnosUseCase.Ejecutar(null, null, null, null, EstadoTurno.Disponible)).ToList();
+        turnos = (await ListarTurnosUseCase.Ejecutar(null, null, null, null, null)).ToList();
         actividades = (await ListarActividadesUseCase.ejecutar()).ToList();
         todosLosProfesores = (await ListarProfesoresUseCase.ejecutar()).ToList();
         todasLasCanchas = (await ListarCanchasUseCase.ejecutar()).ToList();
         turnosFiltrados = turnos;
-
     }
 
     private void AplicarFiltros()
@@ -390,17 +390,25 @@ else
         try
         {
             mensajeTabla = "";
+
             await ConfirmarPagoReservaUseCase.Ejecutar(idReserva);
-            StateHasChanged();
+
+            await RecargarReservas();
+
             mensajeTabla = "Pago confirmado correctamente.";
         }
-        catch (Exception ex) { mensajeTabla = ex.Message; }
+        catch (Exception ex)
+        {
+            mensajeTabla = ex.Message;
+        }
     }
 
     async Task MostrarInscriptos(int Id)
     {
         try
         {
+            turnoActualId = Id;
+
             mostrarInscriptos = true;
 
             reservas = (await ListarInscriptosUseCase.Ejecutar(Id))?.ToList()
@@ -414,6 +422,8 @@ else
             {
                 mensajeTabla = "";
             }
+
+            StateHasChanged();
         }
         catch (Exception ex)
         {
@@ -422,16 +432,30 @@ else
         }
     }
 
+    private async Task RecargarReservas()
+    {
+        reservas = (await ListarInscriptosUseCase.Ejecutar(turnoActualId))?.ToList()
+                   ?? new List<Reserva>();
+
+        await InvokeAsync(StateHasChanged);
+    }
+
     async Task RegistrarAsistencia(int idReserva)
     {
         try
         {
             mensajeTabla = "";
+
             await RegistrarAsistenciaManualUseCase.Ejecutar(idReserva);
-            StateHasChanged();
+
+            await RecargarReservas();
+
             mensajeTabla = "Asistencia manual registrada.";
         }
-        catch (Exception ex) { mensajeTabla = ex.Message; }
+        catch (Exception ex)
+        {
+            mensajeTabla = ex.Message;
+        }
     }
 
     async Task BuscarPorDisponibilidad()
@@ -442,13 +466,13 @@ else
             var horaMinima = new TimeOnly(18, 0); // 18:00
             var horaMaxima = new TimeOnly(23, 0); // 23:00
 
-            if (t.HoraInicio < horaMinima || t.HoraInicio > horaMaxima)
+            /*if (t.HoraInicio < horaMinima || t.HoraInicio > horaMaxima)
             {
                 mensajeTurno = "Error: El centro deportivo opera únicamente en el horario de 18:00 a 23:00 hs.";
                 mostrarDisponibles = false;
                 return;
             }
-
+            */
             var (profesD, canchasD) = await ConsultarDisponibilidadUseCase.ejecutar(t.Fecha, t.HoraInicio);
             profesoresDispo = profesD.ToList();
             canchasDispo = canchasD.ToList();
@@ -482,7 +506,6 @@ else
             StateHasChanged();
             AplicarFiltros();
             mensajeTurno = $"El turno se ha creado exitosamente para la actividad {nuevoTurno.Actividad.Nombre} para la fecha {nuevoTurno.Fecha.ToShortDateString} {nuevoTurno.HoraInicio}.";
-            quiereAgregar = false;
             mostrarDisponibles = false;
             mensajeTurno = "";
         }

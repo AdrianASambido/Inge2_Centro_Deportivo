@@ -72,7 +72,7 @@
             mensajeExito = null;
             await ConfirmarDevolucionUseCase.Ejecutar(idDevolucion);
 
-            mensajeExito = "¡Devolución confirmada.";
+            mensajeExito = "¡Devolución confirmada.!";
 
             devoluciones = (await ListarDevolucionesPendientesUseCase.ejecutar()).ToList();
             StateHasChanged();

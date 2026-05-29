@@ -29,7 +29,7 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.CanchaUseCase
 
             // Regla de negocio:
             // no se puede editar si tiene turnos asignados
-            if (await repo.TieneTurnosAsignadosAsync(canchaEditada.Id))
+            if (await repo.TieneTurnosAsignadosAsync(canchaExistente.Id))
             {
                 throw new Exception(
                     "Edición fallida. Esta cancha tiene turnos agendados"

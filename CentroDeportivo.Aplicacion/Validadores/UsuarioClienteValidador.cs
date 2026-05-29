@@ -23,32 +23,6 @@ namespace CentroDeportivo.Aplicacion.Validadores
             return (true, "");
         }
 
-        public async Task<(bool esValido, string mensaje)> ValidarEdicion(Usuario u)
-        {
-            string mensaje = "";
 
-            // Campos obligatorios
-            var (datosValido, datosMsg) = await ValidarEdicionBase(u);
-            if (!datosValido)
-                mensaje += datosMsg;
-
-            // Validar que el DNI no exista en otro usuario
-            if (!string.IsNullOrWhiteSpace(u.Dni))
-            {
-                if (await _repo.YaExisteDniParaEditar(u.Dni, u.Id)) // Nota: excluye el propio usuario
-                    mensaje += "El DNI ingresado ya se encuentra registrado en el sistema.\n";
-                if (await _repoProfesor.YaExiste(u.Dni))
-                    mensaje += "El DNI ingresado ya se encuentra registrado en el sistema.\n";
-            }
-
-            // Validar que el email no exista en otro usuario
-            if (!string.IsNullOrWhiteSpace(u.Email))
-            {
-                if (await _repo.YaExisteEmailParaEditar(u.Email, u.Id))
-                    mensaje += "El correo ingresado no se encuentra disponible.\n";
-            }
-
-            return (string.IsNullOrEmpty(mensaje), mensaje.Trim());
-        }
     }
 }
