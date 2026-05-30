@@ -50,16 +50,25 @@ else
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var c in canchasFiltradas)
+                    @if (canchasFiltradas.Any())
+                    {
+                        @foreach (var c in canchasFiltradas)
+                        {
+                            <tr>
+                                <td>@c.Id</td>
+                                <td class="fw-bold text-primary">Cancha @c.Numero</td>
+                                <td>@c.Capacidad Personas</td>
+                                <td class="text-center">
+                                    <button class="btn btn-sm btn-primary" @onclick="() => Editar(c.Id)">Editar</button>
+                                    <button class="btn btn-sm btn-danger" @onclick="() => ConfirmarEliminacion(c.Id)">Eliminar</button>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
                     {
                         <tr>
-                            <td>@c.Id</td>
-                            <td class="fw-bold text-primary">Cancha @c.Numero</td>
-                            <td>@c.Capacidad Personas</td>
-                            <td class="text-center">
-                                <button class="btn btn-sm btn-primary" @onclick="() => Editar(c.Id)">Editar</button>
-                                <button class="btn btn-sm btn-danger" @onclick="() => ConfirmarEliminacion(c.Id)">Eliminar</button>
-                            </td>
+                            <td colspan="8" class="text-center py-4 text-muted">No hay canchas registradas.</td>
                         </tr>
                     }
                 </tbody>
@@ -106,10 +115,7 @@ else
     protected override async Task OnInitializedAsync()
     {
         cancha = (await ListarCanchasUseCase.ejecutar()).ToList();
-        if (cancha == null || !cancha.Any())
-        {
-            mensaje = "No hay canchas registradas.";
-        }
+        
     }
     void CerrarSesion() { UsuarioSesion.CerrarSesion(); UsuarioSesion.NotificarCambio(); Navegador.NavigateTo("/Login", true); }
     public void Editar(int Id) => Navegador.NavigateTo($"/editar-cancha/{Id}");

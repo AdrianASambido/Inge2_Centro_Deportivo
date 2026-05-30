@@ -55,10 +55,12 @@ else
             Capacidad = cancha.Capacidad;
         }
     }
+
     void MostrarMensaje(string msj)
     {
         mensaje = msj;
     }
+
     async Task GuardarDatos()
     {
         if (cancha == null)
@@ -69,31 +71,27 @@ else
         try
         {
             mensaje = "";
-
-            var canchaModificada = new Cancha
+            var canchaEditada = new Cancha
             {
-                
-                Numero = numero, 
+                Numero = numero,
                 Capacidad = Capacidad
             };
-            
-            await EditarCanchaCase.Ejecutar(canchaModificada,idCanchaAEditar);
-
-            cancha.Numero = numero;
-            cancha.Capacidad = Capacidad;
-
+            await EditarCanchaCase.Ejecutar(canchaEditada, idCanchaAEditar);
+            cancha = canchaEditada;
             mensaje = "Edición exitosa";
-            StateHasChanged();
         }
         catch (Exception ex)
         {
+            numero = cancha.Numero;
+            Capacidad = cancha.Capacidad;
             mensaje = ex.Message;
         }
         MostrarMensaje(mensaje);
-     }
+    }
 
     void Cancelar()
     {
+        cancha = new Cancha();
         Navegador.NavigateTo("/canchas");
         mensaje = "";
     }

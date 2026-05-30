@@ -35,10 +35,6 @@
                 <p>No estás logueado.</p>
                 <NavLink href="/login" class="btn btn-primary">Iniciar sesión</NavLink>
             }
-            else if (reservas == null)
-            {
-                <p><em>Cargando reservas...</em></p>
-            }
             else
             {
                 <table class="table table-hover">
@@ -54,15 +50,17 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var r in reservasActivas)
+                        @if (reservasActivas.Any())
                         {
-                            <tr>
-                                <td>@r.Turno?.Actividad?.Nombre</td>
-                                <td>@r.Turno?.Fecha.ToShortDateString()</td>
-                                <td>@r.Turno?.HoraInicio</td>
-                                <td>@r.Turno?.Cancha.Numero</td>
-                                <td>@r.Asistencia</td>
-                                <td>@r.Estado</td>
+                            @foreach (var r in reservasActivas)
+                            {
+                                <tr>
+                                    <td>@r.Turno?.Actividad?.Nombre</td>
+                                    <td>@r.Turno?.Fecha.ToShortDateString()</td>
+                                    <td>@r.Turno?.HoraInicio</td>
+                                    <td>@r.Turno?.Cancha.Numero</td>
+                                    <td>@r.Asistencia</td>
+                                    <td>@r.Estado</td>
 
                                 <td>
                                     <button class="btn btn-primary btn-sm me-1"
@@ -83,12 +81,19 @@
                                             </div>
                                         }
 
-                                    <button class="btn btn-danger btn-sm"
-                                    @onclick="() => Cancelar(r.Id)"
-                                    disabled="@(!PuedeCancelar(r))">
-                                        Cancelar
-                                    </button>
-                                </td>
+                                        <button class="btn btn-danger btn-sm"
+                                        @onclick="() => Cancelar(r.Id)"
+                                        disabled="@(!PuedeCancelar(r))">
+                                            Cancelar
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="8" class="text-center py-4 text-muted">No registra reservas.</td>
                             </tr>
                         }
                     </tbody
@@ -109,7 +114,7 @@
     
 @code {
     List<Reserva>? reservasActivas;
-    List<Reserva>? reservas;
+
     private int? reservaSeleccionadaId; 
     private byte[] qrCode = Array.Empty<byte>();
     private string error = "";
@@ -120,7 +125,6 @@
         try
         {
             reservasActivas = (await listarReservasUseCase.Ejecutar(UsuarioSesion.UsuarioActual.Id)).Where(r => r.Estado != EstadoReserva.Cancelado).ToList();
-            reservas = (await listarReservasUseCase.Ejecutar(UsuarioSesion.UsuarioActual.Id)).Where(r => r.Estado == EstadoReserva.Cancelado)?.ToList() ?? new List<Reserva>();
         }
         catch (Exception ex)
         {
@@ -173,7 +177,6 @@
             {
                 var resultado = (await listarReservasUseCase.Ejecutar(UsuarioSesion.UsuarioActual.Id)).Where(r => r.Estado != EstadoReserva.Cancelado);
                 reservasActivas = resultado.ToList();
-                reservas = (await listarReservasUseCase.Ejecutar(UsuarioSesion.UsuarioActual.Id)).Where(r => r.Estado == EstadoReserva.Cancelado).ToList();
             }
             StateHasChanged();
         }

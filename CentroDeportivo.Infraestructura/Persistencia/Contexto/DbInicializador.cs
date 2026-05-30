@@ -17,7 +17,7 @@ public static class DbInicializador
                 Apellido = "Tevez",
                 Domicilio = "Calle 123",
                 Dni = "112345534",
-                Email = "admin@centrodeportivo.com",
+                Email = "admin@gmail.com",
                 Password = BCrypt.Net.BCrypt.HashPassword("Admin1234"),
                 Rol = Rol.Administrador,
                 DebeCambiarPassword = false

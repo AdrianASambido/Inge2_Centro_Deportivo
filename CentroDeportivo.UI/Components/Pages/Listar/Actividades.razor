@@ -53,17 +53,25 @@ else
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var a in actividad)
+                    @if (actividad.Any()){
+                        @foreach (var a in actividad)
+                        {
+                            <tr>
+                                <td>@a.Id</td>
+                                <td class="fw-bold">@a.Nombre</td>
+                                <td>@a.Descripcion</td>
+                                <td>$@a.Precio</td>
+                                <td class="text-center">
+                                    <button class="btn btn-sm btn-primary" @onclick="() => Editar(a.Id)">Editar</button>
+                                    <button class="btn btn-sm btn-danger" @onclick="() => ConfirmarEliminacion(a.Id)">Eliminar</button>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
                     {
                         <tr>
-                            <td>@a.Id</td>
-                            <td class="fw-bold">@a.Nombre</td>
-                            <td>@a.Descripcion</td>
-                            <td>$@a.Precio</td>
-                            <td class="text-center">
-                                <button class="btn btn-sm btn-primary" @onclick="() => Editar(a.Id)">Editar</button>
-                                <button class="btn btn-sm btn-danger" @onclick="() => ConfirmarEliminacion(a.Id)">Eliminar</button>
-                            </td>
+                            <td colspan="8" class="text-center py-4 text-muted">No hay actividades registradas.</td>
                         </tr>
                     }
                 </tbody>
@@ -109,11 +117,8 @@ else
 
     protected override async Task OnInitializedAsync() {
         actividad = (await ListarActividadesUseCase.ejecutar()).ToList();
-        if (actividad == null || !actividad.Any())
-        {
-            mensaje = "No hay actividades registradas."; 
-        }
     }
+
     void CerrarSesion() { UsuarioSesion.CerrarSesion(); UsuarioSesion.NotificarCambio(); Navegador.NavigateTo("/Login", true); }
     void CrearActividad() => quiereAgregar = true;
     public void Editar(int Id) => Navegador.NavigateTo($"/editar-actividad/{Id}");

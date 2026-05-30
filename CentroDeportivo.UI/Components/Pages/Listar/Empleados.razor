@@ -60,26 +60,28 @@ else
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var e in empleado)
+                    @if (empleado.Any()){
+                        @foreach (var e in empleado)
+                        {
+                            <tr>
+                                <td>@e.Id</td>
+                                <td>@e.Nombre</td>
+                                <td>@e.Apellido</td>
+                                <td>@e.Dni</td>
+                                <td class="text-center">
+                                    <button class="btn btn-sm btn-danger" @onclick="() => ConfirmarEliminacion(e.Id)">Eliminar</button>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
                     {
                         <tr>
-                            <td>@e.Id</td>
-                            <td>@e.Nombre</td>
-                            <td>@e.Apellido</td>
-                            <td>@e.Dni</td>
-                            <td class="text-center">
-                                <button class="btn btn-sm btn-danger" @onclick="() => ConfirmarEliminacion(e.Id)">Eliminar</button>
-                            </td>
+                            <td colspan="8" class="text-center py-4 text-muted">No existen empleados.</td>
                         </tr>
                     }
                 </tbody>
             </table>
-            @if (!string.IsNullOrEmpty(mensaje))
-            {
-                <div class="alert alert-info alert-dismissible fade show mb-4" role="alert">
-                    @mensaje
-                </div>
-            }
         </div>
     </div>
 }
@@ -158,7 +160,7 @@ else
         }
         catch (Exception ex)
         {
-            mensaje = "Error: " + ex.Message;
+            mensaje = ex.Message;
             StateHasChanged();
         }
     }
