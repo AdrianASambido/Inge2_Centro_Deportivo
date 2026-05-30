@@ -57,8 +57,26 @@
             {
                 <div class="row justify-content-center">
                     <div class="col-auto">
-                        <div class="text-center fw-semibold mb-2">@TituloMes(ReferenciaMes)</div>
+
+                        <div class="d-flex justify-content-center align-items-center gap-2 mb-2">
+                            <button class="btn btn-outline-secondary btn-sm"
+                                    @onclick="MesAnterior"
+                                    disabled="@EsMesActual()">
+                                ←
+                            </button>
+
+                            <span class="fw-semibold">
+                                @TituloMes(ReferenciaMes)
+                            </span>
+
+                            <button class="btn btn-outline-secondary btn-sm"
+                                    @onclick="MesSiguiente">
+                                →
+                            </button>
+                        </div>
+
                         @TablaCalendario(esMini: false, actividadParaNavegar: aid)
+
                     </div>
                 </div>
             }
@@ -75,7 +93,27 @@
     private bool mostrarCalendarioMini;
     private bool mostrarCalendarioCompleto;
 
-    private DateOnly ReferenciaMes => new(DateTime.Today.Year, DateTime.Today.Month, 1);
+    private DateOnly ReferenciaMes = new(DateTime.Today.Year, DateTime.Today.Month, 1);
+
+    private void MesAnterior()
+    {
+        var mesActual = new DateOnly(DateTime.Today.Year, DateTime.Today.Month, 1);
+
+        if (ReferenciaMes > mesActual)
+            ReferenciaMes = ReferenciaMes.AddMonths(-1);
+    }
+
+    private void MesSiguiente()
+    {
+        ReferenciaMes = ReferenciaMes.AddMonths(1);
+    }
+
+    private bool EsMesActual()
+    {
+        return ReferenciaMes.Year == DateTime.Today.Year &&
+               ReferenciaMes.Month == DateTime.Today.Month;
+    }
+
     string mensaje = "";
 
     protected override async Task OnInitializedAsync()

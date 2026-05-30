@@ -145,6 +145,6 @@ else
         catch (Exception ex) { mensaje = ex.Message; }
     }
 
-    void Cancelar() { quiereAgregar = false; pro = new Datos(); }
+    void Cancelar() { quiereAgregar = false; pro = new Datos(); mensaje = ""; }
     public class Datos { public string nombre { get; set; } = ""; public string apellido { get; set; } = ""; public string dni { get; set; } }
 }
