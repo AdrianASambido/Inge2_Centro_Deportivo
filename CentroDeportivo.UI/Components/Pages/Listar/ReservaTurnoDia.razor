@@ -159,7 +159,7 @@ else
 
             await CrearReservaUseCase.Ejecutar(nuevaReserva);
 
-            mensajeExito = "Reserva realizada correctamente.";
+            mensajeExito = "Reserva realizada con éxito, debe acercarse al centro a abonar.";
             await CargarTurnos();
         }
         catch (Exception ex)

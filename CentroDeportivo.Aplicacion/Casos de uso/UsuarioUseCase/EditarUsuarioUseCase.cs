@@ -8,10 +8,11 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.UsuarioUseCase
     {
         private readonly IUsuarioRepositorio _repo;
 
-        private readonly UsuarioValidadorBase _validador;
+        private readonly UsuarioClienteValidador _validador;
 
-
-        public EditarUsuarioUseCase(IUsuarioRepositorio repo, UsuarioValidadorBase validador)
+        public EditarUsuarioUseCase(
+            IUsuarioRepositorio repo,
+            UsuarioClienteValidador validador)
         {
             _repo = repo;
             _validador = validador;
