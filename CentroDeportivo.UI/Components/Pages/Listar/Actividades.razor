@@ -133,7 +133,6 @@ else
             await EliminarActividadUseCase.Ejecutar(idAEliminar);
             actividad = (await ListarActividadesUseCase.ejecutar()).ToList();
             mensaje = "La actividad se ha eliminado exitosamente.";
-            mensaje = "";
             StateHasChanged();
         }
         catch (Exception ex) { mensaje = ex.Message; }
@@ -150,7 +149,6 @@ else
             mensaje = "Actividad creada con exito.";
             act = new Datos();
             quiereAgregar = false;
-            mensaje = "";
             StateHasChanged();
         }
         catch (Exception ex) { mensaje = ex.Message; }
