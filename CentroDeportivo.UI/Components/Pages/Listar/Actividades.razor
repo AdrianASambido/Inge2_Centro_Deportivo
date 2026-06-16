@@ -20,7 +20,7 @@ else
         <p class="text-muted mb-4">Bienvenido, @UsuarioSesion.UsuarioActual!.Nombre</p>
 
         <div class="d-flex gap-2 mb-4">
-            <button class="btn btn-success" @onclick="CrearActividad">Crear actividad</button>
+            <button class="btn btn-success" @onclick="CrearActividad">Nueva actividad</button>
             <button class="btn btn-danger" @onclick="CerrarSesion">Cerrar sesión</button>
         </div>
 
@@ -132,8 +132,7 @@ else
         {
             await EliminarActividadUseCase.Ejecutar(idAEliminar);
             actividad = (await ListarActividadesUseCase.ejecutar()).ToList();
-            mensaje = "La actividad se ha eliminado con exito.";
-            mensaje = "";
+            mensaje = "La actividad se ha eliminado exitosamente.";
             StateHasChanged();
         }
         catch (Exception ex) { mensaje = ex.Message; }
@@ -150,7 +149,6 @@ else
             mensaje = "Actividad creada con exito.";
             act = new Datos();
             quiereAgregar = false;
-            mensaje = "";
             StateHasChanged();
         }
         catch (Exception ex) { mensaje = ex.Message; }

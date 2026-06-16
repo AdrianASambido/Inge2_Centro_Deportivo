@@ -399,7 +399,7 @@ else
 
             await RecargarReservas();
 
-            mensajeTabla = "Pago confirmado correctamente.";
+            mensajeTabla = "Pago confirmado con éxito.";
         }
         catch (Exception ex)
         {
@@ -454,7 +454,7 @@ else
 
             await RecargarReservas();
 
-            mensajeTabla = "Asistencia manual registrada.";
+            mensajeTabla = "Asistencia registrada con éxito.";
         }
         catch (Exception ex)
         {
@@ -516,9 +516,8 @@ else
             t = new Datos();
             StateHasChanged();
             AplicarFiltros();
-            mensajeTurno = $"El turno se ha creado exitosamente para la actividad {nuevoTurno.Actividad.Nombre} para la fecha {nuevoTurno.Fecha.ToShortDateString} {nuevoTurno.HoraInicio}.";
+            mensajeTurno = "El turno se ha creado exitosamente.";
             mostrarDisponibles = false;
-            mensajeTurno = "";
         }
         catch (Exception ex) { mensajeTurno = ex.Message; }
     }
@@ -565,7 +564,7 @@ else
         {
             await RegistrarAsistenciaQrUseCase.Ejecutar(codigoQr);
 
-            mensaje = "¡Asistencia registrada con éxito!";
+            mensaje = "¡Asistencia registrada correctamente!";
         }
         catch (Exception ex)
         {

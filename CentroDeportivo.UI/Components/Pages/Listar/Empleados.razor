@@ -149,7 +149,7 @@ else
         try
         {
 
-            var emple = new Usuario(emp.nombre, emp.apellido, "a", emp.dni, "A123456789", emp.email, false, Rol.Empleado);
+            var emple = new Usuario(emp.nombre, emp.apellido, "-", emp.dni, "A123456789", emp.email, false, Rol.Empleado);
 
             await CrearEmpleadoUseCase.ejecutar(emple);
 
