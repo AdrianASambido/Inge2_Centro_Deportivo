@@ -6,9 +6,8 @@ using System.Threading.Tasks;
 
 namespace CentroDeportivo.Aplicacion.Entidades
 {
-    public enum EstadoListaEspera
+    public enum EstadoCredito
     {
-        Esperando, Notificado, Confirmado, Expirado
-    } 
-    
+        Disponible, Utilizado, Vencido
+    };
 }

@@ -100,7 +100,7 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
                 .Include(t => t.Cancha)
                 .Where(t => t.Id_Actividad == actividadId
                          && t.Fecha == fecha
-                         && t.Estado == EstadoTurno.Disponible
+                         && (t.Estado == EstadoTurno.Disponible || t.Estado == EstadoTurno.Lleno)
                          && t.Fecha >= hoy)
                 .ToListAsync();
 
@@ -138,6 +138,41 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
             await contexto.SaveChangesAsync();
         }
 
+        public async Task<List<Turno>> ObtenerTurnosDisponiblesRangoAsync(int idTurnoSeleccionado, int idUsuario, DateOnly desde, DateOnly hasta)
+        {
         
+            var turnoBase = await contexto.Turnos
+                .Include(t => t.Actividad) 
+                .FirstOrDefaultAsync(t => t.Id == idTurnoSeleccionado);
+
+            if (turnoBase == null) return new List<Turno>();
+
+           
+            int idActividad = turnoBase.Id_Actividad;
+            TimeOnly horaInicio = turnoBase.HoraInicio;
+            int idProfesor = turnoBase.Id_Profesor;
+
+            return await contexto.Turnos
+                .Where(t => t.Id_Actividad == idActividad
+                         && t.HoraInicio == horaInicio 
+                         && t.Estado != EstadoTurno.Cancelado
+                         && t.Id_Profesor == idProfesor
+                         && t.Fecha >= desde
+                         && t.Fecha <= hasta
+                         && !contexto.Reservas.Any(r => r.Id_Turno == t.Id
+                                                     && r.Id_Usuario == idUsuario
+                                                     && r.Estado != EstadoReserva.Cancelado))
+                .OrderBy(t => t.Fecha)
+                .ToListAsync();
+        }
+
+        public async Task ActualizarMuchosAsync(List<Turno> turnos)
+        {
+            if (turnos == null || !turnos.Any()) return;
+
+            contexto.Turnos.UpdateRange(turnos);
+
+            await contexto.SaveChangesAsync();
+        }
     }
 }

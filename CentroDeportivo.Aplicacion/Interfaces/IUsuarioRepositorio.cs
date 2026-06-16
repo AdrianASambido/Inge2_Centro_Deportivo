@@ -23,6 +23,6 @@ namespace CentroDeportivo.Aplicacion.Interfaces
         Task<bool> YaExisteEmail(string email);
         Task<bool> YaExisteDniParaEditar(string dni, int idUsuario);
         Task<bool> YaExisteEmailParaEditar(string email, int idUsuario);
-        
+       
     }
 }

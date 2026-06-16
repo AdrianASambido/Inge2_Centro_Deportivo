@@ -29,6 +29,46 @@ namespace CentroDeportivo.Infraestructura.Servicios
             _password = configuration["EmailSettings:Password"] ?? "";
         }
 
+        public async Task EnviarAvisoCancelacionMasivo(IEnumerable<string> emailsDestinatarios, Turno turno)
+        {
+            if (emailsDestinatarios == null || !emailsDestinatarios.Any()) return;
+
+            var mensaje = new MimeMessage();
+            mensaje.From.Add(new MailboxAddress("Centro Deportivo", _username));
+
+            mensaje.To.Add(new MailboxAddress("Socios Centro Deportivo", _username));
+
+            foreach (var email in emailsDestinatarios)
+            {
+                mensaje.Bcc.Add(new MailboxAddress("", email));
+            }
+
+            mensaje.Subject = $"AVISO: Cancelación de clase - {turno.Actividad?.Nombre}";
+
+            var bodyBuilder = new BodyBuilder
+            {
+                HtmlBody = $@"
+            <h3>Clase Cancelada</h3>
+            <p>Lamentamos informarle que la clase de <b>{turno.Actividad?.Nombre}</b> del día <b>{turno.Fecha}</b> a las <b>{turno.HoraInicio} hs</b> ha sido cancelada por el establecimiento.</p>
+            <p>Si habías realizado la reserva por adelantado, se genero un credito a tu favor. De lo contrario se te devolvera el dinero</p>"
+            };
+            mensaje.Body = bodyBuilder.ToMessageBody();
+
+            using var client = new SmtpClient();
+            try
+            {
+                await client.ConnectAsync(_host, _port, SecureSocketOptions.StartTls);
+                await client.AuthenticateAsync(_username, _password);
+                await client.SendAsync(mensaje); 
+                await client.DisconnectAsync(true);
+                Console.WriteLine("Correos masivos enviados exitosamente.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error en envío masivo: {ex.Message}");
+                throw;
+            }
+        }
 
         public async Task EnviarContraseniaTemporalAsync(string emailDestino, string contraseniaTemporal)
         {

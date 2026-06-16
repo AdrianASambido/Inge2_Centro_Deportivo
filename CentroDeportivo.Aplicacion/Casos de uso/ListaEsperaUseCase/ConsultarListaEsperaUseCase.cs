@@ -4,10 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CentroDeportivo.Aplicacion.Entidades
+namespace CentroDeportivo.Aplicacion.Casos_de_uso.ListaEsperaUseCase
 {
-    public enum DevolucionEstado
+    public class ConsultarListaEsperaUseCase
     {
-        Pendiente, Confirmado, Cancelado, Fallido
     }
 }

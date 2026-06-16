@@ -23,10 +23,13 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Contexto
         public DbSet<Cancha> Canchas { get; set; }
         public DbSet<Profesor> Profesores { get; set; }
         public DbSet<Devolucion> Devoluciones { get; set; }
+        public DbSet<Credito> Creditos { get; set; }
+        public DbSet<Pago> Pagos { get; set; }
+        public DbSet<InscripcionListaEspera> InscripcionListaEsperas { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Claves Primarias de todas las entidades
+            // claves Primarias de todas las entidades
             modelBuilder.Entity<Usuario>().HasKey(u => u.Id);
             modelBuilder.Entity<Turno>().HasKey(t => t.Id);
             modelBuilder.Entity<Reserva>().HasKey(r => r.Id);
@@ -34,8 +37,11 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Contexto
             modelBuilder.Entity<Cancha>().HasKey(c => c.Id);
             modelBuilder.Entity<Profesor>().HasKey(p => p.Id);
             modelBuilder.Entity<Devolucion>().HasKey(d => d.Id);
+            modelBuilder.Entity<Credito>().HasKey(c => c.Id);
+            modelBuilder.Entity<InscripcionListaEspera>().HasKey(a => a.Id);
+            modelBuilder.Entity<Pago>().HasKey(p => p.Id);
 
-            // Relaciónes
+            // relacipnes
             modelBuilder.Entity<Reserva>()
                 .HasOne(r => r.Usuario)
                 .WithMany()
@@ -43,7 +49,7 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Contexto
 
             modelBuilder.Entity<Reserva>()
                         .HasOne(r => r.Turno)
-                        .WithMany(t => t.Reservas) // <--- ACÁ: Le decimos que Turno tiene la lista "Reservas"
+                        .WithMany(t => t.Reservas) //Le decimos que Turno tiene la lista "Reservas
                         .HasForeignKey(r => r.Id_Turno);
 
 

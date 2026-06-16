@@ -9,12 +9,15 @@ namespace CentroDeportivo.Aplicacion.Entidades
     public class Reserva
     {
         public int Id { get; private set; }
-        public double PrecioPagado { get; set; }
+        public decimal PrecioPagado { get; set; }
         public EstadoReserva Estado { get; set; }
         public Asistencia Asistencia { get; set; }
         public DateOnly FechaReserva { get; set; }
         public DateOnly FechaAsistencia { get; set; }
-        public string? TokenQr { get; set; }
+        public TipoReserva TipoReserva { get; set; }
+        public bool ConCredito { get; set; }
+        public Guid? CodigoPaqueteAdelantado { get; set; } //Guid para enlazar el pago con las reservas por adelantado de una clase
+        public string? TokenQr { get; set; } //token para registrar la asistencia
         public int Id_Usuario { get; set; }
         public int Id_Turno { get; set; }
         public Usuario? Usuario { get; set; } = null;

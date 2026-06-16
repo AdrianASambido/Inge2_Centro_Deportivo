@@ -4,10 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CentroDeportivo.Aplicacion.Entidades
+namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
 {
-    public enum DevolucionEstado
+    public class RenovarReservaAdelantadaUseCase
     {
-        Pendiente, Confirmado, Cancelado, Fallido
     }
 }

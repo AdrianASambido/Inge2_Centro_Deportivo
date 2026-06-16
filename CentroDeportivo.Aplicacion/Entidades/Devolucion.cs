@@ -9,7 +9,7 @@ namespace CentroDeportivo.Aplicacion.Entidades
     public class Devolucion
     {
         public int Id { get; private set; }
-        public double MontoADevolver { get; set; }
+        public decimal MontoADevolver { get; set; }
         public DevolucionEstado Estado { get; set; }
         public int Id_Usuario { get; set; }
         public Usuario Usuario { get; set; }

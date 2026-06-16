@@ -12,7 +12,7 @@ namespace CentroDeportivo.Aplicacion.Entidades
         public DateOnly Fecha { get; set; }
         public TimeOnly HoraInicio { get; set; }
         public TimeOnly HoraFin { get; set; }
-        public double PrecioTurno { get; set; } 
+        public decimal PrecioTurno { get; set; } 
         public int CupoMaximo { get; set; }
         public int CupoDisponible { get; set; }
         public EstadoTurno Estado {get; set;}
@@ -24,6 +24,7 @@ namespace CentroDeportivo.Aplicacion.Entidades
         public Profesor Profesor { get; set; } = null!;
 
         public ICollection<Reserva> Reservas { get; set; } = new List<Reserva>();
+        public ICollection<InscripcionListaEspera> ListaEspera { get; set; } = new List<InscripcionListaEspera>();
 
         public Turno() { }
 

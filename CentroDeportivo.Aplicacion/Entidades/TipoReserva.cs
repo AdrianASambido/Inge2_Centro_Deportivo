@@ -6,9 +6,8 @@ using System.Threading.Tasks;
 
 namespace CentroDeportivo.Aplicacion.Entidades
 {
-    public enum EstadoListaEspera
+    public enum TipoReserva
     {
-        Esperando, Notificado, Confirmado, Expirado
-    } 
-    
+        Ocasional, Adelantado
+    };
 }
