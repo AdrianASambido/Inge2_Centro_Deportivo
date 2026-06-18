@@ -26,6 +26,16 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
             await contexto.SaveChangesAsync();
         }
 
+        public async Task<int> ContarCancelacionesUsuarioMesAsync(int idUsuario, int anio, int mes)
+        {
+            return await contexto.Reservas
+                .Where(r => r.Id_Usuario == idUsuario
+                         && r.Estado == EstadoReserva.Cancelado
+                         && r.FechaReserva.Year == anio
+                         && r.FechaReserva.Month == mes)
+                .CountAsync();
+        }
+
         public async Task<bool> ExisteReservaActivaAsync(int usuarioId, int turnoId)
         {
             throw new NotImplementedException();

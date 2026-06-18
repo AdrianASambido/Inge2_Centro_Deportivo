@@ -19,6 +19,16 @@ namespace CentroDeportivo.Aplicacion.Entidades
 
         public InscripcionListaEspera() { }
 
+        public int ObtenerMinutosRestantes()
+        {
+            if (Estado != EstadoListaEspera.Notificado || !FechaNotificacion.HasValue)
+                return 0;
+
+            var tiempoTranscurrido = DateTime.Now - FechaNotificacion.Value;
+            var restantes = 10 - (int)tiempoTranscurrido.TotalMinutes;
+
+            return restantes > 0 ? restantes : 0;
+        }
 
     }
 }
