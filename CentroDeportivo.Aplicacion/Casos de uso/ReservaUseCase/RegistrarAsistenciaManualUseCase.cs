@@ -23,9 +23,9 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
             var fechaHoraClase = reserva.Turno!.Fecha.ToDateTime(reserva.Turno.HoraInicio);
             var diferencia = fechaHoraClase - DateTime.Now;
             if (diferencia.TotalMinutes > 15)
-                throw new Exception("Error: se puede registrar asistencia 15 minutos antes a que comience la clase.");
+                throw new Exception ("Error: se puede registrar asistencia 15 minutos antes a que comience la clase.");
 
-
+            
 
 
             reserva.Asistencia = Asistencia.Presente;

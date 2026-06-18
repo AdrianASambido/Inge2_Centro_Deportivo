@@ -9,10 +9,9 @@ using CentroDeportivo.Aplicacion.Entidades;
 
 namespace CentroDeportivo.Aplicacion.Casos_de_uso.UsuarioUseCase;
 
-public class CrearEmpleadoUseCase(IUsuarioRepositorio repo, UsuarioEmpleadoValidador validador, IHashServicio repoHash, IEmailServicio repoEmail)
+public class CrearEmpleadoUseCase (IUsuarioRepositorio repo, UsuarioEmpleadoValidador validador, IHashServicio repoHash, IEmailServicio repoEmail)
 {
-    public async Task ejecutar(Usuario u)
-    {
+    public async Task ejecutar(Usuario u) {
         var (esValido, mensaje) = await validador.ValidarDatosComunes(u);
 
         if (!esValido)

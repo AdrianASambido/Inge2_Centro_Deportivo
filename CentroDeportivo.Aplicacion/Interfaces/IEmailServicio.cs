@@ -12,5 +12,6 @@ namespace CentroDeportivo.Aplicacion.Interfaces
         Task EnviarRecordatorioTurnoAsync(string email, Turno turno);
         Task EnviarContraseniaTemporalAsync(string email, string contraseniaTemporal);
         Task EnviarLinkRecuperacionAsync(string email, string link);
+        Task EnviarAvisoCancelacionMasivo(IEnumerable<string> emails, Turno turno);
     }
 }

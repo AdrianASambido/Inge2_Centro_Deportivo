@@ -16,7 +16,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Remove="Entidades\EstadoListaEspera.cs" />
     <Compile Remove="Entidades\ListaEsperaEntrada.cs" />
     <Compile Remove="Interfaces\IListaEsperaRepositorio.cs" />
   </ItemGroup>

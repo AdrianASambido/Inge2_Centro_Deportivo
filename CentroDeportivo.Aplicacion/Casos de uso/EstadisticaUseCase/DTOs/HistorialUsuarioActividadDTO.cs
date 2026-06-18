@@ -7,10 +7,10 @@ using System.Threading.Tasks;
 namespace CentroDeportivo.Aplicacion.Casos_de_uso.EstadisticaUseCase.DTOs
 {
     public record HistorialUsuarioActividadDTO
-    {
+    (
         string NombreActividad,
         int TotalAsistencias,
         int TotalInasistencias,
         int TotalCancelaciones
-    };
+    );
 }

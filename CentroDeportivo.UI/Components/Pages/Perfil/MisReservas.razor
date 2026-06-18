@@ -62,12 +62,12 @@
                                     <td>@r.Asistencia</td>
                                     <td>@r.Estado</td>
 
-                                    <td>
-                                        <button class="btn btn-primary btn-sm me-1"
-                                        @onclick="() => GenerarQr(r.Id)" 
-                                        disabled="@(!PuedeGenerarQr(r))">
-                                            <i class="bi bi-qr-code"></i> Generar QR
-                                        </button>
+                                <td>
+                                    <button class="btn btn-primary btn-sm me-1"
+                                    @onclick="() => GenerarQr(r.Id)" 
+                                    disabled="@(!PuedeGenerarQr(r))">
+                                        <i class="bi bi-qr-code"></i> Generar QR
+                                    </button>
 
                                         @if (reservaSeleccionadaId == r.Id && qrCode != null && qrCode.Length > 0)
                                         {

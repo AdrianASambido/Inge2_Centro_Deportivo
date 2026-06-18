@@ -8,6 +8,6 @@ namespace CentroDeportivo.Aplicacion.Entidades
 {
     public enum TipoReserva
     {
-        Ocasional, Adelantada
+        Ocasional, Adelantado
     };
 }

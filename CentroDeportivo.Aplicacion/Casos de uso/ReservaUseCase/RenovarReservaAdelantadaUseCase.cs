@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CentroDeportivo.Aplicacion.Casos_de_uso.PagoUseCase
+namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
 {
-    public class ConsultarPagosUseCase
+    public class RenovarReservaAdelantadaUseCase
     {
     }
 }

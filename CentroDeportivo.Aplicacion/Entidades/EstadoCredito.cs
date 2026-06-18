@@ -9,5 +9,5 @@ namespace CentroDeportivo.Aplicacion.Entidades
     public enum EstadoCredito
     {
         Disponible, Utilizado, Vencido
-    }
+    };
 }

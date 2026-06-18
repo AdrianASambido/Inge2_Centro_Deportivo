@@ -21,8 +21,7 @@ public class RegistrarUsuarioUseCase(IUsuarioRepositorio repo, UsuarioClienteVal
         }
 
         var (esValido2, mensaje2) = UsuarioClienteValidador.ValidarFormatoPassword(u.Password);
-        if (!esValido2)
-        {
+        if (!esValido2) {
             throw new Exception(mensaje2);
         }
 

@@ -15,13 +15,11 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.UsuarioUseCase
         {
             var usuario = await repoUsuario.ObtenerPorToken(token);
 
-            if (usuario == null)
-            {
+            if (usuario == null) {
                 throw new Exception("Error: link de recuperacion invalido");
             }
 
-            if (DateTime.Now > usuario.TokenRecuperacionVencimiento)
-            {
+            if (DateTime.Now > usuario.TokenRecuperacionVencimiento) {
                 throw new Exception("Este link de recuperación ha vencido. Solicita un nuevo enlace desde la pantalla de ingreso");
             }
 

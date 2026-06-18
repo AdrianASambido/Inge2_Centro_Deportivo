@@ -42,12 +42,12 @@ namespace CentroDeportivo.Aplicacion.Validadores
             if (!string.IsNullOrWhiteSpace(u.Dni) && await _repoProfesor.YaExiste(u.Dni))
                 msg += "Error: el DNI ingresado ya existe.\n";
 
-
+            
             if (!string.IsNullOrWhiteSpace(u.Email) && !EsEmailValidoEstructuralmente(u.Email))
             {
                 msg += "Error: el formato de email no es válido.\n";
             }
-
+            
             else if (!string.IsNullOrWhiteSpace(u.Email) && await _repo.YaExisteEmail(u.Email))
             {
                 msg += "Error: el email ingresado ya existe.\n";
@@ -60,11 +60,11 @@ namespace CentroDeportivo.Aplicacion.Validadores
         {
             string mensaje = "";
 
-
+            
             var (camposOk, msgCampos) = await ValidarCamposObligatorios(u);
             if (!camposOk) mensaje += msgCampos;
 
-
+            
             if (!string.IsNullOrWhiteSpace(u.Dni))
             {
                 if (await _repo.YaExisteDniParaEditar(u.Dni, idUsuario))
@@ -72,7 +72,7 @@ namespace CentroDeportivo.Aplicacion.Validadores
                     mensaje += "Error: el DNI ingresado ya se encuentra registrado.\n";
                 }
 
-
+                
                 if (await _repoProfesor.YaExiste(u.Dni))
                 {
                     mensaje += "Error: el DNI ingresado ya se encuentra registrado.\n";

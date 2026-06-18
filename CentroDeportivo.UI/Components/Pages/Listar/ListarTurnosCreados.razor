@@ -20,9 +20,10 @@
 
 <PageTitle>Listado de Turnos</PageTitle>
 
-@if (!(UsuarioSesion.EstaAutenticado()) && (UsuarioSesion.esAdministrador() || UsuarioSesion.esEmpleado()))
+@* Cambiamos la lógica: Si no cumple con los roles autorizados, mostramos la advertencia y cortamos la ejecución *@
+@if (!UsuarioSesion.EstaAutenticado() || (!UsuarioSesion.esAdministrador() && !UsuarioSesion.esEmpleado()))
 {
-    <div class="alert alert-warning">¡No tenés acceso a esta seccion!</div>
+    <div class="alert alert-warning m-3">¡No tenés acceso a esta sección!</div>
 }
 else
 {
@@ -56,11 +57,7 @@ else
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Hora inicio</label>
-                            <input type="time"
-                                   class="form-control"
-                                   min="18:00"
-                                   max="23:00"
-                                   @bind="t.HoraInicio" />
+                            <input type="time" class="form-control" min="18:00" max="23:00" @bind="t.HoraInicio" />
                         </div>
                     </div>
 
@@ -206,12 +203,12 @@ else
                             </tr>
                         }
                     }
-                    else
+                  @*  else
                     {
                         <tr>
                             <td colspan="8" class="text-center py-4 text-muted">No hay turnos programados.</td>
                         </tr>
-                    }
+                    }*@
                 </tbody>
             </table>
         </div>
@@ -237,7 +234,8 @@ else
                                     <th>Nombre</th>
                                     <th>Apellido</th>
                                     <th>DNI</th>
-                                    <th>Fecha</th>
+                                    <th>Estado</th>
+                                    <th>Asistencia</th>
                                     <th class="text-center">Acciones</th>
                                 </tr>
                             </thead>
@@ -248,14 +246,15 @@ else
                                         <td>@r?.Usuario?.Nombre</td>
                                         <td>@r?.Usuario?.Apellido</td>
                                         <td>@r?.Usuario?.Dni</td>
-                                        <td>@t.Fecha.ToString("dd/MM/yyyy")</td>
+                                        <td>@r?.Estado</td>
+                                        <td>@r?.Asistencia</td>
                                         <td class="text-center">
                                             <button class="btn btn-sm btn-outline-primary" @onclick="() => RegistrarAsistencia(r.Id)" 
-                                                disabled="@(!PuedeRegistrarAsistencia(r))">
+                                            disabled="@(!PuedeRegistrarAsistencia(r))">
                                                 Registrar asistencia
                                             </button>
                                             <button class="btn btn-sm btn-outline-secondary" @onclick="() => RegistrarPago(r.Id)"
-                                                disabled="@(r.Estado != EstadoReserva.PendienteDePago || yaPasoLaHora(r))">Confirmar pago</button>
+                                            disabled="@(r.Estado != EstadoReserva.PendienteDePago || yaPasoLaHora(r))">Confirmar pago</button>
                                         </td>
                                     </tr>
                                 }
@@ -273,6 +272,7 @@ else
             </div>
         </div>
     </div>
+    
 }
 
 <button class="btn btn-info text-white mt-3" @onclick="AbrirEscaner">
@@ -370,6 +370,8 @@ else
         ).ToList();
     }
 
+
+
     private void LimpiarFiltros()
     {
         filtroActividadId = 0;
@@ -383,6 +385,7 @@ else
     {
         UsuarioSesion.CerrarSesion(); UsuarioSesion.NotificarCambio(); Navegador.NavigateTo("/Login", true);
     }
+
 
     void CrearTurno() => quiereAgregar = true;
 
@@ -467,12 +470,12 @@ else
             var horaMinima = new TimeOnly(18, 0); // 18:00
             var horaMaxima = new TimeOnly(23, 0); // 23:00
 
-        /*    if (t.HoraInicio < horaMinima || t.HoraInicio > horaMaxima)
+           /* if (t.HoraInicio < horaMinima || t.HoraInicio > horaMaxima)
             {
                 mensajeTurno = "Error: El centro deportivo opera únicamente en el horario de 18:00 a 23:00 hs.";
                 mostrarDisponibles = false;
                 return;
-            }*/
+             }*/
 
             if (t.Fecha == DateOnly.FromDateTime(DateTime.Now) && t.HoraInicio < TimeOnly.FromDateTime(DateTime.Now))
             {
@@ -521,6 +524,7 @@ else
 
 
 
+    
     private async Task AbrirEscaner()
     {
         mensaje = "";
@@ -601,7 +605,6 @@ else
         public int Id_Profesor { get; set; }
         public int Id_Cancha { get; set; }
     }
-
     private bool PuedeRegistrarAsistencia(Reserva r)
     {
         if (r?.Turno == null)
@@ -647,4 +650,5 @@ else
     
         return false;
     }
+}
 }
