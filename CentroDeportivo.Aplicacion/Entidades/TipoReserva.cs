@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace CentroDeportivo.Aplicacion.Entidades
 {
-    public enum DevolucionEstado
+    public enum TipoReserva
     {
-        Pendiente, Confirmado, Cancelado, Fallido
-    }
+        Ocasional, Adelantada
+    };
 }
