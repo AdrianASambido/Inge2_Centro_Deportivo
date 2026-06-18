@@ -34,6 +34,7 @@ builder.Services.AddScoped<IDevolucionRepositorio, DevolucionRepositorio>();
 builder.Services.AddScoped<IHashServicio, ServicioHash>();
 builder.Services.AddScoped<IEmailServicio, EmailServicio>();
 builder.Services.AddHostedService<TurnosBackgroundServicio>();
+builder.Services.AddScoped<IQrServicio, QrServicio>();    
 
 // --- 3. REGISTRAR VALIDADORES (Lógica de Negocio) ---
 builder.Services.AddScoped<UsuarioClienteValidador>();
