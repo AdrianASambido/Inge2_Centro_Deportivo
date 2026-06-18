@@ -4,11 +4,12 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <UserSecretsId>6258d92e-8715-4149-ac72-71501df25488</UserSecretsId>
+    <UserSecretsId>b637977d-bae4-422b-828d-3e17f70e82e7</UserSecretsId>
   </PropertyGroup>
 
 
   <ItemGroup>
+    <PackageReference Include="Blazor-ApexCharts" Version="6.1.0" />
     <PackageReference Include="MailKit" Version="4.16.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.26">
       <PrivateAssets>all</PrivateAssets>

@@ -467,12 +467,12 @@ else
             var horaMinima = new TimeOnly(18, 0); // 18:00
             var horaMaxima = new TimeOnly(23, 0); // 23:00
 
-            if (t.HoraInicio < horaMinima || t.HoraInicio > horaMaxima)
+        /*    if (t.HoraInicio < horaMinima || t.HoraInicio > horaMaxima)
             {
                 mensajeTurno = "Error: El centro deportivo opera únicamente en el horario de 18:00 a 23:00 hs.";
                 mostrarDisponibles = false;
                 return;
-            }
+            }*/
 
             if (t.Fecha == DateOnly.FromDateTime(DateTime.Now) && t.HoraInicio < TimeOnly.FromDateTime(DateTime.Now))
             {

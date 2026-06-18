@@ -24,7 +24,7 @@ namespace CentroDeportivo.Aplicacion.Entidades
         public Profesor Profesor { get; set; } = null!;
 
         public ICollection<Reserva> Reservas { get; set; } = new List<Reserva>();
-
+        public ICollection<InscripcionListaEspera> ListaEspera { get; set; } = new List<InscripcionListaEspera>();
         public Turno() { }
 
     }
