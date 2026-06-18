@@ -16,6 +16,8 @@ namespace CentroDeportivo.Aplicacion.Interfaces
         Task AgregarAsync(Turno turno);
         Task ActualizarAsync(Turno turno);
         Task EliminarAsync(int id);
+        Task<List<Turno>> ObtenerTurnosDisponiblesRangoAsync(int idTurno, int idUsuario, DateOnly desde, DateOnly hasta);
         Task<bool> TieneInscriptosAsync(int turnoId);
+        Task ActualizarMuchosAsync(List<Turno> turnos);
     }
 }

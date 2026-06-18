@@ -94,10 +94,10 @@ namespace CentroDeportivo.Aplicacion.Validadores
 
             if (!string.IsNullOrWhiteSpace(actividad.Nombre))
             {
+                
+                
 
-
-
-
+             
                 if (await repo.YaExisteParaEditar(actividad.Nombre, idActividad))
                 {
                     mensaje += $"Error: ya existe una actividad con ese nombre.'\n";

@@ -16,13 +16,11 @@ namespace CentroDeportivo.Aplicacion.Validadores
 
 
             var usuario = await repoUsuario.ObtenerPorEmail(email);
-            if (usuario == null)
-            {
-                return (false, "Error: el email ingresado no existe.", null);
+            if (usuario == null) {
+                return (false, "Error: el email ingresado no existe.",null);
             }
 
-            if (!repoHash.Verificar(contra, usuario.Password))
-            {
+            if (!repoHash.Verificar(contra,usuario.Password)) {
                 return (false, "Error: contraseña incorrecta.", null);
             }
 

@@ -106,16 +106,20 @@ else
     string mensaje = ""; bool mostrarDialog = false; int idAEliminar; bool quiereAgregar = false; Datos emp = new Datos();
     List<Usuario> empleado = new List<Usuario>();
 
-    protected override async Task OnInitializedAsync() {
-        empleado = (await ListarEmpleadosUseCase.ejecutar()).ToList(); 
-        
+    protected override async Task OnInitializedAsync()
+    {
+        empleado = (await ListarEmpleadosUseCase.ejecutar()).ToList();
+        if (empleado == null || !empleado.Any())
+        {
+            mensaje = "No existen empleados.";
+        }
     }
 
     void CerrarSesion() { UsuarioSesion.CerrarSesion(); UsuarioSesion.NotificarCambio(); Navegador.NavigateTo("/Login", true); }
 
     void CrearEmpleado()
     {
-        emp = new Datos(); 
+        emp = new Datos();
         quiereAgregar = true;
         mensaje = "";
     }
