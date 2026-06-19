@@ -1,5 +1,9 @@
 ﻿@page "/estadisticas"
 @using Blazor_ApexCharts
+@using CentroDeportivo.Aplicacion.Casos_de_uso.EstadisticaUseCase.DTOs
+@using CentroDeportivo.Aplicacion.Casos_de_uso.EstadisticaUseCase
+@inject ConsultarIngresosDelNegocioUseCase ConsultarIngresosDelNegocioUseCase
+@inject ConsultarIndicesUsuarioUseCase ConsultarIndicesUsuarioUseCase
 
 
 <div class="container-fluid">
@@ -18,18 +22,46 @@
             {
                 <div class="card p-3 shadow-sm">
                     <h5>Reporte de Ingresos del Negocio</h5>
+
+                    @if (datosIngresos == null || datosIngresos.Count == 0)
+                    {
+                        <p><em>No hay datos de ingresos para mostrar.</em></p>
+                    }
+                    else
+                    {
+                        @* 1. Gráfico: Ingresos mensuales usando series y categorías (evita lambdas en atributos) *@
+                        <ApexChart TItem="decimal" Height="320" Title="Ingresos Mensuales ($)">
+                            <ApexSeries TItem="decimal" Name="Ingresos" Items="ingresosValues" />
+                            <ApexXAxis Categories="ingresosCategories" />
+                        </ApexChart>
+                    }
                 </div>
             }
             else if (seccionActiva == "asistencia")
             {
                 <div class="card p-3 shadow-sm">
                     <h5>Índices de Asistencia por Actividad</h5>
+
+                    @if (datosAsistencia == null || datosAsistencia.Count == 0)
+                    {
+                        <p><em>No hay datos de asistencia para mostrar.</em></p>
+                    }
+                    else
+                    {
+                        @* 2. Gráfico de barras: Asistencias vs Cancelaciones por actividad *@
+                        <ApexChart TItem="int" Height="320" Title="Asistencias vs Cancelaciones">
+                            <ApexSeries TItem="int" Name="Asistieron" Items="asistenciasSeries" />
+                            <ApexSeries TItem="int" Name="Cancelaron" Items="cancelacionesSeries" />
+                            <ApexXAxis Categories="actividadesCategories" />
+                        </ApexChart>
+                    }
                 </div>
             }
             else if (seccionActiva == "historial")
             {
                 <div class="card p-3 shadow-sm">
                     <h5>Consulta de Historial Personal</h5>
+                    <p>Contenido del historial...</p>
                 </div>
             }
         </div>
@@ -39,10 +71,85 @@
 @code {
     private string seccionActiva = "ingresos";
 
+    // Listas donde vamos a guardar los datos que devuelven los Casos de Uso
+    private List<IngresoPorMesDto>? datosIngresos;
+    private List<AsistenciaDto>? datosAsistencia;
+    DateOnly desde = DateOnly.FromDateTime(DateTime.Now);
+    DateOnly hasta = DateOnly.FromDateTime(DateTime.Now);
+    private int idUsuario = 1; // cambiar según contexto/selección
+
+    // EL CICLO DE VIDA: Aquí llamo a los Casos de Uso cuando la página arranca
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            // Construir ingresos por mes (últimos 6 meses, se puede cambiar) llamando al caso de uso que devuelve totales
+            var months = Enumerable.Range(0, 6)
+                .Select(i => DateTime.Today.AddMonths(-i))
+                .Reverse()
+                .ToList();
+
+            var ingresos = new List<IngresoPorMesDto>();
+            foreach (var dt in months)
+            {
+                var start = DateOnly.FromDateTime(new DateTime(dt.Year, dt.Month, 1));
+                var end = start.AddMonths(1).AddDays(-1);
+                var total = await ConsultarIngresosDelNegocioUseCase.Ejecutar(start, end);
+                ingresos.Add(new IngresoPorMesDto { Mes = start.ToString("MMM yyyy"), MontoTotal = total });
+            }
+            datosIngresos = ingresos;
+
+            // Obtener índices por usuario y mapear al DTO que usa el gráfico
+            var indices = await ConsultarIndicesUsuarioUseCase.Ejecutar(idUsuario, desde, hasta);
+            datosAsistencia = indices.Select(r => new AsistenciaDto
+            {
+                Actividad = r.NombreActividad,
+                CantidadAsistencias = r.TotalAsistencias,
+                CantidadCancelaciones = r.TotalCancelaciones
+            }).ToList();
+
+            // Preparar colecciones planas para los componentes ApexSeries/XAxis (evita lambdas en markup)
+            ingresosValues = datosIngresos.Select(d => d.MontoTotal).ToList();
+            ingresosCategories = datosIngresos.Select(d => d.Mes).ToList();
+
+            actividadesCategories = datosAsistencia.Select(a => a.Actividad).ToList();
+            asistenciasSeries = datosAsistencia.Select(a => a.CantidadAsistencias).ToList();
+            cancelacionesSeries = datosAsistencia.Select(a => a.CantidadCancelaciones).ToList();
+        }
+        catch (Exception ex)
+        {
+            // Loguear o manejar según convenga; por ahora dejamos los listados vacíos
+            datosIngresos = new List<IngresoPorMesDto>();
+            datosAsistencia = new List<AsistenciaDto>();
+        }
+    }
+
     private void CambiarSeccion(string nuevaSeccion)
     {
         seccionActiva = nuevaSeccion;
     }
+
+    // --- Clases de ejemplo (DTOs) para estructurar lo que recibe el gráfico ---
+    public class IngresoPorMesDto
+    {
+        public string Mes { get; set; }
+        public decimal MontoTotal { get; set; }
+    }
+
+    public class AsistenciaDto
+    {
+        public string Actividad { get; set; }
+        public int CantidadAsistencias { get; set; }
+        public int CantidadCancelaciones { get; set; }
+    }
+
+    // Colecciones planas usadas por ApexSeries/XAxis
+    private List<decimal> ingresosValues = new();
+    private List<string> ingresosCategories = new();
+
+    private List<string> actividadesCategories = new();
+    private List<int> asistenciasSeries = new();
+    private List<int> cancelacionesSeries = new();
 }
 
 <style>
