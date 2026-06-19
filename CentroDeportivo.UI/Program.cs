@@ -105,7 +105,7 @@ builder.Services.AddScoped<ConfirmarPagoReservaUseCase>();
 
 builder.Services.AddScoped<CrearTurnoUseCase>();
 builder.Services.AddScoped<EditarTurnoUseCase>();
-builder.Services.AddScoped<EliminarTurnoUseCase>();
+builder.Services.AddScoped<CancelarTurnoUseCase>();
 builder.Services.AddScoped<ListarTurnosUseCase>();
 builder.Services.AddScoped<ListarTurnosCalendarioUseCase>();
 builder.Services.AddScoped<ConsultarDisponibilidadUseCase>();

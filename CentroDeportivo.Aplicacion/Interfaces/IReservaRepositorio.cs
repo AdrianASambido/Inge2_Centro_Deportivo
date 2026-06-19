@@ -18,6 +18,7 @@ namespace CentroDeportivo.Aplicacion.Interfaces
         Task<bool> TieneConflictoHorarioAsync(int usuarioId, DateOnly fecha, TimeOnly horarioInicio);
         Task AgregarAsync(Reserva reserva);
         Task<int> ContarCancelacionesUsuarioMesAsync(int idUsuario, int anio, int mes);
+        Task ActualizarMuchasAsync(IEnumerable<Reserva> reservas);
         Task GuardarMuchasReservasAsync(List<Reserva> reservas);
         Task ActualizarAsync(Reserva reserva);
         Task<bool> TieneExcesoCancelacionesAsync(int idUsuario, DateOnly fechaLimite);

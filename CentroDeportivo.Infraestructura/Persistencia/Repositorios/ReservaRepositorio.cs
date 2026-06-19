@@ -20,6 +20,12 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
             await contexto.SaveChangesAsync();
         }
 
+        public async Task ActualizarMuchasAsync(IEnumerable<Reserva> reservas)
+        {
+            contexto.Reservas.UpdateRange(reservas);
+            await contexto.SaveChangesAsync();
+        }
+
         public async Task AgregarAsync(Reserva reserva)
         {
             await contexto.Reservas.AddAsync(reserva);

@@ -24,6 +24,13 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
             await contexto.SaveChangesAsync();
         }
 
+        public async Task AgregarMuchosAsync(IEnumerable<Credito> creditos)
+        {
+            await contexto.Creditos.AddRangeAsync(creditos);
+
+            await contexto.SaveChangesAsync();
+        }
+
         public async Task EliminarAsync(int idCredito)
         {
             throw new NotImplementedException();
