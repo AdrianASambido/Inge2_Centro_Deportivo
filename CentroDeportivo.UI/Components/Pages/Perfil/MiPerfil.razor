@@ -30,6 +30,12 @@
             }
             else
             {
+                <div class="Contenedor-de-pestanias">
+                    <button class="tab-boton @(pestañaActiva == 1 ? "activo" : "")" @onclick="() => pestañaActiva = 1">Mi Perfil</button>
+                    <button class="tab-boton @(pestañaActiva == 2 ? "activo" : "")" @onclick="() => pestañaActiva = 2">Historial</button>
+                    <button class="tab-boton @(pestañaActiva == 3 ? "activo" : "")" @onclick="() => pestañaActiva = 3">Comprobantes</button>
+                </div>
+
                 <div class="card border-0 shadow-lg overflow-hidden">
                     <div class="bg-primary p-4 text-center">
                         <div class="rounded-circle bg-white d-inline-flex align-items-center justify-content-center shadow" style="width: 80px; height: 80px;">
@@ -37,6 +43,8 @@
                         </div>
                     </div>
 
+                    @if (pestañaActiva == 1)
+                    {
                     <div class="card-body p-4">
                         <h3 class="card-title text-center mb-4">Datos del usuario</h3>
                         
@@ -78,6 +86,13 @@
                             </button>
                         </div>
                     </div>
+                    }
+                    @if (pestañaActiva == 2){
+                        <h1>Historial</h1>
+                    }
+                    @if (pestañaActiva == 3){
+                        <h1>Comprobantes</h1>
+                    }
                 </div>
             }
         </div>
@@ -85,6 +100,7 @@
 </div>
 
 @code {
+    private int pestañaActiva = 1;
     void IrLogin()
     {
         Navegador.NavigateTo("/Login");

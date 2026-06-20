@@ -18,76 +18,126 @@
     {
         <p class="text-center">@UsuarioSesion.UsuarioActual.Nombre @UsuarioSesion.UsuarioActual.Apellido</p>
 
-        <div class="row justify-content-center">
-            <div class="col-md-6">
-                <label class="form-label">Actividad</label>
-                <select class="form-select" @bind="SeleccionActividad" @bind:after="AlActividadCambiada">
-                    <option value="">— Seleccione una actividad —</option>
-                    @foreach (var a in actividades)
-                    {
-                        <option value="@a.Id">@a.Nombre</option>
-                    }
-                </select>
-            </div>
+        <div class="Contenedor-de-pestanias">
+            <button class="tab-boton @(pestañaActiva == 1 ? "activo" : "")" @onclick="() => pestañaActiva = 1">Reserva ocasional</button>
+            <button class="tab-boton @(pestañaActiva == 2 ? "activo" : "")" @onclick="() => pestañaActiva = 2">Reserva adelantada</button>
         </div>
 
-        @if (int.TryParse(SeleccionActividad, out var aid) && aid > 0)
+        @if (pestañaActiva == 1)
         {
-            <div class="text-center my-4">
-                <div class="position-relative d-inline-block">
-                    <button type="button"
-                            class="btn btn-primary"
-                            @onclick="AlternarCalendarioCompleto"
-                            @onmouseenter="MostrarCalendarioMini"
-                            @onmouseleave="OcultarCalendarioMini">
-                        Reservar turnos
-                    </button>
-
-                    @if (mostrarCalendarioMini)
-                    {
-                        <div class="card position-absolute top-100 start-50 translate-middle-x mt-2 p-2 shadow" style="z-index: 1080; min-width: 220px;">
-                            <div class="small text-muted text-center">@TituloMes(ReferenciaMes)</div>
-                            @TablaCalendario(esMini: true, actividadParaNavegar: aid)
-                        </div>
-                    }
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <label class="form-label">Actividad</label>
+                    <select class="form-select" @bind="SeleccionActividad" @bind:after="AlActividadCambiada">
+                        <option value="">— Seleccione una actividad —</option>
+                        @foreach (var a in actividades)
+                        {
+                            <option value="@a.Id">@a.Nombre</option>
+                        }
+                    </select>
                 </div>
             </div>
 
-            @if (mostrarCalendarioCompleto)
+            @if (int.TryParse(SeleccionActividad, out var aid) && aid > 0)
             {
-                <div class="row justify-content-center">
-                    <div class="col-auto">
+                <div class="text-center my-4">
+                    <div class="position-relative d-inline-block">
+                        <button type="button"
+                        class="btn btn-primary"
+                        @onclick="AlternarCalendarioCompleto"
+                        @onmouseenter="MostrarCalendarioMini"
+                        @onmouseleave="OcultarCalendarioMini">
+                            Reservar turnos
+                        </button>
 
-                        <div class="d-flex justify-content-center align-items-center gap-2 mb-2">
-                            <button class="btn btn-outline-secondary btn-sm"
-                                    @onclick="MesAnterior"
-                                    disabled="@EsMesActual()">
-                                ←
-                            </button>
-
-                            <span class="fw-semibold">
-                                @TituloMes(ReferenciaMes)
-                            </span>
-
-                            <button class="btn btn-outline-secondary btn-sm"
-                                    @onclick="MesSiguiente">
-                                →
-                            </button>
-                        </div>
-
-                        @TablaCalendario(esMini: false, actividadParaNavegar: aid)
-
+                        @if (mostrarCalendarioMini)
+                        {
+                            <div class="card position-absolute top-100 start-50 translate-middle-x mt-2 p-2 shadow" style="z-index: 1080; min-width: 220px;">
+                                <div class="small text-muted text-center">@TituloMes(ReferenciaMes)</div>
+                                @TablaCalendario(esMini: true, actividadParaNavegar: aid)
+                            </div>
+                        }
                     </div>
                 </div>
+
+                @if (mostrarCalendarioCompleto)
+                {
+                    <div class="row justify-content-center">
+                        <div class="col-auto">
+
+                            <div class="d-flex justify-content-center align-items-center gap-2 mb-2">
+                                <button class="btn btn-outline-secondary btn-sm"
+                                @onclick="MesAnterior"
+                                disabled="@EsMesActual()">
+                                    ←
+                                </button>
+
+                                <span class="fw-semibold">
+                                    @TituloMes(ReferenciaMes)
+                                </span>
+
+                                <button class="btn btn-outline-secondary btn-sm"
+                                @onclick="MesSiguiente">
+                                    →
+                                </button>
+                            </div>
+
+                            @TablaCalendario(esMini: false, actividadParaNavegar: aid)
+
+                        </div>
+                    </div>
+                }
+            }
+        }
+
+        @if (pestañaActiva == 2)
+        {
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="mb-3">
+                        <label class="form-label">Actividad</label>
+                        <select class="form-select" @bind="SeleccionActividad" @bind:after="AlActividadCambiada">
+                            <option value="">— Seleccione una actividad —</option>
+                            @foreach (var a in actividades)
+                            {
+                                <option value="@a.Id">@a.Nombre</option>
+                            }
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label">Dia de la semana</label>
+                        <select class="form-select" @bind="diaSemana">
+                            @foreach (var d in Enum.GetValues<DayOfWeek>())
+                                {
+                                    <option value="@d">@NombreDia(d)</option>
+                                }
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            @if (int.TryParse(SeleccionActividad, out var aid2) && aid2 > 0)
+            {
+                <button class="btn btn-primary"
+                @onclick="() => IrAActividad(aid2, diaSemana)">
+                    Continuar
+                </button>
             }
         }
     }
 </div>
 
 @code {
+    private string NombreDia(DayOfWeek dia)
+    {
+        var nombre = CultureInfo.GetCultureInfo("es-AR").DateTimeFormat.GetDayName(dia);
+        return char.ToUpper(nombre[0]) + nombre[1..];
+    }
+    private int pestañaActiva = 1;
     private static readonly string[] NombresActividades = ["Pádel", "Fútbol", "Vóley", "Básquet"];
     private static readonly string[] DiasSemanaCortos = ["Lu", "Ma", "Mi", "Ju", "Vi", "Sa", "Do"];
 
+    private DayOfWeek diaSemana = new DayOfWeek();
     private List<Actividad> actividades = [];
     private string SeleccionActividad = "";
     private bool mostrarCalendarioMini;
@@ -128,7 +178,7 @@
 
             var resultado = await ListarActividadesUseCase.ejecutar();
             actividades = resultado.ToList();
-            
+
             if (!actividades.Any())
             {
                 mensaje = "No hay actividades en la base de datos.";
@@ -184,6 +234,11 @@
             return;
         var f = fecha.ToString("yyyy-MM-dd");
         Navegador.NavigateTo($"/Turnos/dia?actividadId={actividadId}&fecha={f}");
+    }
+
+    private void IrAActividad(int actividadId, DayOfWeek diaSemana)
+    {
+        Navegador.NavigateTo($"/Turno/adelantada?actividadId={actividadId}&diaSemana={(int)diaSemana}");
     }
 
     private RenderFragment TablaCalendario(bool esMini, int actividadParaNavegar) => __builder =>
