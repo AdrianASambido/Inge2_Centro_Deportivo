@@ -8,6 +8,6 @@ namespace CentroDeportivo.Aplicacion.Entidades
 {
     public enum DevolucionEstado
     {
-        Pendiente, Confirmado, Cancelado
+        Pendiente, Confirmado, Cancelado, Fallido
     }
 }

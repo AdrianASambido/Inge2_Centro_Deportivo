@@ -35,7 +35,7 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
         }
 
         //para el empleado 
-        public async Task<IEnumerable<Turno>> BuscarTurnosAsync(DateOnly? fecha, int? actividadId, int? profeId, int? canchaId,EstadoTurno? estado)
+        public async Task<IEnumerable<Turno>> BuscarTurnosAsync(DateOnly? fecha, int? actividadId, int? profeId, int? canchaId, EstadoTurno? estado)
         {
             var query = contexto.Turnos.Where(t => t.Estado != EstadoTurno.Finalizado)
                 .Include(t => t.Actividad)
@@ -53,7 +53,8 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
             if (profeId.HasValue)
                 query = query.Where(t => t.Id_Profesor == profeId.Value);
 
-            if (canchaId.HasValue) { 
+            if (canchaId.HasValue)
+            {
                 query = query.Where(t => t.Id_Cancha == canchaId.Value);
             }
 
@@ -91,7 +92,7 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
                 .Where(r => r.Id_Usuario == usuarioId &&
                             r.Turno.Fecha == fecha &&
                             (r.Estado == EstadoReserva.Confirmado || r.Estado == EstadoReserva.PendienteDePago))
-                .Select(r => new { r.Turno.HoraInicio, r.Turno.HoraFin }) 
+                .Select(r => new { r.Turno.HoraInicio, r.Turno.HoraFin })
                 .ToListAsync();
 
             var turnosCandidatos = await contexto.Turnos
@@ -100,13 +101,13 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
                 .Include(t => t.Cancha)
                 .Where(t => t.Id_Actividad == actividadId
                          && t.Fecha == fecha
-                         && t.Estado == EstadoTurno.Disponible
+                         && (t.Estado == EstadoTurno.Disponible || t.Estado == EstadoTurno.Lleno)
                          && t.Fecha >= hoy)
                 .ToListAsync();
 
             var filtrados = turnosCandidatos.Where(t =>
                 !reservasCliente.Any(r =>
- 
+
                     t.HoraInicio < r.HoraFin && t.HoraFin > r.HoraInicio
                 )
             );
@@ -138,6 +139,38 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
             await contexto.SaveChangesAsync();
         }
 
-        
+        public async Task<List<Turno>> ObtenerTurnosDisponiblesRangoAsync(
+                int idActividad,
+                DayOfWeek diaSemana,
+                int idUsuario,
+                DateOnly desde,
+                DateOnly hasta)
+        {
+
+            return await contexto.Turnos
+                .Include(t => t.Profesor)
+                .Include(t => t.Cancha)
+                .Where(t => t.Id_Actividad == idActividad
+                         && t.Estado == EstadoTurno.Disponible
+                         && t.Fecha >= desde
+                         && t.Fecha <= hasta
+                         && t.Fecha.DayOfWeek == diaSemana
+
+                         && !contexto.Reservas.Any(r => r.Id_Usuario == idUsuario
+                                                     && r.Estado != EstadoReserva.Cancelado
+                                                     && r.Turno.Fecha == t.Fecha
+                                                     && r.Turno.HoraInicio == t.HoraInicio))
+                .OrderBy(t => t.Fecha)
+                .ToListAsync();
+        }
+
+        public async Task ActualizarMuchosAsync(List<Turno> turnos)
+        {
+            if (turnos == null || !turnos.Any()) return;
+
+            contexto.Turnos.UpdateRange(turnos);
+
+            await contexto.SaveChangesAsync();
+        }
     }
 }

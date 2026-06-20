@@ -11,10 +11,10 @@ namespace CentroDeportivo.Aplicacion.Entidades
         public int Id { get; private set; }
         public string Nombre { get; set; } = string.Empty;
         public string Descripcion { get; set; } = string.Empty;
-        public double Precio { get; set; }
+        public decimal Precio { get; set; }
         public bool Existe { get; set; } = true;
 
-        public Actividad(string nombre, string descripcion, double precio)
+        public Actividad(string nombre, string descripcion, decimal precio)
         {
             this.Nombre = nombre;
             this.Descripcion = descripcion;

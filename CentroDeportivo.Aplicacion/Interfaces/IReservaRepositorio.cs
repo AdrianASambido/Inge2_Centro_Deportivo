@@ -1,4 +1,5 @@
-﻿using CentroDeportivo.Aplicacion.Entidades;
+﻿using CentroDeportivo.Aplicacion.Casos_de_uso.EstadisticaUseCase.DTOs;
+using CentroDeportivo.Aplicacion.Entidades;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,6 +17,12 @@ namespace CentroDeportivo.Aplicacion.Interfaces
         Task<bool> ExisteReservaActivaAsync(int usuarioId, int turnoId);
         Task<bool> TieneConflictoHorarioAsync(int usuarioId, DateOnly fecha, TimeOnly horarioInicio);
         Task AgregarAsync(Reserva reserva);
+        Task<int> ContarCancelacionesUsuarioMesAsync(int idUsuario, int anio, int mes);
+        Task ActualizarMuchasAsync(IEnumerable<Reserva> reservas);
+        Task GuardarMuchasReservasAsync(List<Reserva> reservas);
         Task ActualizarAsync(Reserva reserva);
+        Task<bool> TieneExcesoCancelacionesAsync(int idUsuario, DateOnly fechaLimite);
+        Task<ReporteIndicesActividadDTO> ObtenerTotalesPorActividadAsync(int idActividad, DateOnly desde, DateOnly hasta);
+        Task<IEnumerable<HistorialUsuarioActividadDTO>> ObtenerTotalesPorUsuarioAsync(int idUsuario, DateOnly? desde = null, DateOnly? hasta = null);
     }
 }
