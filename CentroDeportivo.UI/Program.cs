@@ -118,7 +118,7 @@ builder.Services.AddScoped<ObtenerUsuarioPorId>();
 builder.Services.AddScoped<ObtenerProfesorPorId>();
 builder.Services.AddScoped<ObtenerCanchaPorId>();
 builder.Services.AddScoped<ObtenerReservaPorId>();
-builder.Services.AddScoped<ObtenerTurnoId>();   
+builder.Services.AddScoped<ObtenerTurnoId>();
 builder.Services.AddScoped<ObtenerActividadPorId>();
 builder.Services.AddScoped<ObtenerDevolucionPorId>();
 builder.Services.AddScoped<EditarUsuarioUseCase>();

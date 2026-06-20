@@ -8,18 +8,18 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ListaEsperaUseCase
     public class AbandonarListaEsperaUseCase(
         IListaDeEsperaRepositorio repoLista,
         ITurnoRepositorio repoTurno,
-        IEmailServicio emailServicio 
+        IEmailServicio emailServicio
     )
     {
         public async Task Ejecutar(int idUsuario, int idTurno)
         {
-      
+
             var inscripciones = await repoLista.ObtenerTodosPorUsuarioAsync(idUsuario);
             InscripcionListaEspera? inscripcionActual = null;
 
             foreach (var ins in inscripciones)
             {
-               
+
                 if (ins.Id_Turno == idTurno && (ins.Estado == EstadoListaEspera.Esperando || ins.Estado == EstadoListaEspera.Notificado))
                 {
                     inscripcionActual = ins;
@@ -32,7 +32,7 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ListaEsperaUseCase
                 throw new Exception("Error: No se encontró una inscripción activa en la lista de espera para este turno.");
             }
 
-           
+
             var estadoAnterior = inscripcionActual.Estado;
 
 

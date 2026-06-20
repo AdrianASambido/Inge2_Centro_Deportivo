@@ -17,7 +17,7 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.TurnoUseCase
     {
         public async Task Ejecutar(int idTurno)
         {
-      
+
             var turno = await repoTurno.ObtenerPorIdAsync(idTurno);
             if (turno == null)
             {
@@ -54,11 +54,11 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.TurnoUseCase
 
                 if (reserva.TipoReserva == TipoReserva.Ocasional)
                 {
-     
+
                     bool devolucionExitosa = await pagoServicio.ProcesarReembolsoAsync(reserva.Id_Usuario, reserva.PrecioPagado);
                     if (!devolucionExitosa)
                     {
-    
+
                         Console.WriteLine($"[Alerta] No se pudo procesar la devolución automática del usuario {reserva.Id_Usuario}");
                     }
                 }
@@ -71,29 +71,29 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.TurnoUseCase
             }
 
 
-            await repoTurno.ActualizarAsync(turno); 
+            await repoTurno.ActualizarAsync(turno);
 
             if (reservasActivas.Any())
             {
-                await repoReserva.ActualizarMuchasAsync(reservasActivas); 
+                await repoReserva.ActualizarMuchasAsync(reservasActivas);
             }
 
             if (nuevosCreditos.Any())
             {
-                await repoCredito.AgregarMuchosAsync(nuevosCreditos); 
+                await repoCredito.AgregarMuchosAsync(nuevosCreditos);
             }
 
- 
+
             if (emailsDestinatarios.Any())
             {
                 try
                 {
-        
+
                     await emailServicio.EnviarAvisoCancelacionMasivo(emailsDestinatarios, turno);
                 }
                 catch (Exception ex)
                 {
-   
+
                     Console.WriteLine($"[Error Email] Las alertas no pudieron enviarse: {ex.Message}");
                 }
             }

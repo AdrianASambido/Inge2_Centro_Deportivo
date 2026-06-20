@@ -20,19 +20,19 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.TurnoUseCase
 
             int diasRestantesEsperados = CantidadDeDiasRestantesEnElMes(hoy, finDeMes, diaSemana);
 
-  
+
             if (diasRestantesEsperados == 0) return new List<ClaseAdelantada>();
 
             var turnosFisicos = await repoTurno.ObtenerTurnosDisponiblesRangoAsync(idActividad, diaSemana, idUsuario, hoy, finDeMes);
 
- 
+
             var clasesAgrupadas = turnosFisicos
                 .GroupBy(t => new { t.Id_Profesor, t.HoraInicio, t.Id_Cancha })
-                .Where(g => g.Count() == diasRestantesEsperados) 
+                .Where(g => g.Count() == diasRestantesEsperados)
                 .Select(g => new ClaseAdelantada
                 {
                     TurnoRepresentativo = g.First(),
-                    TurnosDelMes = g.ToList(), 
+                    TurnosDelMes = g.ToList(),
                     CupoMinimoDisponible = g.Min(t => t.CupoDisponible)
                 })
                 .ToList();

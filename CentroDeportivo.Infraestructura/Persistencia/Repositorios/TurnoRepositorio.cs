@@ -35,7 +35,7 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
         }
 
         //para el empleado 
-        public async Task<IEnumerable<Turno>> BuscarTurnosAsync(DateOnly? fecha, int? actividadId, int? profeId, int? canchaId,EstadoTurno? estado)
+        public async Task<IEnumerable<Turno>> BuscarTurnosAsync(DateOnly? fecha, int? actividadId, int? profeId, int? canchaId, EstadoTurno? estado)
         {
             var query = contexto.Turnos.Where(t => t.Estado != EstadoTurno.Finalizado)
                 .Include(t => t.Actividad)
@@ -53,7 +53,8 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
             if (profeId.HasValue)
                 query = query.Where(t => t.Id_Profesor == profeId.Value);
 
-            if (canchaId.HasValue) { 
+            if (canchaId.HasValue)
+            {
                 query = query.Where(t => t.Id_Cancha == canchaId.Value);
             }
 
@@ -91,7 +92,7 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
                 .Where(r => r.Id_Usuario == usuarioId &&
                             r.Turno.Fecha == fecha &&
                             (r.Estado == EstadoReserva.Confirmado || r.Estado == EstadoReserva.PendienteDePago))
-                .Select(r => new { r.Turno.HoraInicio, r.Turno.HoraFin }) 
+                .Select(r => new { r.Turno.HoraInicio, r.Turno.HoraFin })
                 .ToListAsync();
 
             var turnosCandidatos = await contexto.Turnos
@@ -106,7 +107,7 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
 
             var filtrados = turnosCandidatos.Where(t =>
                 !reservasCliente.Any(r =>
- 
+
                     t.HoraInicio < r.HoraFin && t.HoraFin > r.HoraInicio
                 )
             );

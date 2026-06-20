@@ -15,7 +15,7 @@ namespace CentroDeportivo.Aplicacion.Entidades
         public decimal PrecioTurno { get; set; } 
         public int CupoMaximo { get; set; }
         public int CupoDisponible { get; set; }
-        public EstadoTurno Estado {get; set;}
+        public EstadoTurno Estado { get; set; }
         public int Id_Actividad { get; set; }
         public int Id_Profesor { get; set; }
         public int Id_Cancha { get; set; }

@@ -8,6 +8,7 @@
 @inject ObtenerActividadPorId ObtenerActividadPorId
 @inject ObtenerUsuarioPorId ObtenerUsuarioPorId
 @inject CrearReservaUseCase CrearReservaUseCase
+@inject UnirseListaDeEsperaUseCase UnirseListaDeEsperaUseCase
 
 <PageTitle>Horarios del día</PageTitle>
 
@@ -49,6 +50,16 @@ else
                             @foreach (var t in turnosFiltrados)
                             {
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    @if (t.CupoDisponible == 0)
+                                    {
+                                        <div>
+                                            <span class="fw-bold">@t.HoraInicio.ToString("HH:mm") – @t.HoraFin.ToString("HH:mm")</span>
+                                            <div class="small d-block text-muted">Precio:$@t.PrecioTurno</div>
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-success" disabled="@procesando" @onclick="() => UnirseListaEspera(t.Id)">
+                                            Unirse a lista de espera
+                                        </button>
+                                    }
                                     <div>
                                         <span class="fw-bold">@t.HoraInicio.ToString("HH:mm") – @t.HoraFin.ToString("HH:mm")</span>
                                         <div class="small d-block text-muted">Libres: @t.CupoDisponible / @t.CupoMaximo</div>
@@ -130,20 +141,39 @@ else
 
         var idUsuario = UsuarioSesion.UsuarioActual!.Id;
 
-        
+
         var todos = await ListarTurnosCalendarioUseCase.ejecutar(idUsuario, fechaElegida.Value, ActividadId.Value);
 
         var ahora = DateTime.Now;
         var fechaHoy = DateOnly.FromDateTime(ahora);
         var horaActual = TimeOnly.FromDateTime(ahora);
 
-        
+
         turnosFiltrados = todos
-            .Where(t => t.CupoDisponible > 0
-                     && t.Estado != EstadoTurno.Cancelado
+            .Where(t => t.Estado != EstadoTurno.Cancelado
                      && (t.Fecha > fechaHoy || (t.Fecha == fechaHoy && t.HoraInicio > horaActual)))
             .OrderBy(t => t.HoraInicio) 
             .ToList();
+    }
+    private async Task UnirseListaEspera(int turnoId)
+    {
+        procesando = true;
+        mensajeError = mensajeExito = null;
+        try
+        {
+            await UnirseListaDeEsperaUseCase.Ejecutar(UsuarioSesion.UsuarioActual.Id, turnoId);
+            mensajeExito = "Usted se ha unido a la lista de espera correctamente.";
+            await CargarTurnos();
+        }
+        catch (Exception ex)
+        {
+            mensajeError = ex.Message;
+        }
+        finally
+        {
+            procesando = false;
+            StateHasChanged();
+        }
     }
 
     private async Task Reservar(int turnoId)
@@ -158,7 +188,7 @@ else
                 Id_Turno = turnoId
             };
 
-            await CrearReservaUseCase.Ejecutar(nuevaReserva,tokenTarjeta);
+            await CrearReservaUseCase.Ejecutar(nuevaReserva, null);
 
             mensajeExito = "Reserva realizada con éxito, debe acercarse al centro a abonar.";
             await CargarTurnos();

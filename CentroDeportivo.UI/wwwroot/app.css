@@ -175,3 +175,31 @@ h2, h3, .btn-group, .table-responsive {
     width: 100%;
 }
 
+.Contenedor-de-pestanias {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 25px;
+}
+
+.tab-boton {
+    border: none;
+    background-color: #f1f3f5;
+    color: #495057;
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.tab-boton:hover {
+    background-color: #e9ecef;
+    transform: translateY(-1px);
+}
+
+.tab-boton.activo {
+    background-color: #0d6efd;
+    color: white;
+    box-shadow: 0 4px 12px rgba(13,110,253,.25);
+}

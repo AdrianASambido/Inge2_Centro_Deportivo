@@ -23,7 +23,7 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
                 throw new Exception("No se proporcionaron clases válidas para reservar.");
             }
 
-  
+
             if (clasesDisponibles.Any(t => t.CupoDisponible <= 0))
             {
                 throw new Exception("Una o más clases del mes ya no cuentan con cupo disponible. Operación cancelada.");

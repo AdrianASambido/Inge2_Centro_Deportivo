@@ -32,5 +32,5 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.EstadisticaUseCase
             }).ToList();
         }
     }
-    }
+}
 
