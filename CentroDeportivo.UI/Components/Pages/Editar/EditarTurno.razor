@@ -1,0 +1,81 @@
+﻿@page "/Turno/editar/{id:int}"
+@rendermode InteractiveServer
+@inject NavigationManager Navegador
+@inject EditarTurnoUseCase EditarTurnoUseCase
+@inject Sesion UsuarioSesion
+@inject ITurnoRepositorio RepositorioTurno
+
+<PageTitle>Editar Turno</PageTitle>
+
+<h3>Editar turno</h3>
+
+@if (turno == null)
+{
+    <p>Cargando...</p>
+}
+else
+{
+    <div class="card shadow-sm border-0 rounded-4 p-4" style="max-width: 700px;">
+        <input placeholder="Cupo" @bind="cupo" type="number" class="form-control mb-2" />
+        <input placeholder="Fecha" @bind="fecha" type="date" class="form-control mb-2" />
+        <input placeholder="Hora de inicio" @bind="horaInicio" type="number" class="form-control mb-2" />
+        <input placeholder="Precio" @bind="precio" class="form-control mb-3" type="number" step="0.01" />
+
+        <div class="d-flex gap-2 mt-3 justify-content-end">
+
+            <button class="btn btn-success" @onclick="GuardarDatos">Guardar cambios</button>
+            <button class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
+
+        </div>
+        @if (!string.IsNullOrEmpty(mensaje))
+        {
+            <div class="alert alert-danger mt-3">@mensaje</div>
+        }
+    </div>
+
+}
+
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    public Turno? turno;
+    public int cupo;
+    public DateOnly fecha = DateOnly.FromDateTime(DateTime.Now);
+    public TimeOnly horaInicio;
+    public decimal precio;
+
+
+    public string mensaje = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        turno = await RepositorioTurno.ObtenerPorIdAsync(Id);
+        if (turno != null)
+        {
+            cupo = turno.CupoMaximo;
+            fecha = turno.Fecha;
+            horaInicio = turno.HoraInicio;
+            precio = turno.PrecioTurno;
+        }
+    }
+
+    async Task GuardarDatos()
+    {
+        if (turno == null) return;
+        mensaje = "";
+        try
+        {
+            var tur = new Turno();
+            await EditarTurnoUseCase.Ejecutar(Id,fecha,horaInicio,precio,cupo);
+            mensaje = "Cambios guardados con exito.";
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            mensaje = ex.Message;
+        }
+    }
+
+    void Cancelar() => Navegador.NavigateTo("/listar-turnos-creados");
+}
