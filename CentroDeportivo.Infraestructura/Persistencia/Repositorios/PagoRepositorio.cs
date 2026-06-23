@@ -20,8 +20,11 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
 
         public async Task<decimal> ObtenerIngresosGeneralesAsync(DateOnly desde, DateOnly hasta)
         {
- 
+
             DateTime fechaDesde = desde.ToDateTime(TimeOnly.MinValue);
+            DateTime fechaHasta = hasta.ToDateTime(TimeOnly.MaxValue);
+
+            return await contexto.Pagos
             DateTime fechaHasta = hasta.ToDateTime(TimeOnly.MaxValue); 
             // Sum in memory to avoid provider translation issues when Monto is stored as TEXT in SQLite
             var pagos = await contexto.Pagos
@@ -91,7 +94,7 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
                                 .ThenInclude(t => t.Actividad)
                          .Include(p => p.Turno)
                             .ThenInclude(t => t.Actividad)
-                         .Where(p => p.Id_Usuario == idUsuario) 
+                         .Where(p => p.Id_Usuario == idUsuario)
                          .FirstOrDefaultAsync();
         }
 
@@ -113,7 +116,7 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
                         .Include(p => p.Usuario)
                         .Include(p => p.Turno)
                           .ThenInclude(t => t.Actividad)
-                        .Where(p => p.Id_Turno == idTurno) 
+                        .Where(p => p.Id_Turno == idTurno)
                         .AsNoTracking().ToListAsync();
         }
 
@@ -126,7 +129,7 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
                                 .ThenInclude(t => t.Actividad)
                          .Include(p => p.Turno)
                             .ThenInclude(t => t.Actividad)
-                         .Where(p => p.Id_Usuario == idUsuario) 
+                         .Where(p => p.Id_Usuario == idUsuario)
                          .AsNoTracking().ToListAsync();
         }
     }

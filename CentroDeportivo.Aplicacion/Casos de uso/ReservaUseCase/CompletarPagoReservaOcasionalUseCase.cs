@@ -8,7 +8,7 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
     public class CompletarPagoReservaOcasionalUseCase(
         IReservaRepositorio repoReserva,
         IPagoRepositorio repoPago,
-        IPagoServicio pagoServicio 
+        IPagoServicio pagoServicio
     )
     {
         public async Task Ejecutar(int idReserva, string tarjetaToken)
@@ -34,9 +34,9 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
                 throw new Exception("El cobro del saldo restante fue rechazado por la entidad bancaria. No se pudo confirmar la reserva.");
             }
 
-   
+
             reserva.Estado = EstadoReserva.Confirmado;
-            reserva.PrecioPagado = montoRestante * 2; 
+            reserva.PrecioPagado = montoRestante * 2;
 
             var pago = new Pago(reserva.Id_Usuario, montoRestante, reserva.Id, reserva.Id_Turno, null);
 

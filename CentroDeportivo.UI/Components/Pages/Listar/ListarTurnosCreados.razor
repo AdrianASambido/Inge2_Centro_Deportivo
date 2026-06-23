@@ -7,7 +7,6 @@
 @rendermode InteractiveServer
 @inject NavigationManager Navegador
 @inject ITurnoRepositorio TurnoRepositorio
-@inject EliminarTurnoUseCase EliminarTurnoUseCase
 @inject CrearTurnoUseCase CrearTurnoUseCase
 @inject ConsultarDisponibilidadUseCase ConsultarDisponibilidadUseCase
 @inject ListarActividadesUseCase ListarActividadesUseCase
@@ -17,6 +16,8 @@
 @inject RegistrarAsistenciaQrUseCase RegistrarAsistenciaQrUseCase
 @inject ListarProfesoresUseCase ListarProfesoresUseCase
 @inject ListarCanchasUseCase ListarCanchasUseCase
+@inject EliminarInscriptoUseCase EliminarInscriptoUseCase
+@inject CancelarTurnoUseCase CancelarTurnoUseCase
 
 <PageTitle>Listado de Turnos</PageTitle>
 
@@ -199,6 +200,12 @@ else
                                     <button class="btn btn-sm btn-outline-primary" @onclick="() => MostrarInscriptos(tu.Id)">
                                         Ver Inscriptos
                                     </button>
+                                    <button class="btn btn-sm btn-outline-warning" @onclick="() => EditarTurno(tu.Id)">
+                                        Editar Turno
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger" @onclick="() => ConfirmarCancelacion(tu.Id)">
+                                        Cancelar Turno
+                                    </button>
                                 </td>
                             </tr>
                         }
@@ -211,6 +218,25 @@ else
                     }*@
                 </tbody>
             </table>
+            @if (mostrarDialogCancelar)
+            {
+                <div class="modal show d-block shadow" tabindex="-1" style="background: rgba(0,0,0,0.5);">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Confirmar cancelacion</h5>
+                            </div>
+                            <div class="modal-body">
+                                <p>¿Estás seguro de que querés cancelar este turno?</p>
+                            </div>
+                            <div class="modal-footer">
+                                <button class="btn btn-secondary" @onclick="() => mostrarDialogCancelar = false">Cancelar</button>
+                                <button class="btn btn-danger" @onclick="() => CancelarTurno()">Confirmar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
         </div>
     </div>
 }
@@ -253,8 +279,8 @@ else
                                             disabled="@(!PuedeRegistrarAsistencia(r))">
                                                 Registrar asistencia
                                             </button>
-                                            <button class="btn btn-sm btn-outline-secondary" @onclick="() => RegistrarPago(r.Id)"
-                                            disabled="@(r.Estado != EstadoReserva.PendienteDePago || yaPasoLaHora(r))">Confirmar pago</button>
+                                            <button class="btn btn-sm btn-outline-danger" @onclick="() => ConfirmarEliminacion(r.Id)"
+                                                disabled="@(yaPasoLaHora(r))">Eliminar</button>
                                         </td>
                                     </tr>
                                 }
@@ -263,6 +289,26 @@ else
                         @if (!string.IsNullOrEmpty(mensajeTabla))
                         {
                             <div class="alert alert-info mt-3 shadow-sm">@mensajeTabla</div>
+                        }
+
+                        @if (mostrarDialog)
+                        {
+                            <div class="modal show d-block shadow" tabindex="-1" style="background: rgba(0,0,0,0.5);">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Confirmar eliminación</h5>
+                                        </div>
+                                        <div class="modal-body">
+                                            <p>¿Estás seguro de que querés eliminar este inscripto?</p>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button class="btn btn-secondary" @onclick="() => mostrarDialog = false">Cancelar</button>
+                                            <button class="btn btn-danger" @onclick="() => EliminarInscripto()">Confirmar</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         }
                     </div>
                 </div>
@@ -317,6 +363,7 @@ else
 }
 
 @code {
+    bool mostrarDialog = false;
     string mensajeTurno = "";
     string mensajeTabla = "";
     bool mostrarEscanner = false;
@@ -333,7 +380,7 @@ else
     private int filtroCanchaId = 0;
     private int filtroProfesorId = 0;
     private DateTime? filtroFecha;
-
+    private int idAEliminar;
     private List<Profesor> todosLosProfesores = new();
     private List<Cancha> todasLasCanchas = new();
     private List<Profesor> profesoresDispo = new();
@@ -341,7 +388,10 @@ else
     private List<Cancha> canchasDispo = new();
     private List<Turno> turnos = new();
     private List<Turno> turnosFiltrados = new();
+    bool mostrarDialogCancelar = false;
 
+    void ConfirmarCancelacion(int Id) { idAEliminar = Id; mostrarDialogCancelar = true; }
+    void ConfirmarEliminacion(int Id) { idAEliminar = Id; mostrarDialog = true; }
 
     Cancha? canchaSeleccionada => canchasDispo.FirstOrDefault(c => c.Id == t.Id_Cancha);
 
@@ -622,7 +672,7 @@ else
         var fechaHoraInicio = r.Turno.Fecha.ToDateTime(r.Turno.HoraInicio);
         var fechaHoraFin = r.Turno.Fecha.ToDateTime(r.Turno.HoraFin);
 
-    
+
         return DateTime.Now >= fechaHoraInicio.AddMinutes(-15) && DateTime.Now <= fechaHoraFin;
     }
 
@@ -632,23 +682,53 @@ else
         if (r?.Turno == null)
             return true;
 
-    
+
         DateOnly fechaDelTurno = r.Turno.Fecha;
         TimeOnly horaInicioDelTurno = r.Turno.HoraInicio;
 
-    
+
         DateOnly hoy = DateOnly.FromDateTime(DateTime.Now);
         TimeOnly ahora = TimeOnly.FromDateTime(DateTime.Now);
 
         if (fechaDelTurno < hoy)
             return true;
 
-    
+
         if (fechaDelTurno == hoy && ahora > horaInicioDelTurno)
             return true;
 
-    
+
         return false;
     }
+
+    private async Task EliminarInscripto()
+    {
+        /*
+        mensajeTabla = "";
+        mostrarDialog = false;
+        try
+        {
+            await EliminarInscriptoUseCase.Ejecutar(idAEliminar)
+        }
+        */
+    }
+
+    private void EditarTurno(int turnoId) => Navegador.NavigateTo($"/editar-turno/{turnoId}");
+
+    private async Task CancelarTurno()
+    {
+        mensajeTurno ="";
+        mostrarDialogCancelar = false;
+        try {
+            await CancelarTurnoUseCase.Ejecutar(idAEliminar);
+            mensajeTurno = "El turno se ha cancelado exitosamente.";
+            turnos = (await ListarTurnosUseCase.Ejecutar(null, null, null, null, null)).ToList();
+            StateHasChanged();
+        }
+        catch (Exception ex){
+            mensajeTurno = ex.Message;   
+        }
+    }
+
 }
 }

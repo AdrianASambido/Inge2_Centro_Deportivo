@@ -19,7 +19,7 @@ namespace CentroDeportivo.Aplicacion.Interfaces
         Task<IEnumerable<Pago>> ObtenerTodosAsync();
         Task<decimal> ObtenerIngresosPorActividadAsync(int idActividad, DateOnly desde, DateOnly hasta);
         Task<decimal> ObtenerIngresosGeneralesAsync(DateOnly desde, DateOnly hasta);
-        
+
 
     }
 }
