@@ -7,11 +7,10 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
 {
     public class CompletarPagoReservaOcasionalUseCase(
         IReservaRepositorio repoReserva,
-        IPagoRepositorio repoPago,
         IPagoServicio pagoServicio
     )
     {
-        public async Task Ejecutar(int idReserva, string tarjetaToken)
+        public async Task<string> Ejecutar(int idReserva)
         {
             var reserva = await repoReserva.ObtenerPorIdAsync(idReserva);
 
@@ -27,21 +26,18 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
 
             decimal montoRestante = reserva.PrecioPagado;
 
-            bool cobroExitoso = await pagoServicio.ProcesarCobroAsync(reserva.Id_Usuario, montoRestante, tarjetaToken);
+            string urlExito = $"https://localhost:7001/pago-exitoso-restante?reservaId={reserva.Id}";
 
-            if (!cobroExitoso)
-            {
-                throw new Exception("El cobro del saldo restante fue rechazado por la entidad bancaria. No se pudo confirmar la reserva.");
-            }
+            string tituloPago = $"Seña Turno Ocasional Nro {reserva.Id_Turno} - Saldo Restante";
 
+            string urlRedireccion = await pagoServicio.CrearPreferenciaPagoAsync(
+                reserva.Id_Usuario,
+                montoRestante,
+                tituloPago,
+                urlExito
+            );
 
-            reserva.Estado = EstadoReserva.Confirmado;
-            reserva.PrecioPagado = montoRestante * 2;
-
-            var pago = new Pago(reserva.Id_Usuario, montoRestante, reserva.Id, reserva.Id_Turno, null);
-
-            await repoReserva.ActualizarAsync(reserva);
-            await repoPago.AgregarAsync(pago);
+            return urlRedireccion;
         }
     }
 }

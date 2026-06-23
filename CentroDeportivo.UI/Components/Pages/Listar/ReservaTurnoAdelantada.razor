@@ -5,7 +5,8 @@
 @inject Sesion UsuarioSesion
 @inject ObtenerClasesAdelantadasDisponiblesUseCase ObtenerClasesAdelantadasDisponiblesUseCase
 @inject ObtenerActividadPorId ObtenerActividadPorId
-@inject CrearReservaAdelantadaUseCase CrearReservaAdelantadaUseCase
+
+@inject IniciarReservaAdelantadaUseCase IniciarReservaAdelantadaUseCase
 
 <PageTitle>Horarios del mes</PageTitle>
 
@@ -175,16 +176,17 @@ else
 
         try
         {
-            await CrearReservaAdelantadaUseCase.Ejecutar(UsuarioSesion.UsuarioActual!.Id, clase.TurnosDelMes, "a");
-            mensajeExito = "Reserva adelantada realizada correctamente.";
-            await CargarTurnos();
+            string urlPagoMercadoPago = await IniciarReservaAdelantadaUseCase.Ejecutar(
+                UsuarioSesion.UsuarioActual!.Id,
+                clase.TurnosDelMes
+            );
+
+            Navegador.NavigateTo(urlPagoMercadoPago, forceLoad: true);
         }
         catch (Exception ex)
         {
+ 
             mensajeError = ex.Message;
-        }
-        finally
-        {
             procesando = false;
             StateHasChanged();
         }

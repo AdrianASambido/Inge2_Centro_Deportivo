@@ -9,6 +9,7 @@
 @inject ObtenerUsuarioPorId ObtenerUsuarioPorId
 @inject CrearReservaUseCase CrearReservaUseCase
 @inject UnirseListaDeEsperaUseCase UnirseListaDeEsperaUseCase
+@inject IniciarReservaOcasionalUseCase iniciarReservaOcasionalUse
 
 <PageTitle>Horarios del día</PageTitle>
 
@@ -182,23 +183,21 @@ else
         mensajeError = mensajeExito = null;
         try
         {
+ 
             var nuevaReserva = new Reserva()
             {
                 Id_Usuario = UsuarioSesion.UsuarioActual!.Id,
                 Id_Turno = turnoId
             };
 
-            await CrearReservaUseCase.Ejecutar(nuevaReserva, null);
 
-            mensajeExito = "Reserva realizada con éxito, debe acercarse al centro a abonar.";
-            await CargarTurnos();
+            string urlPagoMercadoPago = await iniciarReservaOcasionalUse.Ejecutar(nuevaReserva);
+
+            Navegador.NavigateTo(urlPagoMercadoPago, forceLoad: true);
         }
         catch (Exception ex)
         {
             mensajeError = ex.Message;
-        }
-        finally
-        {
             procesando = false;
             StateHasChanged();
         }
