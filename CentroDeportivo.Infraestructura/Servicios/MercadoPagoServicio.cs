@@ -19,7 +19,12 @@ namespace CentroDeportivo.Infraestructura.Servicios
            // MercadoPagoConfig.AccessToken = "";
         }
 
-        public async Task<string> CrearPreferenciaPagoAsync(int idUsuario, decimal monto, string nombreActividad, string urlExito)
+        public async Task<string> CrearPreferenciaPagoAsync(
+                    int idUsuario,
+                    decimal monto,
+                    string nombreActividad,
+                    string urlExito,
+                    string urlFallo)
         {
             try
             {
@@ -39,9 +44,9 @@ namespace CentroDeportivo.Infraestructura.Servicios
             },
                     BackUrls = new PreferenceBackUrlsRequest
                     {
-                        Success = urlExito, 
-                        Failure = "https://localhost:7001/pago-fallido",
-                        Pending = "https://localhost:7001/pago-pendiente"
+                        Success = urlExito,
+                        Failure = urlFallo,
+                        Pending = urlFallo
                     },
                     AutoReturn = "approved"
                 };
@@ -52,7 +57,7 @@ namespace CentroDeportivo.Infraestructura.Servicios
             catch (Exception ex)
             {
                 Console.WriteLine($"[MercadoPago Error] Falló la creación de la preferencia: {ex.Message}");
-                throw new Exception("Error al conectar con la pasarela de pagos simulada.");
+                throw new Exception("Error al conectar con la pasarela de pagos.");
             }
         }
 

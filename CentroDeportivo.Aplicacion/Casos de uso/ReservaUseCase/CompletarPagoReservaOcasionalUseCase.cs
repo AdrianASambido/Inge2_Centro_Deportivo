@@ -15,26 +15,24 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
             var reserva = await repoReserva.ObtenerPorIdAsync(idReserva);
 
             if (reserva == null)
-            {
                 throw new Exception("Error: reserva inexistente.");
-            }
 
             if (reserva.Estado != EstadoReserva.Reservado)
-            {
                 throw new Exception("Error: esta reserva no se encuentra pendiente de confirmación/pago restante.");
-            }
 
             decimal montoRestante = reserva.PrecioPagado;
 
-            string urlExito = $"https://localhost:7001/pago-exitoso-restante?reservaId={reserva.Id}";
+            string urlExito = $"https://localhost:7001/MisReservas?pagoExitoso=true&reservaId={reserva.Id}";
+            string urlFallo = $"https://localhost:7001/MisReservas?pagoExitoso=false&reservaId={reserva.Id}";
 
-            string tituloPago = $"Seña Turno Ocasional Nro {reserva.Id_Turno} - Saldo Restante";
+            string tituloPago = $"Saldo Restante - Turno Ocasional Nro {reserva.Id_Turno}";
 
             string urlRedireccion = await pagoServicio.CrearPreferenciaPagoAsync(
                 reserva.Id_Usuario,
                 montoRestante,
                 tituloPago,
-                urlExito
+                urlExito,
+                urlFallo
             );
 
             return urlRedireccion;
