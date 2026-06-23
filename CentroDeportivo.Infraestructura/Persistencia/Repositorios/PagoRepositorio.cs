@@ -23,18 +23,26 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
  
             DateTime fechaDesde = desde.ToDateTime(TimeOnly.MinValue);
             DateTime fechaHasta = hasta.ToDateTime(TimeOnly.MaxValue); 
-
-            return await contexto.Pagos
+            // Sum in memory to avoid provider translation issues when Monto is stored as TEXT in SQLite
+            var pagos = await contexto.Pagos
                 .Where(p => p.Fecha >= fechaDesde && p.Fecha <= fechaHasta)
-                .SumAsync(p => p.Monto);
+                .Select(p => p.Monto)
+                .ToListAsync();
+
+            return pagos.Sum();
         }
 
         public async Task<decimal> ObtenerIngresosPorActividadAsync(int idActividad, DateOnly desde, DateOnly hasta)
         {
-            return await contexto.Pagos
+            // Load into memory and compute on client side to avoid translation issues
+            var pagos = await contexto.Pagos
                         .Include(p => p.Turno)
-                        .Where(p => p.Turno!.Id_Actividad == idActividad && p.Turno.Fecha >= desde && p.Turno.Fecha <= hasta)
-                        .SumAsync(P => P.Monto);
+                        .AsNoTracking()
+                        .ToListAsync();
+
+            return pagos
+                        .Where(p => p.Turno != null && p.Turno.Id_Actividad == idActividad && p.Turno.Fecha >= desde && p.Turno.Fecha <= hasta)
+                        .Sum(p => p.Monto);
         }
 
         public async Task<Pago?> ObtenerPorIdAsync(int idPago)

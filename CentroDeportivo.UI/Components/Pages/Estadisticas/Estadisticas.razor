@@ -13,7 +13,7 @@
             <div class="nav flex-column nav-pills">
                 <button class="nav-link boton-menu @(seccionActiva == "ingresos" ? "active" : "")" @onclick='() => CambiarSeccion("ingresos")'>Ingresos Generales</button>
                 <button class="nav-link boton-menu @(seccionActiva == "asistencia" ? "active" : "")" @onclick='() => CambiarSeccion("asistencia")'>Asistencia y Cancelaciones</button>
-                <button class="nav-link boton-menu @(seccionActiva == "historial" ? "active" : "")" @onclick='() => CambiarSeccion("historial")'>Historial de Usuario</button>
+                <button class="nav-link boton-menu @(seccionActiva == "historialUsuario" ? "active" : "")" @onclick='() => CambiarSeccion("historialUsuario")'>Historial de Usuario</button>
             </div>
         </div>
 
@@ -22,6 +22,20 @@
             {
                 <div class="card p-3 shadow-sm">
                     <h5>Reporte de Ingresos del Negocio</h5>
+
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label>Desde</label>
+                            <input type="date" class="form-control" @bind="desdeDate" />
+                        </div>
+                        <div class="col-md-4">
+                            <label>Hasta</label>
+                            <input type="date" class="form-control" @bind="hastaDate" />
+                        </div>
+                        <div class="col-md-4 d-flex align-items-end">
+                            <button class="btn btn-primary" @onclick="FetchIngresosAsync">Buscar</button>
+                        </div>
+                    </div>
 
                     @if (datosIngresos == null || datosIngresos.Count == 0)
                     {
@@ -42,6 +56,20 @@
                 <div class="card p-3 shadow-sm">
                     <h5>Índices de Asistencia por Actividad</h5>
 
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label>Desde</label>
+                            <input type="date" class="form-control" @bind="desdeDate" />
+                        </div>
+                        <div class="col-md-4">
+                            <label>Hasta</label>
+                            <input type="date" class="form-control" @bind="hastaDate" />
+                        </div>
+                        <div class="col-md-4 d-flex align-items-end">
+                            <button class="btn btn-primary" @onclick="FetchAsistenciaAsync">Buscar</button>
+                        </div>
+                    </div>
+
                     @if (datosAsistencia == null || datosAsistencia.Count == 0)
                     {
                         <p><em>No hay datos de asistencia para mostrar.</em></p>
@@ -57,11 +85,37 @@
                     }
                 </div>
             }
-            else if (seccionActiva == "historial")
+            else if (seccionActiva == "historialUsuario")
             {
                 <div class="card p-3 shadow-sm">
                     <h5>Consulta de Historial Personal</h5>
-                    <p>Contenido del historial...</p>
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label>Desde</label>
+                            <input type="date" class="form-control" @bind="desdeDate" />
+                        </div>
+                        <div class="col-md-4">
+                            <label>Hasta</label>
+                            <input type="date" class="form-control" @bind="hastaDate" />
+                        </div>
+                        <div class="col-md-4 d-flex align-items-end">
+                            <button class="btn btn-primary" @onclick="FetchHistorialAsync">Buscar</button>
+                        </div>
+                    </div>
+
+                    @if (datosHistorial == null || datosHistorial.Count == 0)
+                    {
+                        <p><em>No hay datos de historial para mostrar.</em></p>
+                    }
+                    else
+                    {
+                        @* 3. ARREGLAR ESTE --- Gráfico de barras: Asistencias vs Cancelaciones por actividad *@
+                        <ApexChart TItem="int" Height="320" Title="Asistencias vs Cancelaciones">
+                            <ApexSeries TItem="int" Name="Asistieron" Items="asistenciasSeries" />
+                            <ApexSeries TItem="int" Name="Cancelaron" Items="cancelacionesSeries" />
+                            <ApexXAxis Categories="actividadesCategories" />
+                        </ApexChart>
+                    }
                 </div>
             }
         </div>
@@ -74,8 +128,10 @@
     // Listas donde vamos a guardar los datos que devuelven los Casos de Uso
     private List<IngresoPorMesDto>? datosIngresos;
     private List<AsistenciaDto>? datosAsistencia;
-    DateOnly desde = DateOnly.FromDateTime(DateTime.Now);
-    DateOnly hasta = DateOnly.FromDateTime(DateTime.Now);
+    private List<AsistenciaDto>? datosHistorial;
+    // Rango de búsqueda seleccionable por el usuario (usamos DateTime en inputs y convertimos a DateOnly)
+    private DateTime desdeDate = DateTime.Today.AddMonths(-5);
+    private DateTime hastaDate = DateTime.Today;
     private int idUsuario = 1; // cambiar según contexto/selección
 
     // EL CICLO DE VIDA: Aquí llamo a los Casos de Uso cuando la página arranca
@@ -83,50 +139,77 @@
     {
         try
         {
-            // Construir ingresos por mes (últimos 6 meses, se puede cambiar) llamando al caso de uso que devuelve totales
-            var months = Enumerable.Range(0, 6)
-                .Select(i => DateTime.Today.AddMonths(-i))
-                .Reverse()
-                .ToList();
-
-            var ingresos = new List<IngresoPorMesDto>();
-            foreach (var dt in months)
-            {
-                var start = DateOnly.FromDateTime(new DateTime(dt.Year, dt.Month, 1));
-                var end = start.AddMonths(1).AddDays(-1);
-                var total = await ConsultarIngresosDelNegocioUseCase.Ejecutar(start, end);
-                ingresos.Add(new IngresoPorMesDto { Mes = start.ToString("MMM yyyy"), MontoTotal = total });
-            }
-            datosIngresos = ingresos;
-
-            // Obtener índices por usuario y mapear al DTO que usa el gráfico
-            var indices = await ConsultarIndicesUsuarioUseCase.Ejecutar(idUsuario, desde, hasta);
-            datosAsistencia = indices.Select(r => new AsistenciaDto
-            {
-                Actividad = r.NombreActividad,
-                CantidadAsistencias = r.TotalAsistencias,
-                CantidadCancelaciones = r.TotalCancelaciones
-            }).ToList();
-
-            // Preparar colecciones planas para los componentes ApexSeries/XAxis (evita lambdas en markup)
-            ingresosValues = datosIngresos.Select(d => d.MontoTotal).ToList();
-            ingresosCategories = datosIngresos.Select(d => d.Mes).ToList();
-
-            actividadesCategories = datosAsistencia.Select(a => a.Actividad).ToList();
-            asistenciasSeries = datosAsistencia.Select(a => a.CantidadAsistencias).ToList();
-            cancelacionesSeries = datosAsistencia.Select(a => a.CantidadCancelaciones).ToList();
+            // Iniciar con los últimos 6 meses
+            await FetchIngresosAsync();
+            await FetchAsistenciaAsync();
         }
         catch (Exception ex)
         {
-            // Loguear o manejar según convenga; por ahora dejamos los listados vacíos
+            // Loguear la excepción para diagnóstico y devolver listas vacías
+            Console.WriteLine($"ESTADISTICAS-ERROR: {ex.Message}\n{ex.StackTrace}");
             datosIngresos = new List<IngresoPorMesDto>();
             datosAsistencia = new List<AsistenciaDto>();
         }
     }
 
+    // ----- Métodos para buscar según rango de fechas seleccionadas -----
+    private async Task FetchIngresosAsync()
+    {
+        var start = DateOnly.FromDateTime(new DateTime(desdeDate.Year, desdeDate.Month, 1));
+        var endMonth = new DateTime(hastaDate.Year, hastaDate.Month, 1);
+        var months = new List<DateTime>();
+        var cursor = new DateTime(start.Year, start.Month, 1);
+        while (cursor <= endMonth)
+        {
+            months.Add(cursor);
+            cursor = cursor.AddMonths(1);
+        }
+
+        var ingresos = new List<IngresoPorMesDto>();
+        foreach (var dt in months)
+        {
+            var mesStart = DateOnly.FromDateTime(new DateTime(dt.Year, dt.Month, 1));
+            var mesEnd = mesStart.AddMonths(1).AddDays(-1);
+            var total = await ConsultarIngresosDelNegocioUseCase.Ejecutar(mesStart, mesEnd);
+            ingresos.Add(new IngresoPorMesDto { Mes = mesStart.ToString("MMM yyyy"), MontoTotal = total });
+        }
+
+        datosIngresos = ingresos;
+        ingresosValues = datosIngresos.Select(d => d.MontoTotal).ToList();
+        ingresosCategories = datosIngresos.Select(d => d.Mes).ToList();
+        StateHasChanged();
+    }
+
+    private async Task FetchAsistenciaAsync()
+    {
+        var desde = DateOnly.FromDateTime(desdeDate);
+        var hasta = DateOnly.FromDateTime(hastaDate);
+        var indices = await ConsultarIndicesUsuarioUseCase.Ejecutar(idUsuario, desde, hasta);
+        datosAsistencia = indices.Select(r => new AsistenciaDto
+        {
+            Actividad = r.NombreActividad,
+            CantidadAsistencias = r.TotalAsistencias,
+            CantidadCancelaciones = r.TotalCancelaciones
+        }).ToList();
+
+        actividadesCategories = datosAsistencia.Select(a => a.Actividad).ToList();
+        asistenciasSeries = datosAsistencia.Select(a => a.CantidadAsistencias).ToList();
+        cancelacionesSeries = datosAsistencia.Select(a => a.CantidadCancelaciones).ToList();
+        StateHasChanged();
+    }
+
+    private async Task FetchHistorialAsync()
+    {
+        // Por ahora reutilizamos el mismo caso de uso de índices por usuario si no hay caso de uso específico
+        await FetchAsistenciaAsync();
+    }
+
     private void CambiarSeccion(string nuevaSeccion)
     {
         seccionActiva = nuevaSeccion;
+        // actualizar rangos por defecto al cambiar sección
+        desdeDate = DateTime.Today.AddMonths(-5);
+        hastaDate = DateTime.Today;
     }
 
     // --- Clases de ejemplo (DTOs) para estructurar lo que recibe el gráfico ---
