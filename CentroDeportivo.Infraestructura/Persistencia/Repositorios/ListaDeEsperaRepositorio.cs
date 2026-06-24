@@ -87,5 +87,12 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
                                  .Where(x => x.Id_Usuario == idUsuario && (x.Estado == EstadoListaEspera.Esperando || x.Estado == EstadoListaEspera.Notificado))
                                  .AsNoTracking().ToListAsync();
         }
+
+        public async Task<InscripcionListaEspera?> ObtenerPorUsuarioYTurno(int idUsuario, int idTurno)
+        {
+            return await contexto.InscripcionListaEsperas
+                .FirstOrDefaultAsync(i => i.Id_Usuario == idUsuario
+                                       && i.Id_Turno == idTurno);
+        }
     }
 }

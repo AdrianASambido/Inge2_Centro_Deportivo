@@ -90,7 +90,10 @@ else
 @code {
     [SupplyParameterFromQuery] public int? ActividadId { get; set; }
     [SupplyParameterFromQuery] public string? Fecha { get; set; }
-    [SupplyParameterFromQuery] public bool pagoExitoso { get; set; } = false;
+    [SupplyParameterFromQuery] public bool pagoExitoso { get; set; }
+    [SupplyParameterFromQuery] public bool volviMP { get; set; }
+    [SupplyParameterFromQuery] public string? payment_id { get; set; }
+    [SupplyParameterFromQuery] public int TurnoId { get; set; }
 
     private bool parametrosOk;
     private DateOnly? fechaElegida;
@@ -105,6 +108,26 @@ else
 
     protected override async Task OnParametersSetAsync()
     {
+        if (volviMP)
+        {
+            if (pagoExitoso)
+            {
+                var nuevaReserva = new Reserva()
+                {
+                    Id_Usuario = UsuarioSesion.UsuarioActual!.Id,
+                    Id_Turno = TurnoId
+                };
+
+                await CrearReservaUseCase.Ejecutar(nuevaReserva, payment_id);
+                mensajeExito = "Pago y reserva realizados con exito.";
+                await CargarTurnos();
+            }
+            else
+            {
+                mensajeError = "El pago no se pudo realizar. Intente nuevamente.";
+            }
+        }
+
         procesando = true;
         mensajeError = mensajeExito = null;
 

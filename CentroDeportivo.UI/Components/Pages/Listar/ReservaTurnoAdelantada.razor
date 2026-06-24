@@ -5,8 +5,9 @@
 @inject Sesion UsuarioSesion
 @inject ObtenerClasesAdelantadasDisponiblesUseCase ObtenerClasesAdelantadasDisponiblesUseCase
 @inject ObtenerActividadPorId ObtenerActividadPorId
-@inject CrearReservaAdelantadaUseCase crearReservaAdelantadaUse
+@inject CrearReservaAdelantadaUseCase CrearReservaAdelantadaUseCase
 @inject IniciarReservaAdelantadaUseCase IniciarReservaAdelantadaUseCase
+@inject ObtenerTurnoId ObtenerTurnoPorId
 
 <PageTitle>Horarios del mes</PageTitle>
 
@@ -121,9 +122,47 @@ else
 
     private ClaseAdelantada? seleccion;
     private List<ClaseAdelantada> clasesDisponibles = new();
+    [SupplyParameterFromQuery] public bool pagoExitoso { get; set; }
+    [SupplyParameterFromQuery] public bool volviMP { get; set; }
+    [SupplyParameterFromQuery] public string? payment_id { get; set; }
+    [SupplyParameterFromQuery] public string? turnosId { get; set; }
 
     protected override async Task OnParametersSetAsync()
     {
+        if (volviMP)
+        {
+            if (pagoExitoso)
+            {
+                var idsTurnos = turnosId?
+                    .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(int.Parse)
+                    .ToList() ?? new();
+
+                var turnos = new List<Turno>();
+
+                foreach (var id in idsTurnos)
+                {
+                    var turno = await ObtenerTurnoPorId.Ejecutar(id);
+
+                    if (turno != null)
+                        turnos.Add(turno);
+                }
+
+                await CrearReservaAdelantadaUseCase.Ejecutar(
+                    UsuarioSesion.UsuarioActual!.Id,
+                    turnos,
+                    payment_id!);
+
+                mensajeExito = "Pago y reserva realizados con éxito.";
+
+                await CargarTurnos();
+            }
+            else
+            {
+                mensajeError = "El pago no se pudo realizar. Intente nuevamente.";
+            }
+        }
+
         procesando = true;
         mensajeError = mensajeExito = null;
 

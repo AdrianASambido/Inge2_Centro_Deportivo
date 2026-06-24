@@ -99,6 +99,13 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
                          .AsNoTracking().ToListAsync();
         }
 
+        public async Task<IEnumerable<Pago>> ObtenerTodosPorReservaAsync(int idReserva)
+        {
+            return await contexto.Pagos
+        .Where(p => p.Id_Reserva == idReserva)
+        .ToListAsync();
+        }
+
         public async Task<IEnumerable<Pago>> ObtenerTodosPorTurnoAsync(int idTurno)
         {
             return await contexto.Pagos
