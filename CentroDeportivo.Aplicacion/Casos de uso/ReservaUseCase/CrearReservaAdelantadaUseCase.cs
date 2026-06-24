@@ -14,7 +14,7 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
 
 )
     { 
-        public async Task Ejecutar(int idUsuario, List<Turno> clasesDisponibles)
+        public async Task Ejecutar(int idUsuario, List<Turno> clasesDisponibles, string idPayment)
         {
             DateOnly hoy = DateOnly.FromDateTime(DateTime.Now);
 
@@ -54,7 +54,7 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
 
    
             var nuevoPago = new Pago(idUsuario, montoTotalAPagar, null, null, codigoPaquete);
-
+            nuevoPago.MercadoPagoTransactionId = idPayment;
     
             await repoReserva.GuardarMuchasReservasAsync(nuevasReservas);
             await repoTurno.ActualizarMuchosAsync(clasesDisponibles);

@@ -13,7 +13,7 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
     {
 
 
-        public async Task Ejecutar(Reserva reserva)
+        public async Task Ejecutar(Reserva reserva, string idPayment)
         {
 
             var turno = await repoTurno.ObtenerPorIdAsync(reserva.Id_Turno);
@@ -42,6 +42,7 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
            
 
             var pago = new Pago(reserva.Id_Usuario, montoSena, null, turno.Id, null);
+            pago.MercadoPagoTransactionId = idPayment;
 
             await repoReserva.AgregarAsync(reserva);
             await repoTurno.ActualizarAsync(turno);

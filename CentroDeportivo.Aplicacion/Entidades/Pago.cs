@@ -14,6 +14,7 @@ namespace CentroDeportivo.Aplicacion.Entidades
 
         public int? Id_Turno { get; set; }
         public Guid? CodigoPaqueteAdelantado { get; set; }
+        public string? MercadoPagoTransactionId { get; set; }
 
         public decimal Monto { get; set; }
         public DateTime Fecha { get; set; }

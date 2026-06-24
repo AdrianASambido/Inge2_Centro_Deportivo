@@ -12,5 +12,6 @@ namespace CentroDeportivo.Aplicacion.Interfaces
         Task<bool> ProcesarCobroAsync(int idUsuario, decimal monto, string token);
         // Devuelve la URL de la preferencia de Mercado Pago (el SandboxInitPoint)
         Task<string> CrearPreferenciaPagoAsync(int idUsuario, decimal monto, string nombreActividad, string urlexito,string urlfallo);
+        Task<bool> RealizarReembolsoAsync(string idTransaccion);
     }
 }

@@ -1,12 +1,16 @@
-﻿using System;
+﻿using CentroDeportivo.Aplicacion.Interfaces;
+using MercadoPago.Client.Payment;
+using MercadoPago.Client.Preference;
+using MercadoPago.Config;
+using MercadoPago.Client.PaymentMethod;
+using MercadoPago.Client.DisbursementRefund;
+using MercadoPago.Resource.Preference;
+using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using CentroDeportivo.Aplicacion.Interfaces;
-using MercadoPago.Config;
-using MercadoPago.Client.Preference;
-using MercadoPago.Resource.Preference;
 
 namespace CentroDeportivo.Infraestructura.Servicios
 {
@@ -69,6 +73,18 @@ namespace CentroDeportivo.Infraestructura.Servicios
         public Task<bool> ProcesarReembolsoAsync(int idUsuario, decimal montoADevolver)
         {
             throw new NotImplementedException();
+        }
+
+        public async Task<bool> RealizarReembolsoAsync(string idTransaccion)
+        {
+            // Usamos PaymentClient, que es el que gestiona las operaciones sobre un pago
+            var client = new MercadoPago.Client.Payment.PaymentClient();
+
+            // El reembolso se hace llamando al método Refund del PaymentClient
+            // Pasamos el ID del pago (convertido a long)
+            var refund = await client.RefundAsync(long.Parse(idTransaccion));
+
+            return refund.Status == "approved";
         }
     }
 }
