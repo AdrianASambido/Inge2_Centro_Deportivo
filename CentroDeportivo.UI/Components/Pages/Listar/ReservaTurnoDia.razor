@@ -9,6 +9,7 @@
 @inject ObtenerUsuarioPorId ObtenerUsuarioPorId
 @inject CrearReservaUseCase CrearReservaUseCase
 @inject UnirseListaDeEsperaUseCase UnirseListaDeEsperaUseCase
+@inject IniciarReservaOcasionalUseCase iniciarReservaOcasionalUse
 
 <PageTitle>Horarios del día</PageTitle>
 
@@ -89,6 +90,7 @@ else
 @code {
     [SupplyParameterFromQuery] public int? ActividadId { get; set; }
     [SupplyParameterFromQuery] public string? Fecha { get; set; }
+    [SupplyParameterFromQuery] public bool pagoExitoso { get; set; } = false;
 
     private bool parametrosOk;
     private DateOnly? fechaElegida;
@@ -97,6 +99,7 @@ else
     private bool procesando;
     private string? mensajeExito;
     private string? mensajeError;
+    private string? tokenTarjeta;
 
     private List<Turno> turnosFiltrados = new();
 
@@ -151,7 +154,7 @@ else
         turnosFiltrados = todos
             .Where(t => t.Estado != EstadoTurno.Cancelado
                      && (t.Fecha > fechaHoy || (t.Fecha == fechaHoy && t.HoraInicio > horaActual)))
-            .OrderBy(t => t.HoraInicio) 
+            .OrderBy(t => t.HoraInicio)
             .ToList();
     }
     private async Task UnirseListaEspera(int turnoId)
@@ -181,23 +184,21 @@ else
         mensajeError = mensajeExito = null;
         try
         {
+
             var nuevaReserva = new Reserva()
             {
                 Id_Usuario = UsuarioSesion.UsuarioActual!.Id,
                 Id_Turno = turnoId
             };
 
-            await CrearReservaUseCase.Ejecutar(nuevaReserva, null);
 
-            mensajeExito = "Reserva realizada con éxito, debe acercarse al centro a abonar.";
-            await CargarTurnos();
+            string urlPagoMercadoPago = await iniciarReservaOcasionalUse.Ejecutar(nuevaReserva);
+
+            Navegador.NavigateTo(urlPagoMercadoPago, forceLoad: true);
         }
         catch (Exception ex)
         {
             mensajeError = ex.Message;
-        }
-        finally
-        {
             procesando = false;
             StateHasChanged();
         }

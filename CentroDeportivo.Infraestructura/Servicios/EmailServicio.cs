@@ -14,12 +14,10 @@ namespace CentroDeportivo.Infraestructura.Servicios
 {
     public class EmailServicio : IEmailServicio
     {
-
         private readonly string _host;
         private readonly int _port;
         private readonly string _username;
         private readonly string _password;
-
 
         public EmailServicio(IConfiguration configuration)
         {
@@ -35,7 +33,6 @@ namespace CentroDeportivo.Infraestructura.Servicios
 
             var mensaje = new MimeMessage();
             mensaje.From.Add(new MailboxAddress("Centro Deportivo", _username));
-
             mensaje.To.Add(new MailboxAddress("Socios Centro Deportivo", _username));
 
             foreach (var email in emailsDestinatarios)
@@ -70,10 +67,8 @@ namespace CentroDeportivo.Infraestructura.Servicios
             }
         }
 
-
         public async Task EnviarContraseniaTemporalAsync(string emailDestino, string contraseniaTemporal)
         {
-            //  Crea mensaje con MimeKit
             var mensaje = new MimeMessage();
             mensaje.From.Add(new MailboxAddress("Centro Deportivo", _username));
             mensaje.To.Add(new MailboxAddress("", emailDestino));
@@ -89,19 +84,12 @@ namespace CentroDeportivo.Infraestructura.Servicios
             };
             mensaje.Body = bodyBuilder.ToMessageBody();
 
-
             using var client = new SmtpClient();
             try
             {
-
                 await client.ConnectAsync(_host, _port, SecureSocketOptions.StartTls);
-
-
                 await client.AuthenticateAsync(_username, _password);
-
-
                 await client.SendAsync(mensaje);
-
                 await client.DisconnectAsync(true);
                 Console.WriteLine("Correo enviado exitosamente con Gmail.");
             }
@@ -111,7 +99,6 @@ namespace CentroDeportivo.Infraestructura.Servicios
                 throw;
             }
         }
-
 
         public async Task EnviarLinkRecuperacionAsync(string emailDestino, string link)
         {
