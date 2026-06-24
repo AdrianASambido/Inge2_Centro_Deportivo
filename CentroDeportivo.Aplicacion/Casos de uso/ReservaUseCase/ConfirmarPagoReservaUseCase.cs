@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using CentroDeportivo.Aplicacion.Entidades;
 
 namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
-{
+{//este ya no se usa
     public class ConfirmarPagoReservaUseCase(IReservaRepositorio repo)
     {
         public async Task Ejecutar(int idReserva) {

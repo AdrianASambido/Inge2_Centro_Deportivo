@@ -8,7 +8,7 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
     public class CompletarPagoReservaOcasionalUseCase(
         IReservaRepositorio repoReserva,
         IPagoServicio pagoServicio
-    )
+    ) //este se lo llama para mandarlo a mercado pago a pagar el 50 restante de la reserva ocasional
     {
         public async Task<string> Ejecutar(int idReserva)
         {

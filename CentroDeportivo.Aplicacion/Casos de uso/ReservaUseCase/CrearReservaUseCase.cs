@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using CentroDeportivo.Aplicacion.Entidades;
 
 namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
-{
+{ ///cuando vuelve de pagar en mercado pago, reserva ocasional/ 
     public class CrearReservaUseCase(
         IReservaRepositorio repoReserva,
         ITurnoRepositorio repoTurno,
