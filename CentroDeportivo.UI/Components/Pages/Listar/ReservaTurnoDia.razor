@@ -10,6 +10,8 @@
 @inject CrearReservaUseCase CrearReservaUseCase
 @inject UnirseListaDeEsperaUseCase UnirseListaDeEsperaUseCase
 @inject IniciarReservaOcasionalUseCase iniciarReservaOcasionalUse
+@inject ConsultarCreditosUseCase ConsultarCreditosUseCase
+@inject CrearReservaConCreditoUseCase CrearReservaConCreditoUseCase
 
 <PageTitle>Horarios del día</PageTitle>
 
@@ -66,7 +68,7 @@ else
                                         <div class="small d-block text-muted">Libres: @t.CupoDisponible / @t.CupoMaximo</div>
                                         <div class="small d-block text-muted">Precio:$@t.PrecioTurno</div>
                                     </div>
-                                    <button type="button" class="btn btn-sm btn-success" disabled="@procesando" @onclick="() => Reservar(t.Id)">
+                                    <button type="button" class="btn btn-sm btn-success" disabled="@procesando" @onclick="() => ConsultarCreditos(t.Id)">
                                         Reservar
                                     </button>
                                 </li>
@@ -87,6 +89,26 @@ else
     </div>
 }
 
+@if (mostrarDialogoReserva)
+{
+    <div class="modal show d-block shadow" tabindex="-1" style="background: rgba(25,25,100,0.5);">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Reserva con créditos</h5>
+                </div>
+                <div class="modal-body">
+                    <p>¿Desea utilizar un credito disponible para esta reserva?</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" @onclick="() => Reservar(idTurnoAReservar)">No, gracias</button>
+                    <button class="btn btn-success" @onclick="() => ReservarConCredito(idTurnoAReservar)">Si porfavor</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
 @code {
     [SupplyParameterFromQuery] public int? ActividadId { get; set; }
     [SupplyParameterFromQuery] public string? Fecha { get; set; }
@@ -95,6 +117,7 @@ else
     [SupplyParameterFromQuery] public string? payment_id { get; set; }
     [SupplyParameterFromQuery] public int TurnoId { get; set; }
 
+    private List<Credito> creditosUsuario = new();
     private bool parametrosOk;
     private DateOnly? fechaElegida;
     private string fechaFormateada = "";
@@ -128,6 +151,7 @@ else
             }
         }
 
+        creditosUsuario = (await ConsultarCreditosUseCase.Ejecutar(UsuarioSesion.UsuarioActual!.Id)).ToList();
         procesando = true;
         mensajeError = mensajeExito = null;
 
@@ -203,6 +227,7 @@ else
 
     private async Task Reservar(int turnoId)
     {
+        mostrarDialogoReserva = false;
         procesando = true;
         mensajeError = mensajeExito = null;
         try
@@ -224,6 +249,47 @@ else
             mensajeError = ex.Message;
             procesando = false;
             StateHasChanged();
+        }
+    }
+
+    private async Task ReservarConCredito(int turnoId)
+    {
+        procesando = true;
+        mensajeError = mensajeExito = null;
+        try
+        {
+
+            var nuevaReserva = new Reserva()
+            {
+                Id_Usuario = UsuarioSesion.UsuarioActual!.Id,
+                Id_Turno = turnoId
+            };
+
+            await CrearReservaConCreditoUseCase.Ejecutar(nuevaReserva);
+            mensajeExito = "Reserva realizada con éxito utilizando un crédito.";
+            await CargarTurnos();
+        }
+        catch (Exception ex)
+        {
+            mensajeError = ex.Message;
+            procesando = false;
+            StateHasChanged();
+        }
+    }
+
+    public bool mostrarDialogoReserva { get; set; } = false;
+    public int idTurnoAReservar { get; set; }
+
+    public void ConsultarCreditos(int Id)
+    {
+        idTurnoAReservar = Id;
+        if (creditosUsuario.Any())
+        {
+            mostrarDialogoReserva = true;
+        }
+        else
+        {
+            Reservar(Id);
         }
     }
 
