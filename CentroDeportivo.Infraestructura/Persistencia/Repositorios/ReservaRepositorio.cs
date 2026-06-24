@@ -20,10 +20,26 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
             await contexto.SaveChangesAsync();
         }
 
+        public async Task ActualizarMuchasAsync(IEnumerable<Reserva> reservas)
+        {
+            contexto.Reservas.UpdateRange(reservas);
+            await contexto.SaveChangesAsync();
+        }
+
         public async Task AgregarAsync(Reserva reserva)
         {
             await contexto.Reservas.AddAsync(reserva);
             await contexto.SaveChangesAsync();
+        }
+
+        public async Task<int> ContarCancelacionesUsuarioMesAsync(int idUsuario, int anio, int mes)
+        {
+            return await contexto.Reservas
+                .Where(r => r.Id_Usuario == idUsuario
+                         && r.Estado == EstadoReserva.Cancelado
+                         && r.FechaReserva.Year == anio
+                         && r.FechaReserva.Month == mes)
+                .CountAsync();
         }
 
         public async Task<bool> ExisteReservaActivaAsync(int usuarioId, int turnoId)
@@ -86,7 +102,7 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
                 .Where(r => r.Id_Usuario == usuarioId)
                 .AsQueryable();
 
-            
+
             if (!incluirPasadas)
             {
                 query = query.Where(r =>
@@ -95,13 +111,13 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
                 );
             }
 
-            
+
             if (estado.HasValue)
             {
                 query = query.Where(r => r.Estado == estado.Value);
             }
 
-           
+
             if (actividadId.HasValue)
             {
                 query = query.Where(r => r.Turno!.Id_Actividad == actividadId.Value);
@@ -141,7 +157,7 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
             return new ReporteIndicesActividadDTO(total, asistencias, inasistencias, canceladas);
         }
 
-        public async Task<IEnumerable<HistorialUsuarioActividadDTO>> ObtenerTotalesPorUsuarioAsync(int idUsuario, DateOnly? desde=null, DateOnly? hasta=null)
+        public async Task<IEnumerable<HistorialUsuarioActividadDTO>> ObtenerTotalesPorUsuarioAsync(int idUsuario, DateOnly? desde = null, DateOnly? hasta = null)
         {
             var reservas = await contexto.Reservas
                            .Include(r => r.Turno)

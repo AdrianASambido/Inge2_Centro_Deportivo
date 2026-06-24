@@ -8,9 +8,10 @@ using System.Threading.Tasks;
 
 namespace CentroDeportivo.Aplicacion.Casos_de_uso.EstadisticaUseCase
 {
-    public class ConsultarIndicesUsuarioUseCase  (IReservaRepositorio repoReserva)
+    public class ConsultarIndicesUsuarioUseCase(IReservaRepositorio repoReserva)
     {
-        public async Task<IEnumerable<ReporteIndiceUsuarioResponseDTO>> Ejecutar(int idUsuario, DateOnly desde, DateOnly hasta) {
+        public async Task<IEnumerable<ReporteIndiceUsuarioResponseDTO>> Ejecutar(int idUsuario, DateOnly desde, DateOnly hasta)
+        {
             var totales = await repoReserva.ObtenerTotalesPorUsuarioAsync(idUsuario, desde, hasta);
 
             return totales.Select(t =>
@@ -32,5 +33,5 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.EstadisticaUseCase
             }).ToList();
         }
     }
-    }
+}
 

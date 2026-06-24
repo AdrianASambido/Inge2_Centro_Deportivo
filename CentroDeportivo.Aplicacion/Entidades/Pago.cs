@@ -13,7 +13,8 @@ namespace CentroDeportivo.Aplicacion.Entidades
         public int? Id_Reserva { get; set; }
 
         public int? Id_Turno { get; set; }
-        public Guid? CodigoPaqueteAdelantado { get; set; } 
+        public Guid? CodigoPaqueteAdelantado { get; set; }
+        public string? MercadoPagoTransactionId { get; set; }
 
         public decimal Monto { get; set; }
         public DateTime Fecha { get; set; }
@@ -30,7 +31,7 @@ namespace CentroDeportivo.Aplicacion.Entidades
             this.Id_Reserva = idReserva;
             this.Id_Turno = idTurno;
             this.CodigoPaqueteAdelantado = codigoPaquete;
-            this.Fecha = DateTime.Now; 
+            this.Fecha = DateTime.Now;
         }
     }
 }

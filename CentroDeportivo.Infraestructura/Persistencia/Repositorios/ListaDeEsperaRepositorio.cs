@@ -27,7 +27,8 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
         public async Task EliminarAsync(int idLista)
         {
             var lista = await this.ObtenerPorIdAsync(idLista);
-            if (lista != null) {
+            if (lista != null)
+            {
                 contexto.InscripcionListaEsperas.Remove(lista);
                 await contexto.SaveChangesAsync();
             }
@@ -55,16 +56,16 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
                 .Include(x => x.Usuario)
                 .Include(x => x.Turno)
                 .Where(x => x.Id_Turno == idTurno && x.Estado == EstadoListaEspera.Esperando)
-                .OrderBy(x => x.FechaInscripcion) 
+                .OrderBy(x => x.FechaInscripcion)
                 .FirstOrDefaultAsync();
         }
 
         public async Task<IEnumerable<InscripcionListaEspera>> ObtenerTodosAsync()
         {
-           return await contexto.InscripcionListaEsperas
-                                .Include(x => x.Usuario)
-                                .Include(x => x.Turno)
-                                .AsNoTracking().ToListAsync();
+            return await contexto.InscripcionListaEsperas
+                                 .Include(x => x.Usuario)
+                                 .Include(x => x.Turno)
+                                 .AsNoTracking().ToListAsync();
         }
 
         //para mostrarle al empleado los inscriptos en una lista de espera de un turno
@@ -73,7 +74,7 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
             return await contexto.InscripcionListaEsperas
                             .Include(x => x.Usuario)
                             .Include(x => x.Turno)
-                            .Where(x => x.Id_Turno == idTurno && (x.Estado == EstadoListaEspera.Esperando  || x.Estado == EstadoListaEspera.Notificado))
+                            .Where(x => x.Id_Turno == idTurno && (x.Estado == EstadoListaEspera.Esperando || x.Estado == EstadoListaEspera.Notificado))
                             .AsNoTracking().ToListAsync();
         }
 
@@ -85,6 +86,13 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
                                  .Include(x => x.Turno)
                                  .Where(x => x.Id_Usuario == idUsuario && (x.Estado == EstadoListaEspera.Esperando || x.Estado == EstadoListaEspera.Notificado))
                                  .AsNoTracking().ToListAsync();
+        }
+
+        public async Task<InscripcionListaEspera?> ObtenerPorUsuarioYTurno(int idUsuario, int idTurno)
+        {
+            return await contexto.InscripcionListaEsperas
+                .FirstOrDefaultAsync(i => i.Id_Usuario == idUsuario
+                                       && i.Id_Turno == idTurno);
         }
     }
 }

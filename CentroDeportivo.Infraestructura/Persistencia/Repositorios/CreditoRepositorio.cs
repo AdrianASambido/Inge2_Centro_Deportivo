@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
 {
-    public class CreditoRepositorio (CentroDeportivoContext contexto): ICreditoRepositorio
+    public class CreditoRepositorio(CentroDeportivoContext contexto) : ICreditoRepositorio
     {
         public async Task ActualizarAsync(Credito credito)
         {
@@ -24,12 +24,19 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
             await contexto.SaveChangesAsync();
         }
 
+        public async Task AgregarMuchosAsync(IEnumerable<Credito> creditos)
+        {
+            await contexto.Creditos.AddRangeAsync(creditos);
+
+            await contexto.SaveChangesAsync();
+        }
+
         public async Task EliminarAsync(int idCredito)
         {
             throw new NotImplementedException();
         }
 
-        
+
         public async Task<IEnumerable<Credito?>> ObtenerDisponiblesAsync(int idUsuario, int idActividad)
         {
             return await contexto.Creditos.Include(c => c.Usuario)

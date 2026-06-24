@@ -1,0 +1,239 @@
+﻿@page "/Turno/adelantada"
+@rendermode InteractiveServer
+@inject NavigationManager Navegador
+@using System.Globalization
+@inject Sesion UsuarioSesion
+@inject ObtenerClasesAdelantadasDisponiblesUseCase ObtenerClasesAdelantadasDisponiblesUseCase
+@inject ObtenerActividadPorId ObtenerActividadPorId
+@inject CrearReservaAdelantadaUseCase CrearReservaAdelantadaUseCase
+@inject IniciarReservaAdelantadaUseCase IniciarReservaAdelantadaUseCase
+@inject ObtenerTurnoId ObtenerTurnoPorId
+
+<PageTitle>Horarios del mes</PageTitle>
+
+@if (UsuarioSesion.UsuarioActual is null)
+{
+    <div class="alert alert-warning">Debe iniciar sesión. <NavLink href="/Login">Ir al Login</NavLink></div>
+}
+else if (!parametrosOk)
+{
+    <div class="container-fluid p-0">
+        <div class="alert alert-warning">Indique actividad y fecha válida.</div>
+        <button type="button" class="btn btn-secondary" @onclick="VolverTurnos">Volver</button>
+    </div>
+}
+else
+{
+    <div class="container-fluid p-0">
+        <h2 class="mb-1">@actividadNombre</h2>
+        <p class="text-muted mb-4">
+            Día: @Transformar()
+        </p>
+
+        @if (!string.IsNullOrEmpty(mensajeExito))
+        {
+            <div class="alert alert-success shadow-sm">@mensajeExito</div>
+        }
+        @if (!string.IsNullOrEmpty(mensajeError))
+        {
+            <div class="alert alert-danger shadow-sm">@mensajeError</div>
+        }
+
+        <div class="row">
+            <div class="col-12 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white fw-bold">Turnos Disponibles</div>
+                    <ul class="list-group list-group-flush">
+                        @if (clasesDisponibles.Any())
+                        {
+                            @foreach (var clase in clasesDisponibles)
+                            {
+                                var t = clase.TurnoRepresentativo;
+
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <span class="fw-bold">@Transformar()</span>
+
+                                        <span class="fw-bold">
+                                            @t.HoraInicio.ToString("HH:mm")
+                                            –
+                                            @t.HoraFin.ToString("HH:mm")
+                                        </span>
+
+                                        <div class="small text-muted">
+                                            Profesor: @t.Profesor.Nombre
+                                        </div>
+
+                                        <div class="small text-muted">
+                                            Cupo mínimo disponible:
+                                            @clase.CupoMinimoDisponible
+                                        </div>
+
+                                        <div class="small text-muted">
+                                            Cantidad de clases:
+                                            @clase.TurnosDelMes.Count
+                                        </div>
+
+                                    </div>
+
+                                    <button class="btn btn-success"
+                                            disabled="@procesando"
+                                            @onclick="() => Reservar(clase)">
+                                        Reservar mes
+                                    </button>
+                                </li>
+                            }
+                        }
+                        else
+                        {
+                            <li class="list-group-item text-center py-4 text-muted">
+                                No hay turnos disponibles para reservar en esta fecha.
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <button type="button" class="btn btn-secondary mt-2" @onclick="VolverTurnos">Volver a turnos</button>
+    </div>
+}
+@code {
+    [SupplyParameterFromQuery] public int? ActividadId { get; set; }
+    [SupplyParameterFromQuery] public int? DiaSemana { get; set; }
+
+    private string NombreDia(DayOfWeek dia)
+    {
+        var nombre = CultureInfo.GetCultureInfo("es-AR").DateTimeFormat.GetDayName(dia);
+        return char.ToUpper(nombre[0]) + nombre[1..];
+    }
+
+    private string Transformar()
+    {
+        var dia = (DayOfWeek)DiaSemana.Value;
+        return NombreDia(dia);
+    }
+
+    private bool parametrosOk;
+    private string actividadNombre = "";
+    private bool procesando;
+    private string? mensajeExito;
+    private string? mensajeError;
+
+    private ClaseAdelantada? seleccion;
+    private List<ClaseAdelantada> clasesDisponibles = new();
+    [SupplyParameterFromQuery] public bool pagoExitoso { get; set; }
+    [SupplyParameterFromQuery] public bool volviMP { get; set; }
+    [SupplyParameterFromQuery] public string? payment_id { get; set; }
+    [SupplyParameterFromQuery] public string? turnosId { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (volviMP)
+        {
+            if (pagoExitoso)
+            {
+                var idsTurnos = turnosId?
+                    .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(int.Parse)
+                    .ToList() ?? new();
+
+                var turnos = new List<Turno>();
+
+                foreach (var id in idsTurnos)
+                {
+                    var turno = await ObtenerTurnoPorId.Ejecutar(id);
+
+                    if (turno != null)
+                        turnos.Add(turno);
+                }
+
+                await CrearReservaAdelantadaUseCase.Ejecutar(
+                    UsuarioSesion.UsuarioActual!.Id,
+                    turnos,
+                    payment_id!);
+
+                mensajeExito = "Pago y reserva realizados con éxito.";
+
+                await CargarTurnos();
+            }
+            else
+            {
+                mensajeError = "El pago no se pudo realizar. Intente nuevamente.";
+            }
+        }
+
+        procesando = true;
+        mensajeError = mensajeExito = null;
+
+        if (UsuarioSesion.UsuarioActual is null) return;
+
+        if (ActividadId is not > 0 || DiaSemana is null || DiaSemana < 0 || DiaSemana > 6)
+        {
+            parametrosOk = false;
+            procesando = false;
+            return;
+        }
+
+        parametrosOk = true;
+
+        try
+        {
+            var act = await ObtenerActividadPorId.Ejecutar(ActividadId.Value);
+            actividadNombre = act?.Nombre ?? "Actividad";
+            await CargarTurnos();
+        }
+        catch (Exception ex)
+        {
+            mensajeError = "Error de carga: " + ex.Message;
+        }
+        finally
+        {
+            procesando = false;
+        }
+    }
+
+
+    private async Task CargarTurnos()
+    {
+        if (!parametrosOk || DiaSemana is null || ActividadId is null)
+            return;
+
+        var idUsuario = UsuarioSesion.UsuarioActual!.Id;
+        var dia = (DayOfWeek)DiaSemana.Value;
+        clasesDisponibles =
+            (await ObtenerClasesAdelantadasDisponiblesUseCase.Ejecutar(
+                ActividadId.Value,
+                dia,
+                idUsuario)).ToList();
+    }
+
+    private async Task Reservar(ClaseAdelantada clase)
+    {
+        procesando = true;
+        mensajeError = mensajeExito = null;
+
+        try
+        {
+            string urlPagoMercadoPago = await IniciarReservaAdelantadaUseCase.Ejecutar(
+                UsuarioSesion.UsuarioActual!.Id,
+                clase.TurnosDelMes
+            );
+
+            Navegador.NavigateTo(urlPagoMercadoPago, forceLoad: true);
+        }
+        catch (Exception ex)
+        {
+ 
+            mensajeError = ex.Message;
+            procesando = false;
+            StateHasChanged();
+        }
+    }
+
+    private void VolverTurnos()
+    {
+        Navegador.NavigateTo("/Turnos");
+    }
+
+}

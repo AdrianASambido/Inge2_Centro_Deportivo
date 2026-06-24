@@ -38,6 +38,7 @@ builder.Services.AddScoped<IDevolucionRepositorio, DevolucionRepositorio>();
 builder.Services.AddScoped<IHashServicio, ServicioHash>();
 builder.Services.AddScoped<IEmailServicio, EmailServicio>();
 builder.Services.AddHostedService<TurnosBackgroundServicio>();
+builder.Services.AddHostedService<ListaEsperaWorker>();
 builder.Services.AddScoped<IQrServicio, QrServicio>();
 builder.Services.AddScoped<IPagoRepositorio, PagoRepositorio>();
 builder.Services.AddScoped<ICreditoRepositorio, CreditoRepositorio>();
@@ -108,6 +109,8 @@ builder.Services.AddScoped<EliminarTurnoUseCase>();
 builder.Services.AddScoped<ListarTurnosUseCase>();
 builder.Services.AddScoped<ListarTurnosCalendarioUseCase>();
 builder.Services.AddScoped<ConsultarDisponibilidadUseCase>();
+builder.Services.AddScoped<EliminarInscriptoUseCase>();
+builder.Services.AddScoped<CancelarTurnoUseCase>();
 
 builder.Services.AddScoped<ConfirmarDevolucionUseCase>();
 builder.Services.AddScoped<ListarDevolucionesPendientesUseCase>();
@@ -116,7 +119,7 @@ builder.Services.AddScoped<ObtenerUsuarioPorId>();
 builder.Services.AddScoped<ObtenerProfesorPorId>();
 builder.Services.AddScoped<ObtenerCanchaPorId>();
 builder.Services.AddScoped<ObtenerReservaPorId>();
-builder.Services.AddScoped<ObtenerTurnoId>();   
+builder.Services.AddScoped<ObtenerTurnoId>();
 builder.Services.AddScoped<ObtenerActividadPorId>();
 builder.Services.AddScoped<ObtenerDevolucionPorId>();
 builder.Services.AddScoped<EditarUsuarioUseCase>();
@@ -136,8 +139,9 @@ builder.Services.AddScoped<CompletarPagoReservaOcasionalUseCase>();
 builder.Services.AddScoped<CrearReservaAdelantadaUseCase>();
 builder.Services.AddScoped<CrearReservaConCreditoUseCase>();
 builder.Services.AddScoped<RenovarReservaAdelantadaUseCase>();
+builder.Services.AddScoped<ObtenerClasesAdelantadasDisponiblesUseCase>();
 
-builder.Services.AddScoped<Sesion>(); 
+builder.Services.AddScoped<Sesion>();
 
 // Add services to the container.
 builder.Services.AddRazorComponents()

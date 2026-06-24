@@ -13,7 +13,7 @@ namespace CentroDeportivo.Aplicacion.Entidades
         public DevolucionEstado Estado { get; set; }
         public int Id_Usuario { get; set; }
         public Usuario Usuario { get; set; }
-        public int Id_Reserva {  get; set; }
+        public int Id_Reserva { get; set; }
         public Reserva Reserva { get; set; }
         public DateTime FechaGeneracion { get; set; }
         public DateTime? FechaDevolucion { get; set; }

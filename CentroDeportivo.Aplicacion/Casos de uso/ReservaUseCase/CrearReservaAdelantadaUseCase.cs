@@ -8,13 +8,13 @@ using System.Threading.Tasks;
 namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
 {
     public class CrearReservaAdelantadaUseCase(
-        IReservaRepositorio repoReserva,
-        ITurnoRepositorio repoTurno,
-        IPagoRepositorio repoPago,        
-        IPagoServicio pagoServicio        
-    )
+    IReservaRepositorio repoReserva,
+    ITurnoRepositorio repoTurno,
+    IPagoRepositorio repoPago
+
+)
     {
-        public async Task Ejecutar(int idUsuario, int idTurnoSeleccionado, string tarjetaToken)
+        public async Task Ejecutar(int idUsuario, List<Turno> clasesDisponibles, string idPayment)
         {
             DateOnly hoy = DateOnly.FromDateTime(DateTime.Now);
             DateOnly finDeMes = new DateOnly(hoy.Year, hoy.Month, DateTime.DaysInMonth(hoy.Year, hoy.Month));
@@ -27,6 +27,7 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
             }
 
             Guid codigoPaquete = Guid.NewGuid();
+
             decimal precioBaseTurno = clasesDisponibles.First().PrecioTurno;
             decimal precioConDescuento = precioBaseTurno * 0.80m;
 
@@ -50,7 +51,7 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
                     Id_Turno = turnoClase.Id,
                     FechaReserva = hoy,
                     FechaAsistencia = turnoClase.Fecha,
-                    Estado = EstadoReserva.Confirmado, 
+                    Estado = EstadoReserva.Confirmado,
                     Asistencia = Asistencia.Ausente,
                     TipoReserva = TipoReserva.Adelantado,
                     PrecioPagado = precioConDescuento,
@@ -62,19 +63,15 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
                 nuevasReservas.Add(reserva);
 
                 turnoClase.CupoDisponible--;
-                if (turnoClase.CupoDisponible == 0)
+                if (turnoClase.CupoDisponible <= 0)
                 {
                     turnoClase.Estado = EstadoTurno.Lleno;
                 }
             }
 
-            var nuevoPago = new Pago
-            {
-                Id_Usuario = idUsuario,
-                Monto = montoTotalAPagar,
-                Fecha = DateTime.Now,
-                CodigoPaqueteAdelantado = codigoPaquete
-            };
+
+            var nuevoPago = new Pago(idUsuario, montoTotalAPagar, null, null, codigoPaquete);
+            nuevoPago.MercadoPagoTransactionId = idPayment;
 
             await repoReserva.GuardarMuchasReservasAsync(nuevasReservas);
             await repoTurno.ActualizarMuchosAsync(clasesDisponibles);

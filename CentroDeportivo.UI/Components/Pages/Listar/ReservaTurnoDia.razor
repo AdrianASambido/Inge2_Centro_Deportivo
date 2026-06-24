@@ -8,6 +8,10 @@
 @inject ObtenerActividadPorId ObtenerActividadPorId
 @inject ObtenerUsuarioPorId ObtenerUsuarioPorId
 @inject CrearReservaUseCase CrearReservaUseCase
+@inject UnirseListaDeEsperaUseCase UnirseListaDeEsperaUseCase
+@inject IniciarReservaOcasionalUseCase iniciarReservaOcasionalUse
+@inject ConsultarCreditosUseCase ConsultarCreditosUseCase
+@inject CrearReservaConCreditoUseCase CrearReservaConCreditoUseCase
 
 <PageTitle>Horarios del día</PageTitle>
 
@@ -49,12 +53,22 @@ else
                             @foreach (var t in turnosFiltrados)
                             {
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    @if (t.CupoDisponible == 0)
+                                    {
+                                        <div>
+                                            <span class="fw-bold">@t.HoraInicio.ToString("HH:mm") – @t.HoraFin.ToString("HH:mm")</span>
+                                            <div class="small d-block text-muted">Precio:$@t.PrecioTurno</div>
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-success" disabled="@procesando" @onclick="() => UnirseListaEspera(t.Id)">
+                                            Unirse a lista de espera
+                                        </button>
+                                    }
                                     <div>
                                         <span class="fw-bold">@t.HoraInicio.ToString("HH:mm") – @t.HoraFin.ToString("HH:mm")</span>
                                         <div class="small d-block text-muted">Libres: @t.CupoDisponible / @t.CupoMaximo</div>
                                         <div class="small d-block text-muted">Precio:$@t.PrecioTurno</div>
                                     </div>
-                                    <button type="button" class="btn btn-sm btn-success" disabled="@procesando" @onclick="() => Reservar(t.Id)">
+                                    <button type="button" class="btn btn-sm btn-success" disabled="@procesando" @onclick="() => ConsultarCreditos(t.Id)">
                                         Reservar
                                     </button>
                                 </li>
@@ -75,10 +89,35 @@ else
     </div>
 }
 
+@if (mostrarDialogoReserva)
+{
+    <div class="modal show d-block shadow" tabindex="-1" style="background: rgba(25,25,100,0.5);">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Reserva con créditos</h5>
+                </div>
+                <div class="modal-body">
+                    <p>¿Desea utilizar un credito disponible para esta reserva?</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" @onclick="() => Reservar(idTurnoAReservar)">No, gracias</button>
+                    <button class="btn btn-success" @onclick="() => ReservarConCredito(idTurnoAReservar)">Si porfavor</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
 @code {
     [SupplyParameterFromQuery] public int? ActividadId { get; set; }
     [SupplyParameterFromQuery] public string? Fecha { get; set; }
+    [SupplyParameterFromQuery] public bool pagoExitoso { get; set; }
+    [SupplyParameterFromQuery] public bool volviMP { get; set; }
+    [SupplyParameterFromQuery] public string? payment_id { get; set; }
+    [SupplyParameterFromQuery] public int TurnoId { get; set; }
 
+    private List<Credito> creditosUsuario = new();
     private bool parametrosOk;
     private DateOnly? fechaElegida;
     private string fechaFormateada = "";
@@ -92,6 +131,27 @@ else
 
     protected override async Task OnParametersSetAsync()
     {
+        if (volviMP)
+        {
+            if (pagoExitoso)
+            {
+                var nuevaReserva = new Reserva()
+                {
+                    Id_Usuario = UsuarioSesion.UsuarioActual!.Id,
+                    Id_Turno = TurnoId
+                };
+
+                await CrearReservaUseCase.Ejecutar(nuevaReserva, payment_id);
+                mensajeExito = "Pago y reserva realizados con exito.";
+                await CargarTurnos();
+            }
+            else
+            {
+                mensajeError = "El pago no se pudo realizar. Intente nuevamente.";
+            }
+        }
+
+        creditosUsuario = (await ConsultarCreditosUseCase.Ejecutar(UsuarioSesion.UsuarioActual!.Id)).ToList();
         procesando = true;
         mensajeError = mensajeExito = null;
 
@@ -130,37 +190,28 @@ else
 
         var idUsuario = UsuarioSesion.UsuarioActual!.Id;
 
-        
+
         var todos = await ListarTurnosCalendarioUseCase.ejecutar(idUsuario, fechaElegida.Value, ActividadId.Value);
 
         var ahora = DateTime.Now;
         var fechaHoy = DateOnly.FromDateTime(ahora);
         var horaActual = TimeOnly.FromDateTime(ahora);
 
-        
+
         turnosFiltrados = todos
-            .Where(t => t.CupoDisponible > 0
-                     && t.Estado != EstadoTurno.Cancelado
+            .Where(t => t.Estado != EstadoTurno.Cancelado
                      && (t.Fecha > fechaHoy || (t.Fecha == fechaHoy && t.HoraInicio > horaActual)))
-            .OrderBy(t => t.HoraInicio) 
+            .OrderBy(t => t.HoraInicio)
             .ToList();
     }
-
-    private async Task Reservar(int turnoId)
+    private async Task UnirseListaEspera(int turnoId)
     {
         procesando = true;
         mensajeError = mensajeExito = null;
         try
         {
-            var nuevaReserva = new Reserva()
-            {
-                Id_Usuario = UsuarioSesion.UsuarioActual!.Id,
-                Id_Turno = turnoId
-            };
-
-            await CrearReservaUseCase.Ejecutar(nuevaReserva,tokenTarjeta);
-
-            mensajeExito = "Reserva realizada con éxito, debe acercarse al centro a abonar.";
+            await UnirseListaDeEsperaUseCase.Ejecutar(UsuarioSesion.UsuarioActual.Id, turnoId);
+            mensajeExito = "Usted se ha unido a la lista de espera correctamente.";
             await CargarTurnos();
         }
         catch (Exception ex)
@@ -171,6 +222,74 @@ else
         {
             procesando = false;
             StateHasChanged();
+        }
+    }
+
+    private async Task Reservar(int turnoId)
+    {
+        mostrarDialogoReserva = false;
+        procesando = true;
+        mensajeError = mensajeExito = null;
+        try
+        {
+
+            var nuevaReserva = new Reserva()
+            {
+                Id_Usuario = UsuarioSesion.UsuarioActual!.Id,
+                Id_Turno = turnoId
+            };
+
+
+            string urlPagoMercadoPago = await iniciarReservaOcasionalUse.Ejecutar(nuevaReserva);
+
+            Navegador.NavigateTo(urlPagoMercadoPago, forceLoad: true);
+        }
+        catch (Exception ex)
+        {
+            mensajeError = ex.Message;
+            procesando = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task ReservarConCredito(int turnoId)
+    {
+        procesando = true;
+        mensajeError = mensajeExito = null;
+        try
+        {
+
+            var nuevaReserva = new Reserva()
+            {
+                Id_Usuario = UsuarioSesion.UsuarioActual!.Id,
+                Id_Turno = turnoId
+            };
+
+            await CrearReservaConCreditoUseCase.Ejecutar(nuevaReserva);
+            mensajeExito = "Reserva realizada con éxito utilizando un crédito.";
+            await CargarTurnos();
+        }
+        catch (Exception ex)
+        {
+            mensajeError = ex.Message;
+            procesando = false;
+            StateHasChanged();
+        }
+    }
+
+    public bool mostrarDialogoReserva { get; set; } = false;
+    public int idTurnoAReservar { get; set; }
+
+    public void ConsultarCreditos(int Id)
+    {
+        idTurnoAReservar = Id;
+        if (creditosUsuario.Any())
+        {
+            mostrarDialogoReserva = true;
+        }
+        else
+        {
+            Reservar(Id);
         }
     }
 

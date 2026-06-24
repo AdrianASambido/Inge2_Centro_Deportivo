@@ -9,6 +9,6 @@ namespace CentroDeportivo.Aplicacion.Entidades
     public enum EstadoListaEspera
     {
         Esperando, Notificado, Confirmado, Expirado
-    } 
-    
+    }
+
 }

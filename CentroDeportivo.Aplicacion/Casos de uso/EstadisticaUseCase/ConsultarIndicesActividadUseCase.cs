@@ -8,12 +8,14 @@ using System.Threading.Tasks;
 
 namespace CentroDeportivo.Aplicacion.Casos_de_uso.EstadisticaUseCase
 {
-    public class ConsultarIndicesActividadUseCase (IReservaRepositorio repoReserva)
+    public class ConsultarIndicesActividadUseCase(IReservaRepositorio repoReserva)
     {
-        public async Task<ReporteIndicesActividadResponseDTO> Ejecutar(int idActividad, DateOnly desde, DateOnly hasta) {
+        public async Task<ReporteIndicesActividadResponseDTO> Ejecutar(int idActividad, DateOnly desde, DateOnly hasta)
+        {
             var totales = await repoReserva.ObtenerTotalesPorActividadAsync(idActividad, desde, hasta);
 
-            if (totales.TotalReservas == 0) {
+            if (totales.TotalReservas == 0)
+            {
                 return new ReporteIndicesActividadResponseDTO();
             }
 

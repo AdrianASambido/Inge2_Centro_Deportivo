@@ -13,17 +13,18 @@ namespace CentroDeportivo.Aplicacion.Entidades
         public int Id_Actividad { get; set; }
         public DateTime FechaGeneracion { get; set; }
         public DateTime FechaVencimiento { get; set; }
-        public EstadoCredito Estado {  get; set; }
+        public EstadoCredito Estado { get; set; }
         public Usuario Usuario { get; set; }
         public Actividad Actividad { get; set; }
 
         public Credito() { }
 
-        public Credito(int idUsuario, int idActividad, DateTime fechaGeneracion) { 
+        public Credito(int idUsuario, int idActividad)
+        {
             this.Id_Usuario = idUsuario;
             this.Id_Actividad = idActividad;
-            this.FechaGeneracion = fechaGeneracion;
-            this.FechaVencimiento = fechaGeneracion.AddDays(30);
+            this.FechaGeneracion = DateTime.Now;
+            this.FechaVencimiento = this.FechaGeneracion.AddDays(30);
             this.Estado = EstadoCredito.Disponible;
         }
 

@@ -9,7 +9,8 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.EstadisticaUseCase
 {
     public class ConsultarIngresosDelNegocioUseCase(IPagoRepositorio repoPago)
     {
-        public async Task<decimal> Ejecutar(DateOnly desde, DateOnly hasta) { 
+        public async Task<decimal> Ejecutar(DateOnly desde, DateOnly hasta)
+        {
             return await repoPago.ObtenerIngresosGeneralesAsync(desde, hasta);
         }
     }
