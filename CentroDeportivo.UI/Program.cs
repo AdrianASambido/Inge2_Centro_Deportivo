@@ -102,6 +102,9 @@ builder.Services.AddScoped<RegistrarAsistenciaManualUseCase>();
 builder.Services.AddScoped<RegistrarAsistenciaQrUseCase>();
 builder.Services.AddScoped<GenerarQrUseCase>();
 builder.Services.AddScoped<ConfirmarPagoReservaUseCase>();
+builder.Services.AddScoped<IniciarReservaAdelantadaUseCase>();
+builder.Services.AddScoped<IniciarReservaOcasionalUseCase>();
+builder.Services.AddScoped <ConfirmarPagoRestanteReservaOcasionalUseCase>();
 
 builder.Services.AddScoped<CrearTurnoUseCase>();
 builder.Services.AddScoped<EditarTurnoUseCase>();

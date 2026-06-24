@@ -7,41 +7,35 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
 {
     public class CompletarPagoReservaOcasionalUseCase(
         IReservaRepositorio repoReserva,
-        IPagoRepositorio repoPago,
         IPagoServicio pagoServicio
     )
     {
-        public async Task Ejecutar(int idReserva, string tarjetaToken)
+        public async Task<string> Ejecutar(int idReserva)
         {
             var reserva = await repoReserva.ObtenerPorIdAsync(idReserva);
 
             if (reserva == null)
-            {
                 throw new Exception("Error: reserva inexistente.");
-            }
 
             if (reserva.Estado != EstadoReserva.Reservado)
-            {
                 throw new Exception("Error: esta reserva no se encuentra pendiente de confirmación/pago restante.");
-            }
 
             decimal montoRestante = reserva.PrecioPagado;
 
-            bool cobroExitoso = await pagoServicio.ProcesarCobroAsync(reserva.Id_Usuario, montoRestante, tarjetaToken);
+            string urlExito = $"https://localhost:7001/MisReservas?pagoExitoso=true&reservaId={reserva.Id}";
+            string urlFallo = $"https://localhost:7001/MisReservas?pagoExitoso=false&reservaId={reserva.Id}";
 
-            if (!cobroExitoso)
-            {
-                throw new Exception("El cobro del saldo restante fue rechazado por la entidad bancaria. No se pudo confirmar la reserva.");
-            }
+            string tituloPago = $"Saldo Restante - Turno Ocasional Nro {reserva.Id_Turno}";
 
+            string urlRedireccion = await pagoServicio.CrearPreferenciaPagoAsync(
+                reserva.Id_Usuario,
+                montoRestante,
+                tituloPago,
+                urlExito,
+                urlFallo
+            );
 
-            reserva.Estado = EstadoReserva.Confirmado;
-            reserva.PrecioPagado = montoRestante * 2;
-
-            var pago = new Pago(reserva.Id_Usuario, montoRestante, reserva.Id, reserva.Id_Turno, null);
-
-            await repoReserva.ActualizarAsync(reserva);
-            await repoPago.AgregarAsync(pago);
+            return urlRedireccion;
         }
     }
 }

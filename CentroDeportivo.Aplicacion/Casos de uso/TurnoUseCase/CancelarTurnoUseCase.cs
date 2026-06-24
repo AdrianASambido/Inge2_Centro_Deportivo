@@ -13,7 +13,7 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.TurnoUseCase
         ICreditoRepositorio repoCredito,
         IPagoServicio pagoServicio,
         IEmailServicio emailServicio
-    ) ///acomodar el filtrado de lista d espera para q deje de lado las d turno cancelado
+    )
     {
         public async Task Ejecutar(int idTurno)
         {

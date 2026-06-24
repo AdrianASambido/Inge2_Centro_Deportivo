@@ -19,6 +19,7 @@ namespace CentroDeportivo.Aplicacion.Interfaces
         Task<IEnumerable<InscripcionListaEspera>> ObtenerTodosPorUsuarioAsync(int idUsuario);
         Task<IEnumerable<InscripcionListaEspera>> ObtenerTodosPorTurnoAsync(int idTurno);
         Task<InscripcionListaEspera?> ObtenerPrimeroEnFilaAsync(int idTurno);
+        Task<InscripcionListaEspera?> ObtenerPorUsuarioYTurno(int idUsuario, int idTurno);
 
     }
 }
