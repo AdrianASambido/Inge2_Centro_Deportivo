@@ -27,8 +27,8 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
 
             string stringIdsTurnos = string.Join(",", clasesDisponibles.Select(t => t.Id));
 
-            string urlExito = $"https://localhost:7001/Turno/adelantada?pagoExitoso=true&turnoIds={stringIdsTurnos}";
-            string urlFallo = $"https://localhost:7001/Turno/adelantada?pagoExitoso=false&turnoIds={stringIdsTurnos}";
+            string urlExito = $"https://localhost:7001/Turno/adelantada?&volviendo=true&pagoExitoso=true&turnoIds={stringIdsTurnos}";
+            string urlFallo = $"https://localhost:7001/Turno/adelantada?&volviendo=true&pagoExitoso=false&turnoIds={stringIdsTurnos}";
 
             string nombreProducto = $"Abono Mensual Adelantado ({clasesDisponibles.Count} Clases)";
 

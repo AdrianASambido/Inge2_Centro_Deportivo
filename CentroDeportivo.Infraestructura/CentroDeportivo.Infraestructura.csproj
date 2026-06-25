@@ -1,14 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <Compile Remove="Persistencia\Repositorios\ListaEsperaRepositorio.cs" />
-  </ItemGroup>
+	<ItemGroup>
+		<Compile Remove="Persistencia\Repositorios\ListaEsperaRepositorio.cs" />
+	</ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="BCrypt.Net-Next" Version="4.1.0" />
@@ -23,8 +23,8 @@
     <PackageReference Include="QRCoder" Version="1.8.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\CentroDeportivo.Aplicacion\CentroDeportivo.Aplicacion.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\CentroDeportivo.Aplicacion\CentroDeportivo.Aplicacion.csproj" />
+	</ItemGroup>
 
 </Project>
