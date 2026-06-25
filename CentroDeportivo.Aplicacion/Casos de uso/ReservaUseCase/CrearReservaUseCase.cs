@@ -39,7 +39,7 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
             reserva.ConCredito = false;
             reserva.TipoReserva = TipoReserva.Ocasional;
 
-           
+
 
             var pago = new Pago(reserva.Id_Usuario, montoSena, null, turno.Id, null);
             pago.MercadoPagoTransactionId = idPayment;

@@ -32,8 +32,8 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
             }
 
             decimal montoSena = turno.PrecioTurno / 2;
-            string urlExito = $"https://localhost:7001/Turnos/dia?pagoExitoso=true&turnoId={reserva.Id_Turno}";
-            string urlFallo = $"https://localhost:7001/Turnos/dia?pagoExitoso=false&turnoId={reserva.Id_Turno}";
+            string urlExito = $"https://localhost:7001/Turnos/dia?volviendo=true&pagoExitoso=true&turnoId={reserva.Id_Turno}";
+            string urlFallo = $"https://localhost:7001/Turnos/dia?volviendo=true&pagoExitoso=false&turnoId={reserva.Id_Turno}";
 
             string nombreActividad = $"Seña Turno Ocasional Nro {turno.Id}";
 

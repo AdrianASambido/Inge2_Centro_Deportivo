@@ -16,7 +16,6 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
     {
         public async Task<(bool conDevolucion, decimal monto)> Ejecutar(int idReserva)
         {
-  
             var reserva = await repoReserva.ObtenerPorIdAsync(idReserva);
             if (reserva == null) throw new Exception("Error: reserva inexistente.");
             if (reserva.Turno!.Estado == EstadoTurno.Finalizado) throw new Exception("Error: la clase ya transcurrió.");
@@ -28,7 +27,7 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
 
             bool aplicaDevolucion = false;
             decimal montoADevolver = 0;
-
+            
   
             if (diferencia.TotalHours >= 24 && !reserva.ConCredito)
             {

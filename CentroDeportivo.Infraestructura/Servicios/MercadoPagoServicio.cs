@@ -11,6 +11,10 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using CentroDeportivo.Aplicacion.Interfaces;
+using MercadoPago.Config;
+using MercadoPago.Client.Preference;
+using MercadoPago.Resource.Preference;
 
 namespace CentroDeportivo.Infraestructura.Servicios
 {
@@ -19,8 +23,8 @@ namespace CentroDeportivo.Infraestructura.Servicios
 
         public MercadoPagoServicio()
         {
- 
-           // MercadoPagoConfig.AccessToken = "";
+
+            // MercadoPagoConfig.AccessToken = "";
         }
 
         public async Task<string> CrearPreferenciaPagoAsync(

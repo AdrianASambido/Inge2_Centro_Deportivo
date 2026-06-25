@@ -19,12 +19,13 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
                 throw new Exception("El turno ya no está disponible.");
             }
 
-            // Aquí cobramos el 100%
+
             decimal montoTotal = turno.PrecioTurno;
 
-            // IMPORTANTE: Un nuevo tipo de URL para que el sistema sepa que es 100%
-            string urlExito = $"https://localhost:7001/Turnos/lista-espera?pagoExitoso=true&turnoId={idTurno}";
-            string urlFallo = $"https://localhost:7001/Turnos/lista-espera?pagoExitoso=false&turnoId={idTurno}";
+
+
+            string urlExito = $"https://localhost:7001/MisReservas?pagoExitoso=true&turnoId={idTurno}&tipo=listaEspera";
+            string urlFallo = $"https://localhost:7001/MisReservas?pagoExitoso=false&turnoId={idTurno}&tipo=listaEspera";
 
             string nombreActividad = $"Pago Total Turno Nro {turno.Id} (Lista de Espera)";
 

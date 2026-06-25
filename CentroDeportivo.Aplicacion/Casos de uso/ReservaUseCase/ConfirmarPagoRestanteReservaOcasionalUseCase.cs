@@ -25,7 +25,7 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
 
 
             reserva.Estado = EstadoReserva.Confirmado;
-            reserva.PrecioPagado = reserva.PrecioPagado + montoSaldoRestante; 
+            reserva.PrecioPagado = reserva.PrecioPagado + montoSaldoRestante;
 
             var pagoSegundo = new Pago(
                 reserva.Id_Usuario,
