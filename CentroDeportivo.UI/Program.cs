@@ -143,11 +143,14 @@ builder.Services.AddScoped<CrearReservaConCreditoUseCase>();
 builder.Services.AddScoped<RenovarReservaAdelantadaUseCase>();
 builder.Services.AddScoped<ObtenerClasesAdelantadasDisponiblesUseCase>();
 
-builder.Services.AddScoped<Sesion>(); 
+builder.Services.AddScoped<Sesion>();
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents();
+    .AddInteractiveServerComponents(options =>
+    {
+        options.DisconnectedCircuitRetentionPeriod = TimeSpan.FromMinutes(10);
+    });
 
 var app = builder.Build();
 

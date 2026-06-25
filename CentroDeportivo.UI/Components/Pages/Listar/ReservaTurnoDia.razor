@@ -7,6 +7,7 @@
 @inject ListarTurnosCalendarioUseCase ListarTurnosCalendarioUseCase
 @inject ObtenerActividadPorId ObtenerActividadPorId
 @inject ObtenerUsuarioPorId ObtenerUsuarioPorId
+@inject IJSRuntime JS
 @inject CrearReservaUseCase CrearReservaUseCase
 @inject UnirseListaDeEsperaUseCase UnirseListaDeEsperaUseCase
 @inject IniciarReservaOcasionalUseCase iniciarReservaOcasionalUse
@@ -15,9 +16,17 @@
 
 <PageTitle>Horarios del día</PageTitle>
 
-@if (UsuarioSesion.UsuarioActual is null)
+@if (!_inicializado)
 {
-    <div class="alert alert-warning">Debe iniciar sesión. <NavLink href="/Login">Ir al Login</NavLink></div>
+    <div class="d-flex justify-content-center mt-5">
+        <div class="spinner-border text-primary" role="status"></div>
+    </div>
+}
+else if (UsuarioSesion.UsuarioActual is null)
+{
+    <div class="alert alert-warning">
+        Debe iniciar sesión. <NavLink href="/Login">Ir al Login</NavLink>
+    </div>
 }
 else if (!parametrosOk)
 {
@@ -114,8 +123,9 @@ else
     [SupplyParameterFromQuery] public string? Fecha { get; set; }
     [SupplyParameterFromQuery] public bool pagoExitoso { get; set; }
     [SupplyParameterFromQuery] public bool volviMP { get; set; }
-    [SupplyParameterFromQuery] public string? payment_id { get; set; }
+    [SupplyParameterFromQuery(Name = "payment_id")] public string? PaymentId { get; set; }
     [SupplyParameterFromQuery] public int TurnoId { get; set; }
+    [SupplyParameterFromQuery] public int? UserId { get; set; }
 
     private List<Credito> creditosUsuario = new();
     private bool parametrosOk;
@@ -128,28 +138,29 @@ else
     private string? tokenTarjeta;
 
     private List<Turno> turnosFiltrados = new();
+    private bool _inicializado = true;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && volviMP && UsuarioSesion.UsuarioActual is null && UserId.HasValue)
+        {
+            var usuario = await ObtenerUsuarioPorId.Ejecutar(UserId.Value);
+            if (usuario != null)
+                UsuarioSesion.RestaurarSesion(usuario);
+
+            await ProcesarVueltaDeMP();
+            StateHasChanged();
+        }
+    }
 
     protected override async Task OnParametersSetAsync()
     {
-        if (volviMP)
-        {
-            if (pagoExitoso)
-            {
-                var nuevaReserva = new Reserva()
-                {
-                    Id_Usuario = UsuarioSesion.UsuarioActual!.Id,
-                    Id_Turno = TurnoId
-                };
+        if (UsuarioSesion.UsuarioActual is null) return;
 
-                await CrearReservaUseCase.Ejecutar(nuevaReserva, payment_id);
-                mensajeExito = "Pago y reserva realizados con exito.";
-                await CargarTurnos();
-            }
-            else
-            {
-                mensajeError = "El pago no se pudo realizar. Intente nuevamente.";
-            }
-        }
+        if (UsuarioSesion.UsuarioActual is null) return;
+        if (volviMP) return; // lo maneja OnAfterRenderAsync
+
+       
 
         creditosUsuario = (await ConsultarCreditosUseCase.Ejecutar(UsuarioSesion.UsuarioActual!.Id)).ToList();
         procesando = true;
@@ -181,6 +192,27 @@ else
         finally
         {
             procesando = false;
+        }
+    }
+
+    private async Task ProcesarVueltaDeMP()
+    {
+        if (!volviMP) return;
+
+        if (pagoExitoso)
+        {
+            var nuevaReserva = new Reserva()
+            {
+                Id_Usuario = UsuarioSesion.UsuarioActual!.Id,
+                Id_Turno = TurnoId
+            };
+            await CrearReservaUseCase.Ejecutar(nuevaReserva, PaymentId);
+            mensajeExito = "Pago y reserva realizados con éxito.";
+            await CargarTurnos();
+        }
+        else
+        {
+            mensajeError = "El pago no se pudo realizar. Intente nuevamente.";
         }
     }
 

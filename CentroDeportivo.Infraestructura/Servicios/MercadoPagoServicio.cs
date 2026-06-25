@@ -19,8 +19,8 @@ namespace CentroDeportivo.Infraestructura.Servicios
 
         public MercadoPagoServicio()
         {
- 
-           // MercadoPagoConfig.AccessToken = "";
+
+            MercadoPagoConfig.AccessToken = "APP_USR-5442003176761914-062314-1678b41e43e09ff885799c55acf2537e-3494487120";
         }
 
         public async Task<string> CrearPreferenciaPagoAsync(
