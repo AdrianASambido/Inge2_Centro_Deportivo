@@ -77,14 +77,19 @@ namespace CentroDeportivo.Infraestructura.Servicios
 
         public async Task<bool> RealizarReembolsoAsync(string idTransaccion)
         {
-            // Usamos PaymentClient, que es el que gestiona las operaciones sobre un pago
-            var client = new MercadoPago.Client.Payment.PaymentClient();
-
-            // El reembolso se hace llamando al método Refund del PaymentClient
-            // Pasamos el ID del pago (convertido a long)
-            var refund = await client.RefundAsync(long.Parse(idTransaccion));
-
-            return refund.Status == "approved";
+            try
+            {
+                var client = new MercadoPago.Client.Payment.PaymentClient();
+                // Convertimos a long (asegúrate de que idTransaccion siempre sea numérico)
+                var refund = await client.RefundAsync(long.Parse(idTransaccion));
+                return refund.Status == "approved";
+            }
+            catch (Exception ex)
+            {
+                // Loguear el error es vital para debuguear en la demo
+                Console.WriteLine($"Error en reembolso: {ex.Message}");
+                return false;
+            }
         }
     }
 }
