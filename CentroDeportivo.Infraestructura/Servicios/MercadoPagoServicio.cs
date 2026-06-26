@@ -20,7 +20,7 @@ namespace CentroDeportivo.Infraestructura.Servicios
         public MercadoPagoServicio()
         {
 
-           // MercadoPagoConfig.AccessToken = "";
+            MercadoPagoConfig.AccessToken = "APP_USR-5442003176761914-062314-1678b41e43e09ff885799c55acf2537e-3494487120";
         }
 
         public async Task<string> CrearPreferenciaPagoAsync(
@@ -75,21 +75,34 @@ namespace CentroDeportivo.Infraestructura.Servicios
             throw new NotImplementedException();
         }
 
-        public async Task<bool> RealizarReembolsoAsync(string idTransaccion)
+       /* public async Task<bool> RealizarReembolsoAsync(string idTransaccion)
         {
+            Console.WriteLine($"[Reembolso] Intentando reembolsar payment_id: {idTransaccion}");
             try
             {
                 var client = new MercadoPago.Client.Payment.PaymentClient();
-                // Convertimos a long (asegúrate de que idTransaccion siempre sea numérico)
+
+                var requestOptions = new MercadoPago.Http.MercadoPagoRequest(
+                    MercadoPago.Http.HttpMethod.Post,
+                    $"/v1/payments/{idTransaccion}/refunds",
+                    null
+                );
+
                 var refund = await client.RefundAsync(long.Parse(idTransaccion));
-                return refund.Status == "approved";
+                return refund != null;
             }
             catch (Exception ex)
             {
-                // Loguear el error es vital para debuguear en la demo
                 Console.WriteLine($"Error en reembolso: {ex.Message}");
                 return false;
             }
-        }
+        }*/
+
+        public async Task<bool> RealizarReembolsoAsync(string idTransaccion)
+          {
+              Console.WriteLine($"[Reembolso SIMULADO] payment_id: {idTransaccion}");
+              await Task.CompletedTask;
+              return true;
+          } 
     }
 }

@@ -18,6 +18,7 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.TurnoUseCase
     {
         public async Task Ejecutar(int idTurno)
         {
+            Console.WriteLine("HOLAAAAAA");
             var turno = await repoTurno.ObtenerPorIdAsync(idTurno);
             if (turno == null) throw new Exception("El turno que intenta cancelar no existe.");
             if (turno.Estado == EstadoTurno.Cancelado) throw new Exception("El turno ya se encuentra cancelado.");
@@ -56,7 +57,7 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.TurnoUseCase
                             bool exito = await pagoServicio.RealizarReembolsoAsync(pago.MercadoPagoTransactionId);
                             if (!exito)
                             {
-                                Console.WriteLine($"[Error] Fallo en reembolso de reserva {reserva.Id}");
+                                throw new Exception($"No se pudo procesar el reembolso de la reserva {reserva.Id}. Cancelación abortada.");
                             }
                         }
                     }
@@ -73,11 +74,11 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.TurnoUseCase
             if (reservasActivas.Any()) await repoReserva.ActualizarMuchasAsync(reservasActivas);
             if (nuevosCreditos.Any()) await repoCredito.AgregarMuchosAsync(nuevosCreditos);
 
-            if (emailsDestinatarios.Any())
+           /* if (emailsDestinatarios.Any())
             {
                 try { await emailServicio.EnviarAvisoCancelacionMasivo(emailsDestinatarios, turno); }
                 catch { }
-            }
+            }*/
         }
     }
 }
