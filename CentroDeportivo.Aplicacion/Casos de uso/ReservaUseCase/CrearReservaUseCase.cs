@@ -26,16 +26,16 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
             var turno = await repoTurno.ObtenerPorIdAsync(reserva.Id_Turno);
 
  
-            decimal montoSena = turno!.PrecioTurno / 2; 
+            decimal montoSena = turno!.PrecioTurno / 2;
 
-           
+            /*
             bool cobroExitoso = await pagoServicio.ProcesarCobroAsync(reserva.Id_Usuario, montoSena, tarjetaToken);
 
             if (!cobroExitoso)
             {
                 throw new Exception("El cobro de la seña fue rechazado por la entidad bancaria. Reserva cancelada.");
             }
-
+            */
             turno.CupoDisponible--;
 
             if (turno.CupoDisponible == 0)
@@ -51,13 +51,13 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
             reserva.TipoReserva = TipoReserva.Ocasional;
             reserva.TokenQr = null; 
 
-            var pago = new Pago(reserva.Id_Usuario, montoSena, null, turno.Id,null);
+            // var pago = new Pago(reserva.Id_Usuario, montoSena, null, turno.Id,null);
 
             await repoReserva.AgregarAsync(reserva);
             await repoTurno.ActualizarAsync(turno);
 
-            pago.Id_Reserva = reserva.Id;
-            await repoPago.AgregarAsync(pago);
+            //pago.Id_Reserva = reserva.Id;
+            //await repoPago.AgregarAsync(pago);
         }
     }
 }

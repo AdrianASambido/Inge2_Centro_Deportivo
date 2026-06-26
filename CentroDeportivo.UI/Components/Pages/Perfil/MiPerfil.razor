@@ -1,8 +1,10 @@
 ﻿@page "/MiPerfil"
 @rendermode InteractiveServer
 
+@using CentroDeportivo.Aplicacion.Casos_de_uso.EstadisticaUseCase.DTOs
 @inject Sesion UsuarioSesion
 @inject NavigationManager Navegador
+@inject ConsultarHistorialUsuarioUseCase ConsultarHistorialUsuarioCase
 
 <PageTitle>Mi Perfil</PageTitle>
 
@@ -32,8 +34,13 @@
             {
                 <div class="Contenedor-de-pestanias">
                     <button class="tab-boton @(pestañaActiva == 1 ? "activo" : "")" @onclick="() => pestañaActiva = 1">Mi Perfil</button>
-                    <button class="tab-boton @(pestañaActiva == 2 ? "activo" : "")" @onclick="() => pestañaActiva = 2">Historial</button>
-                    <button class="tab-boton @(pestañaActiva == 3 ? "activo" : "")" @onclick="() => pestañaActiva = 3">Comprobantes</button>
+                    @if (UsuarioSesion.esEmpleado() || UsuarioSesion.esAdministrador() ){
+                        <button class="tab-boton @(pestañaActiva == 2 ? "activo" : "")" @onclick="() => pestañaActiva = 2">Consultar Historial personal</button>
+                    }
+                    @if (UsuarioSesion.esCliente()){
+                        <button class="tab-boton @(pestañaActiva == 2 ? "activo" : "")" @onclick="() => pestañaActiva = 3">Consultar Historial Usuarios</button>
+                    }
+                    <button class="tab-boton @(pestañaActiva == 3 ? "activo" : "")" @onclick="() => pestañaActiva = 4">Listar Comprobantes</button>
                 </div>
 
                 <div class="card border-0 shadow-lg overflow-hidden">
@@ -88,11 +95,51 @@
                     </div>
                     }
                     @if (pestañaActiva == 2){
-                        <h1>Historial</h1>
+                        <h1>Consultar Historial Personal</h1>
                     }
                     @if (pestañaActiva == 3){
+                        @if (!string.IsNullOrEmpty(mensaje))
+{
+    <div class="alert alert-info">
+        @mensaje
+    </div>
+}
+else if (historial == null)
+{
+    <p>Cargando...</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Actividad</th>
+                <th>Asistencias</th>
+                <th>Inasistencias</th>
+                <th>Cancelaciones</th>
+                <th>% Asistencia</th>
+                <th>% Inasistencia</th>
+                <th>% Cancelación</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var h in historial)
+        {
+            <tr>
+                <td>@h.NombreActividad</td>
+                <td>@h.TotalAsistencias</td>
+                <td>@h.TotalInasistencias</td>
+                <td>@h.TotalCancelaciones</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+                    }
+                    @if (pestañaActiva == 4){
                         <h1>Comprobantes</h1>
                     }
+
                 </div>
             }
         </div>
@@ -101,6 +148,34 @@
 
 @code {
     private int pestañaActiva = 1;
+    private List<HistorialUsuarioActividadDTO>? historial;
+    private string mensaje = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            if (UsuarioSesion.UsuarioActual == null)
+            {
+                mensaje = "Debe iniciar sesión.";
+                return;
+            }
+
+            historial = (await ConsultarHistorialUsuarioCase.Ejecutar(
+                UsuarioSesion.UsuarioActual.Id))
+                .ToList();
+
+            if (!historial.Any())
+            {
+                mensaje = "No registra actividad.";
+            }
+        }
+        catch (Exception ex)
+        {
+            mensaje = ex.Message;
+        }
+    }
+
     void IrLogin()
     {
         Navegador.NavigateTo("/Login");
