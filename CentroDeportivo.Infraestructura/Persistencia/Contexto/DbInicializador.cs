@@ -22,6 +22,8 @@ public static class DbInicializador
                 Rol = Rol.Administrador,
                 DebeCambiarPassword = false
             };
+
+
             context.Usuarios.Add(admin);
             context.SaveChanges();
         }
