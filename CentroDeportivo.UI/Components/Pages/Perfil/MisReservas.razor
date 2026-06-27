@@ -5,116 +5,255 @@
 @inject Sesion UsuarioSesion
 @inject ListarReservasUseCase listarReservasUseCase
 @inject CancelarReservaUseCase cancelarReservasUseCase
+@inject CompletarPagoReservaOcasionalUseCase CompletarPagoReservaCase // <-- 1. Inyectamos el caso de uso
 @inject NavigationManager Navigation
-@inject CancelarReservaUseCase CancelarReservaCase
 
 <PageTitle>Mis Reservas</PageTitle>
 
 <div class="container-fluid p-0">
     <div class="p-5 mb-4 bg-light rounded-3 shadow-sm">
-            <h2 class="mb-1">Mis reservas</h2>
+        <h2 class="mb-3">Mis reservas</h2>
 
-        
-        <div class="table-responsive shadow-sm" style="background: white; border-radius: 8px;">
-            @*
-            @if (qrCode != null && qrCode.Length > 0)
-            {
-                <div class="card mb-4 shadow-sm" style="max-width: 300px; margin: auto;">
-                    <div class="card-body text-center">
-                        <h5 class="card-title">Tu Código QR</h5>
-                        <img src="data:image/png;base64,@Convert.ToBase64String(qrCode)" class="img-fluid" alt="QR Asistencia" />
-                        <p class="card-text small text-muted mt-2">Presentalo en la recepción para ingresar.</p>
-                        <button class="btn btn-outline-secondary btn-sm" @onclick="() => qrCode = Array.Empty<byte>()">Cerrar</button>
-                    </div>
-                </div>
-            }
-            *@
-
-            @if (!UsuarioSesion.EstaAutenticado())
-            {
+        @if (!UsuarioSesion.EstaAutenticado())
+        {
+            <div class="alert alert-warning">
                 <p>No estás logueado.</p>
                 <NavLink href="/login" class="btn btn-primary">Iniciar sesión</NavLink>
-            }
-            else
+            </div>
+        }
+        else
+        {
+            <div class="d-flex gap-2 mb-4">
+                <button class="btn @(tipoFiltroActivo == 1 ? "btn-primary" : "btn-outline-primary")" 
+                        @onclick="() => tipoFiltroActivo = 1">
+                    <i class="bi bi-calendar-event me-2"></i>Reservas Ocasionales
+                </button>
+                <button class="btn @(tipoFiltroActivo == 2 ? "btn-primary" : "btn-outline-primary")" 
+                        @onclick="() => tipoFiltroActivo = 2">
+                    <i class="bi bi-box-seam me-2"></i>Paquetes Adelantados
+                </button>
+            </div>
+
+            @if (tipoFiltroActivo == 1)
             {
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th>Actividad</th>
-                            <th>Fecha</th>
-                            <th>Horario</th>
-                            <th>Cancha</th>
-                            <th>Asistencia</th>
-                            <th>Estado</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @if (reservasActivas.Any())
-                        {
-                            @foreach (var r in reservasActivas)
+                <div class="table-responsive shadow-sm" style="background: white; border-radius: 8px;">
+                    <table class="table table-hover align-middle m-0">
+                        <thead>
+                            <tr>
+                                <th>Actividad</th>
+                                <th>Fecha</th>
+                                <th>Horario</th>
+                                <th>Cancha</th>
+                                <th>Precio Abonado</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (ObtenerReservasFiltradas().Any())
+                            {
+                                @foreach (var r in ObtenerReservasFiltradas())
+                                {
+                                    <tr>
+                                        <td>@r.Turno?.Actividad?.Nombre</td>
+                                        <td>@r.Turno?.Fecha.ToShortDateString()</td>
+                                        <td>@r.Turno?.HoraInicio hs</td>
+                                        <td>Cancha @r.Turno?.Cancha?.Numero</td>
+                                        <td><span class="badge bg-success-subtle text-success">$ @r.PrecioPagado</span></td>
+                                        <td>
+                                            <span class="badge @(r.Estado == EstadoReserva.Confirmado ? "bg-success" : "bg-warning text-dark")">
+                                                @r.Estado
+                                            </span>
+                                        </td>
+                                        <td>
+                                            @if (r.Estado == EstadoReserva.Reservado)
+                                            {
+                                                <button class="btn btn-success btn-sm me-1"
+                                                        @onclick="() => PagarSaldoRestante(r.Id)">
+                                                    <i class="bi bi-credit-card me-1"></i> Pagar Saldo (50%)
+                                                </button>
+                                            }
+
+                                            <button class="btn btn-primary btn-sm me-1"
+                                                    @onclick="() => GenerarQr(r.Id)"
+                                                    disabled="@(!PuedeGenerarQr(r))">
+                                                <i class="bi bi-qr-code"></i> Generar QR
+                                            </button>
+
+                                            @if (reservaSeleccionadaId == r.Id && qrCode != null && qrCode.Length > 0)
+                                            {
+                                                <div class="card shadow-sm my-4 border-primary" style="max-width: 300px; position: absolute; z-index: 100;">
+                                                    <div class="card-header bg-primary text-white text-center">Tu código de acceso</div>
+                                                    <div class="card-body text-center bg-white">
+                                                        <img src="data:image/png;base64,@Convert.ToBase64String(qrCode)" alt="QR Reserva" style="width: 200px;" />
+                                                        <p class="small text-muted mt-2">Presentá este código al ingresar</p>
+                                                        <button class="btn btn-outline-secondary btn-sm" @onclick="CerrarQr">Cerrar</button>
+                                                    </div>
+                                                </div>
+                                            }
+
+                                            <button class="btn btn-danger btn-sm"
+                                                    @onclick="() => Cancelar(r.Id)"
+                                                    disabled="@(!PuedeCancelar(r))">
+                                                Cancelar
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
                             {
                                 <tr>
-                                    <td>@r.Turno?.Actividad?.Nombre</td>
-                                    <td>@r.Turno?.Fecha.ToShortDateString()</td>
-                                    <td>@r.Turno?.HoraInicio</td>
-                                    <td>@r.Turno?.Cancha.Numero</td>
-                                    <td>@r.Asistencia</td>
-                                    <td>@r.Estado</td>
-
-                                <td>
-                                    <button class="btn btn-primary btn-sm me-1"
-                                    @onclick="() => GenerarQr(r.Id)" 
-                                    disabled="@(!PuedeGenerarQr(r))">
-                                        <i class="bi bi-qr-code"></i> Generar QR
-                                    </button>
-
-                                        @if (reservaSeleccionadaId == r.Id && qrCode != null && qrCode.Length > 0)
-                                        {
-                                            <div class="card shadow-sm my-4 border-primary" style="max-width: 300px; position: absolute; z-index: 100;">
-                                                <div class="card-header bg-primary text-white text-center">Tu código de acceso</div>
-                                                <div class="card-body text-center bg-white">
-                                                    <img src="data:image/png;base64,@Convert.ToBase64String(qrCode)" alt="QR Reserva" style="width: 200px;" />
-                                                    <p class="small text-muted mt-2">Presentá este código al ingresar</p>
-                                                    <button class="btn btn-outline-secondary btn-sm" @onclick="CerrarQr">Cerrar</button>
-                                                </div>
-                                            </div>
-                                        }
-
-                                        <button class="btn btn-danger btn-sm"
-                                        @onclick="() => Cancelar(r.Id)"
-                                        disabled="@(!PuedeCancelar(r))">
-                                            Cancelar
-                                        </button>
-                                    </td>
+                                    <td colspan="7" class="text-center py-4 text-muted">No registra reservas ocasionales activas.</td>
                                 </tr>
                             }
-                        }
-                        else
-                        {
-                            <tr>
-                                <td colspan="8" class="text-center py-4 text-muted">No registra reservas activas.</td>
-                            </tr>
-                        }
-                    </tbody
-                </table>
+                        </tbody>
+                    </table>
+                </div>
             }
-        </div>
+            else if (tipoFiltroActivo == 2)
+            {
+                <div class="p-0">
+                    @if (ObtenerPaquetesAdelantados().Any())
+                    {
+                        @foreach (var paquete in ObtenerPaquetesAdelantados())
+                        {
+                            <div class="card mb-3 border-primary shadow-sm" style="border-radius: 8px; overflow: hidden;">
+                                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center py-3">
+                                    <div>
+                                        <h5 class="mb-0 fw-bold">
+                                            <i class="bi bi-box-seam me-2"></i> Paquete: @paquete.NombreActividad
+                                        </h5>
+                                        <small class="opacity-75">Código de compra: @paquete.CodigoPaquete.ToString().Substring(0, 8)...</small>
+                                    </div>
+                                    <div class="d-flex gap-2">
+                                        <button class="btn btn-light btn-sm text-primary fw-bold" @onclick="() => AlternarDetallePaquete(paquete.CodigoPaquete)">
+                                            <i class="bi @(paqueteIdDesplegado == paquete.CodigoPaquete ? "bi-eye-slash-fill" : "bi-eye-fill") me-1"></i> 
+                                            @(paqueteIdDesplegado == paquete.CodigoPaquete ? "Ocultar reservas" : "Ver reservas")
+                                        </button>
+                                        
+                                        <button class="btn btn-warning btn-sm fw-bold text-dark" @onclick="() => RenovarPaquete(paquete.CodigoPaquete)">
+                                            <i class="bi bi-arrow-repeat me-1"></i> Renovar reserva
+                                        </button>
+                                    </div>
+                                </div>
+
+                                @if (paqueteIdDesplegado == paquete.CodigoPaquete)
+                                {
+                                    <div class="card-body bg-light p-0">
+                                        <div class="table-responsive">
+                                            <table class="table table-sm table-hover m-0 bg-white align-middle">
+                                                <thead class="table-secondary">
+                                                    <tr>
+                                                        <th class="ps-3">Día / Fecha</th>
+                                                        <th>Horario</th>
+                                                        <th>Cancha</th>
+                                                        <th>Precio Unitario</th>
+                                                        <th>Estado</th>
+                                                        <th class="text-end pe-3">Acciones</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach (var r in paquete.ReservasAsociadas.OrderBy(res => res.Turno?.Fecha))
+                                                    {
+                                                        <tr>
+                                                            <td class="ps-3 fw-bold text-primary">@r.Turno?.Fecha.ToString("dddd dd/MM/yyyy")</td>
+                                                            <td>@r.Turno?.HoraInicio hs</td>
+                                                            <td>Cancha @r.Turno?.Cancha?.Numero</td>
+                                                            <td>$ @r.PrecioPagado</td>
+                                                            <td>
+                                                                <span class="badge @(r.Estado == EstadoReserva.Confirmado ? "bg-success" : "bg-secondary")">
+                                                                    @r.Estado
+                                                                </span>
+                                                            </td>
+                                                            <td class="text-end pe-3 position-relative">
+                                                                <button class="btn btn-primary btn-sm me-1"
+                                                                        @onclick="() => GenerarQr(r.Id)" 
+                                                                        disabled="@(!PuedeGenerarQr(r))">
+                                                                    <i class="bi bi-qr-code"></i> QR
+                                                                </button>
+
+                                                                @if (reservaSeleccionadaId == r.Id && qrCode != null && qrCode.Length > 0)
+                                                                {
+                                                                    <div class="card shadow border-primary text-center p-2" style="position: absolute; right: 20px; top: 35px; z-index: 110; max-width: 220px;">
+                                                                        <img src="data:image/png;base64,@Convert.ToBase64String(qrCode)" alt="QR" class="img-fluid mx-auto" style="width: 130px;" />
+                                                                        <button class="btn btn-outline-secondary btn-xs mt-1 w-100" @onclick="CerrarQr">Cerrar</button>
+                                                                    </div>
+                                                                }
+
+                                                                <button class="btn btn-danger btn-sm"
+                                                                        @onclick="() => Cancelar(r.Id)"
+                                                                        disabled="@(!PuedeCancelar(r))">
+                                                                    Cancelar
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="card p-4 text-center text-muted bg-white shadow-sm" style="border-radius: 8px;">
+                            No registra paquetes adelantados activos.
+                        </div>
+                    }
+                </div>
+            }
+        }
     </div>
 </div>
-
 
 @if (!string.IsNullOrEmpty(error))
 {
     <div class="alert alert-info mt-3 shadow-sm">@error</div>
 }
 
-
-
-    
 @code {
-    List<Reserva>? reservasActivas;
+    private Guid? paqueteIdDesplegado = null;
 
+    public class PaqueteAgrupadoDTO
+    {
+        public Guid CodigoPaquete { get; set; }
+        public string NombreActividad { get; set; } = string.Empty;
+        public List<Reserva> ReservasAsociadas { get; set; } = new();
+    }
+
+    private IEnumerable<PaqueteAgrupadoDTO> ObtenerPaquetesAdelantados()
+    {
+        if (reservasActivas == null) return Enumerable.Empty<PaqueteAgrupadoDTO>();
+
+        return reservasActivas
+            .Where(r => r.TipoReserva == TipoReserva.Adelantado && r.CodigoPaqueteAdelantado.HasValue)
+            .GroupBy(r => r.CodigoPaqueteAdelantado!.Value)
+            .Select(g => new PaqueteAgrupadoDTO
+            {
+                CodigoPaquete = g.Key,
+                NombreActividad = g.First().Turno?.Actividad?.Nombre ?? "Clase Adelantada",
+                ReservasAsociadas = g.ToList()
+            });
+    }
+
+    private void AlternarDetallePaquete(Guid codigoPaquete)
+    {
+        if (paqueteIdDesplegado == codigoPaquete)
+            paqueteIdDesplegado = null;
+        else
+            paqueteIdDesplegado = codigoPaquete;
+    }
+
+    private void RenovarPaquete(Guid codigoPaquete)
+    {
+        Navigation.NavigateTo($"/renovar-reserva/{codigoPaquete}");
+    }
+
+    List<Reserva>? reservasActivas;
+    private int tipoFiltroActivo = 1; 
     private int? reservaSeleccionadaId; 
     private byte[] qrCode = Array.Empty<byte>();
     private string error = "";
@@ -122,15 +261,56 @@
     protected override async Task OnInitializedAsync()
     {
         error = "";
+        await CargarReservas();
+    }
+
+    private async Task CargarReservas()
+    {
         try
         {
-            reservasActivas = (await listarReservasUseCase.Ejecutar(UsuarioSesion.UsuarioActual.Id)).Where(r => r.Estado != EstadoReserva.Cancelado).ToList();
+            if (UsuarioSesion.UsuarioActual != null)
+            {
+                var resultado = await listarReservasUseCase.Ejecutar(UsuarioSesion.UsuarioActual.Id);
+                reservasActivas = resultado.Where(r => r.Estado != EstadoReserva.Cancelado).ToList();
+            }
         }
         catch (Exception ex)
         {
             error = ex.Message;
         }
+    }
 
+    // 3. Método para invocar el caso de uso y despachar a Mercado Pago
+    private async Task PagarSaldoRestante(int idReserva)
+    {
+        try
+        {
+            error = "";
+            string urlRedireccion = await CompletarPagoReservaCase.Ejecutar(idReserva);
+            
+            if (!string.IsNullOrEmpty(urlRedireccion))
+            {
+                // Navegación forzada (true) hacia el checkout pro externo de Mercado Pago
+                Navigation.NavigateTo(urlRedireccion, true);
+            }
+            else
+            {
+                error = "No se pudo generar la pasarela de pago en este momento.";
+            }
+        }
+        catch (Exception ex)
+        {
+            error = ex.Message;
+        }
+    }
+
+    private IEnumerable<Reserva> ObtenerReservasFiltradas()
+    {
+        if (reservasActivas == null) return Enumerable.Empty<Reserva>();
+
+        return tipoFiltroActivo == 1 
+            ? reservasActivas.Where(r => r.TipoReserva == TipoReserva.Ocasional)
+            : reservasActivas.Where(r => r.TipoReserva == TipoReserva.Adelantado);
     }
 
     async Task GenerarQr(int reservaId)
@@ -164,20 +344,13 @@
     {
         try
         {
-
             var (conDevolucion, monto) = await cancelarReservasUseCase.Ejecutar(idReserva);
-
 
             error = conDevolucion
                 ? $"Reserva cancelada exitosamente. Se ha generado una devolución de: ${monto}"
                 : "Reserva cancelada exitosamente. No corresponde devolución.";
 
-
-            if (UsuarioSesion.UsuarioActual != null)
-            {
-                var resultado = (await listarReservasUseCase.Ejecutar(UsuarioSesion.UsuarioActual.Id)).Where(r => r.Estado != EstadoReserva.Cancelado);
-                reservasActivas = resultado.ToList();
-            }
+            await CargarReservas();
             StateHasChanged();
         }
         catch (Exception ex)
@@ -188,7 +361,7 @@
 
     private bool PuedeGenerarQr(Reserva r)
     {
-        if (r.Estado != EstadoReserva.Confirmado)
+        if (r.Estado != EstadoReserva.Confirmado && r.Estado != EstadoReserva.Reservado)
             return false;
 
         if (r.Asistencia != Asistencia.Ausente)
@@ -198,20 +371,15 @@
             return false;
 
         var fechaHoraTurno = r.Turno.Fecha.ToDateTime(r.Turno.HoraInicio);
-
         return DateTime.Now >= fechaHoraTurno.AddMinutes(-15);
     }
 
     private bool PuedeCancelar(Reserva r)
     {
         if (r.Asistencia != Asistencia.Ausente)
-        {
             return false;
-        }
 
         var fechaHoraTurno = r.Turno.Fecha.ToDateTime(r.Turno.HoraInicio);
         return DateTime.Now < fechaHoraTurno;
     }
-
-    
 }

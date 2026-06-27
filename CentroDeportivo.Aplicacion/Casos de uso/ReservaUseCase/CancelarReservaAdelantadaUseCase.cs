@@ -57,21 +57,21 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
                 }
             }
 
-                if (aplicarSancion)
-                {
-                    usuario.TieneSancionDescuento = true;
-                }
+            if (aplicarSancion)
+            {
+                usuario.TieneSancionDescuento = true;
+            }
 
-                bool otorgaCredito = cumpleAnticipacion && !usuario.TieneSancionDescuento;
-                if (otorgaCredito)
-                {
-                    Credito credito = new Credito(idUsuario, turno.Id_Actividad);
-                    await repoCredito.AgregarAsync(credito);
-                }
+            bool otorgaCredito = cumpleAnticipacion && !usuario.TieneSancionDescuento;
+            if (otorgaCredito)
+            {
+                Credito credito = new Credito(idUsuario, turno.Id_Actividad);
+                await repoCredito.AgregarAsync(credito);
+            }
 
-                await repoReserva.ActualizarAsync(reserva);
-                await repoUsuario.ActualizarAsync(usuario);
-                await repoTurno.ActualizarAsync(turno);
+            await repoReserva.ActualizarAsync(reserva);
+            await repoUsuario.ActualizarAsync(usuario);
+            await repoTurno.ActualizarAsync(turno);
 
             string mensaje;
             if (aplicarSancion)
@@ -88,7 +88,7 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
                 }
                 else
                 {
- 
+
                     mensaje = !cumpleAnticipacion
                         ? "Clase cancelada fuera de término (menos de 48hs de anticipación). No se te otorga un credito."
                         : "Clase cancelada a tiempo, pero no se otorgó crédito por poseer una sanción vigente.";
@@ -96,6 +96,6 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
             }
 
             return (otorgaCredito, mensaje);
-            }
         }
     }
+}

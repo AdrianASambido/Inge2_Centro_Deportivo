@@ -12,6 +12,7 @@ namespace CentroDeportivo.Aplicacion.Interfaces
         Task AgregarAsync(Pago pago);
         Task<IEnumerable<Pago>> ObtenerTodosPorTurnoAsync(int idTurno);
         Task<Pago?> ObtenerPorReservaAsync(int idReserva);
+        Task<IEnumerable<Pago>> ObtenerTodosPorReservaAsync(int idReserva);
         Task<Pago?> ObtenerPorIdAsync (int  idPago);
         Task<Pago?> ObtenerPorPaqueteAsync(Guid codigo); //codigo guid
         Task<Pago?> ObtenerPorUsuarioAsync(int idUsuario);
@@ -19,7 +20,7 @@ namespace CentroDeportivo.Aplicacion.Interfaces
         Task<IEnumerable<Pago>> ObtenerTodosAsync();
         Task<decimal> ObtenerIngresosPorActividadAsync(int idActividad, DateOnly desde, DateOnly hasta);
         Task<decimal> ObtenerIngresosGeneralesAsync(DateOnly desde, DateOnly hasta);
-        
+
 
     }
 }

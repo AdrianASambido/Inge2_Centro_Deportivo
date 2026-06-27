@@ -102,6 +102,9 @@ builder.Services.AddScoped<RegistrarAsistenciaManualUseCase>();
 builder.Services.AddScoped<RegistrarAsistenciaQrUseCase>();
 builder.Services.AddScoped<GenerarQrUseCase>();
 builder.Services.AddScoped<ConfirmarPagoReservaUseCase>();
+builder.Services.AddScoped<IniciarReservaAdelantadaUseCase>();
+builder.Services.AddScoped<IniciarReservaOcasionalUseCase>();
+builder.Services.AddScoped <ConfirmarPagoRestanteReservaOcasionalUseCase>();
 
 builder.Services.AddScoped<CrearTurnoUseCase>();
 builder.Services.AddScoped<EditarTurnoUseCase>();
@@ -110,7 +113,6 @@ builder.Services.AddScoped<ListarTurnosUseCase>();
 builder.Services.AddScoped<ListarTurnosCalendarioUseCase>();
 builder.Services.AddScoped<ConsultarDisponibilidadUseCase>();
 builder.Services.AddScoped<EliminarInscriptoUseCase>();
-builder.Services.AddScoped<CancelarTurnoUseCase>();
 
 builder.Services.AddScoped<ConfirmarDevolucionUseCase>();
 builder.Services.AddScoped<ListarDevolucionesPendientesUseCase>();
@@ -145,7 +147,10 @@ builder.Services.AddScoped<Sesion>();
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents();
+    .AddInteractiveServerComponents(options =>
+    {
+        options.DisconnectedCircuitRetentionPeriod = TimeSpan.FromMinutes(10);
+    });
 
 var app = builder.Build();
 

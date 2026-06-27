@@ -37,7 +37,7 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ListaEsperaUseCase
                 Id_Usuario = idUsuario,
                 FechaInscripcion = DateTime.Now,
                 Estado = EstadoListaEspera.Esperando,
-                FechaNotificacion = null 
+                FechaNotificacion = null
             };
 
             await repoLista.AgregarAsync(nuevaInscripcion);

@@ -4,6 +4,7 @@
 @inject Sesion UsuarioSesion
 @inject NavigationManager Navegador
 @inject IUsuarioRepositorio UsuarioRepositorio
+@inject IJSRuntime JS
 @rendermode InteractiveServer
 
 <PageTitle>Iniciar Sesión</PageTitle>
@@ -51,6 +52,7 @@
         {
             var usuario = await IniciarSesionUseCase.ejecutar(datos.Correo, datos.Password);
             UsuarioSesion.IniciarSesion(usuario);
+            await JS.InvokeVoidAsync("cookieHelper.set", "userId", usuario.Id, 1); 
             UsuarioSesion.NotificarCambio();
 
             if (UsuarioSesion.esAdministrador() || (UsuarioSesion.esEmpleado() && !UsuarioSesion.UsuarioActual.DebeCambiarPassword))

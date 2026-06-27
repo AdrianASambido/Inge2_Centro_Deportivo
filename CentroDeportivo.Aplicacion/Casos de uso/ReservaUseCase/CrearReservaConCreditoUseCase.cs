@@ -45,7 +45,7 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
             reserva.TipoReserva = TipoReserva.Ocasional;
 
             await repoReserva.AgregarAsync(reserva);
-            await repoTurno.ActualizarAsync(turno);           
+            await repoTurno.ActualizarAsync(turno);
             await repoCredito.ActualizarAsync(creditoAConsumir);
         }
     }

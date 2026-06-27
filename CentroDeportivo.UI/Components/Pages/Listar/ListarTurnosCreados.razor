@@ -7,7 +7,6 @@
 @rendermode InteractiveServer
 @inject NavigationManager Navegador
 @inject ITurnoRepositorio TurnoRepositorio
-@inject CancelarTurnoUseCase EliminarTurnoUseCase
 @inject CrearTurnoUseCase CrearTurnoUseCase
 @inject ConsultarDisponibilidadUseCase ConsultarDisponibilidadUseCase
 @inject ListarActividadesUseCase ListarActividadesUseCase
@@ -280,8 +279,8 @@ else
                                             disabled="@(!PuedeRegistrarAsistencia(r))">
                                                 Registrar asistencia
                                             </button>
-                                            <button class="btn btn-sm btn-outline-secondary" @onclick="() => RegistrarPago(r.Id)"
-                                            disabled="@(r.Estado != EstadoReserva.PendienteDePago || yaPasoLaHora(r))">Confirmar pago</button>
+                                            <button class="btn btn-sm btn-outline-danger" @onclick="() => ConfirmarEliminacion(r.Id)"
+                                                disabled="@(yaPasoLaHora(r))">Eliminar</button>
                                         </td>
                                     </tr>
                                 }

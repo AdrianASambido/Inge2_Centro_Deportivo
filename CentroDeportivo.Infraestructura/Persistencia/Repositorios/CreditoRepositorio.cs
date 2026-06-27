@@ -36,7 +36,7 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
             throw new NotImplementedException();
         }
 
-        
+
         public async Task<IEnumerable<Credito?>> ObtenerDisponiblesAsync(int idUsuario, int idActividad)
         {
             return await contexto.Creditos.Include(c => c.Usuario)

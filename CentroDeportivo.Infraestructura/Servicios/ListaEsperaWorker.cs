@@ -12,7 +12,7 @@ namespace CentroDeportivo.Infraestructura.Servicios
     public class ListaEsperaWorker : BackgroundService
     {
         private readonly IServiceScopeFactory _scopeFactory;
-        private readonly TimeSpan _tiempoDePeriodo = TimeSpan.FromMinutes(1); 
+        private readonly TimeSpan _tiempoDePeriodo = TimeSpan.FromMinutes(1);
 
         public ListaEsperaWorker(IServiceScopeFactory scopeFactory)
         {
@@ -21,7 +21,7 @@ namespace CentroDeportivo.Infraestructura.Servicios
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-   
+
             while (!stoppingToken.IsCancellationRequested)
             {
                 try
@@ -30,7 +30,7 @@ namespace CentroDeportivo.Infraestructura.Servicios
                 }
                 catch (Exception ex)
                 {
- 
+
                     Console.WriteLine($"Error en el Worker de Lista de Espera: {ex.Message}");
                 }
 
@@ -68,11 +68,11 @@ namespace CentroDeportivo.Infraestructura.Servicios
 
                 if (siguienteEnFila != null)
                 {
-      
+
                     siguienteEnFila.Estado = EstadoListaEspera.Notificado;
                     siguienteEnFila.FechaNotificacion = ahora;
 
-     
+
                     await emailServicio.EnviarAvisoVacanteListaEsperaAsync(siguienteEnFila.Usuario.Email, turno!);
                     await repoLista.ActualizarAsync(siguienteEnFila);
 
@@ -80,7 +80,7 @@ namespace CentroDeportivo.Infraestructura.Servicios
                 }
                 else
                 {
-  
+
                     if (turno != null)
                     {
                         turno.CupoDisponible++;

@@ -24,7 +24,7 @@ namespace CentroDeportivo.Aplicacion.Entidades
             this.Id_Actividad = idActividad;
             this.FechaGeneracion = DateTime.Now;
             this.FechaVencimiento = this.FechaGeneracion.AddDays(30);
-            this.Estado = EstadoCredito.Disponible;      
+            this.Estado = EstadoCredito.Disponible;
         }
 
     }
