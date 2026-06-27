@@ -158,15 +158,14 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
             return new ReporteIndicesActividadDTO(total, asistencias, inasistencias, canceladas);
         }
 
-        public async Task<IEnumerable<HistorialUsuarioActividadDTO>> ObtenerTotalesPorUsuarioAsync(int idUsuario, DateOnly? desde=null, DateOnly? hasta=null)
+        public async Task<IEnumerable<HistorialUsuarioActividadDTO>> ObtenerTotalesPorUsuarioAsync(int idUsuario, DateOnly? desde = null, DateOnly? hasta = null)
         {
             var reservas = await contexto.Reservas
                            .Include(r => r.Turno)
                            .ThenInclude(t => t.Actividad)
                            .Where(r => r.Id_Usuario == idUsuario
                                  && r.Turno != null
-                                 && r.Turno.Estado != EstadoTurno.Cancelado
-                                 && r.Turno.Estado == EstadoTurno.Finalizado
+                                 && (r.Turno.Estado == EstadoTurno.Finalizado || r.Estado == EstadoReserva.Cancelado)
                                  && (desde == null || r.Turno.Fecha >= desde.Value)
                                  && (hasta == null || r.Turno.Fecha <= hasta.Value))
                            .ToListAsync();
@@ -176,12 +175,16 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
                             {
                                 var primeraReserva = grupo.First();
                                 string nombreActividad = primeraReserva.Turno.Actividad.Nombre;
+
                                 int asistencias = grupo.Count(r => r.Estado != EstadoReserva.Cancelado && r.Asistencia == Asistencia.Presente);
                                 int inasistencias = grupo.Count(r => r.Estado != EstadoReserva.Cancelado && r.Asistencia == Asistencia.Ausente);
+
                                 int cancelaciones = grupo.Count(r => r.Estado == EstadoReserva.Cancelado);
+
                                 return new HistorialUsuarioActividadDTO(nombreActividad, asistencias, inasistencias, cancelaciones);
                             })
                             .ToList();
+
             return historial;
         }
 
