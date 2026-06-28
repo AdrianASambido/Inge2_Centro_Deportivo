@@ -107,6 +107,7 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
             {
                 query = query.Where(r =>
                     r.Turno!.Estado != EstadoTurno.Finalizado &&
+                    r.Turno.Estado != EstadoTurno.Cancelado &&
                     r.Estado != EstadoReserva.Cancelado
                 );
             }

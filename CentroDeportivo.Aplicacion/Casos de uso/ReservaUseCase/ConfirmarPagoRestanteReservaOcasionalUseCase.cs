@@ -4,7 +4,7 @@ using System;
 using System.Threading.Tasks;
 
 namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
-{
+{//este se lo llama despeus de pagar en mercado pago
     public class ConfirmarPagoRestanteReservaOcasionalUseCase(
         IReservaRepositorio repoReserva,
         IPagoRepositorio repoPago

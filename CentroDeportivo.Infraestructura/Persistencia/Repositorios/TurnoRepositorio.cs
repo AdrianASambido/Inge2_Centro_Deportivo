@@ -37,13 +37,12 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
         //para el empleado 
         public async Task<IEnumerable<Turno>> BuscarTurnosAsync(DateOnly? fecha, int? actividadId, int? profeId, int? canchaId, EstadoTurno? estado)
         {
-            var query = contexto.Turnos.Where(t => t.Estado != EstadoTurno.Finalizado)
+            var query = contexto.Turnos.Where(t => t.Estado != EstadoTurno.Finalizado && t.Estado != EstadoTurno.Cancelado)
                 .Include(t => t.Actividad)
                 .Include(t => t.Profesor)
                 .Include(t => t.Cancha)
                 .AsQueryable(); // encadena filtros
 
-            // Filtros dinámicos, solo se aplican si el empleado los elige
             if (fecha.HasValue)
                 query = query.Where(t => t.Fecha == fecha.Value);
 
@@ -74,6 +73,8 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
                 .Include(t => t.Actividad)
                 .Include(t => t.Profesor)
                 .Include(t => t.Cancha)
+                .Include(t => t.Reservas)
+                    .ThenInclude(r => r.Usuario) 
                 .FirstOrDefaultAsync(t => t.Id == id);
         }
 
@@ -91,7 +92,7 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
             var reservasCliente = await contexto.Reservas
                 .Where(r => r.Id_Usuario == usuarioId &&
                             r.Turno.Fecha == fecha &&
-                            (r.Estado == EstadoReserva.Confirmado || r.Estado == EstadoReserva.PendienteDePago))
+                            (r.Estado == EstadoReserva.Confirmado || r.Estado == EstadoReserva.PendienteDePago || r.Estado == EstadoReserva.Reservado))
                 .Select(r => new { r.Turno.HoraInicio, r.Turno.HoraFin })
                 .ToListAsync();
 

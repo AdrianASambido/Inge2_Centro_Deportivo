@@ -9,6 +9,9 @@ public class Sesion
     public void IniciarSesion(Usuario u)
         => UsuarioActual = u;
 
+    public void RestaurarSesion(Usuario u)
+        => UsuarioActual = u;
+
     public bool esCliente()
         => UsuarioActual != null && UsuarioActual.Rol == Rol.Cliente;
     public bool esAdministrador()
