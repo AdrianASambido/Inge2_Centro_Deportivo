@@ -11,12 +11,13 @@ namespace CentroDeportivo.Aplicacion.Entidades
         public int Id { get; private set; }
         public int Numero { get; set; }
         public int Capacidad { get; set; }
-        public bool Existe { get; set; }
+        public bool Existe { get; set; } = true;
 
         public Cancha(int numero, int capacidad)
         {
             Numero = numero;
             Capacidad = capacidad;
+           
         }
 
         public Cancha() { }

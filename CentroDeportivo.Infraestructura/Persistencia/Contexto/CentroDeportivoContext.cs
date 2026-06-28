@@ -15,7 +15,6 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Contexto
         {
         }
 
-        // Definimos las tablas
         public DbSet<Usuario> Usuarios { get; set; }
         public DbSet<Reserva> Reservas { get; set; }
         public DbSet<Turno> Turnos { get; set; }
