@@ -76,6 +76,26 @@ builder.Services.AddScoped<RecuperarContraseniaUseCase>();
 builder.Services.AddScoped<ListarEmpleadosUseCase>();
 builder.Services.AddScoped<RestablecerContraseniaUseCase>();
 
+//
+builder.Services.AddScoped<CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase.CrearReservaListaEsperaUseCase>();
+builder.Services.AddScoped<CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase.IniciarPagoListaEsperaUseCase>();
+builder.Services.AddScoped<CentroDeportivo.Aplicacion.Casos_de_uso.ListaEsperaUseCase.ConsultarListaEsperaUseCase>();
+builder.Services.AddScoped<CentroDeportivo.Aplicacion.Casos_de_uso.ListaEsperaUseCase.AbandonarListaEsperaUseCase>();
+builder.Services.AddScoped<IListaDeEsperaRepositorio, ListaDeEsperaRepositorio>();
+// Faltan estos registros:
+builder.Services.AddScoped<IPagoRepositorio, PagoRepositorio>();
+builder.Services.AddScoped<IPagoServicio, MercadoPagoServicio>();
+builder.Services.AddScoped<IPDFServicio, PdfServicio>();
+builder.Services.AddScoped<IListaDeEsperaRepositorio, ListaDeEsperaRepositorio>();
+builder.Services.AddScoped<CentroDeportivo.Aplicacion.Casos_de_uso.ListaEsperaUseCase.ConsultarListaEsperaUseCase>();
+builder.Services.AddScoped<CentroDeportivo.Aplicacion.Casos_de_uso.ListaEsperaUseCase.AbandonarListaEsperaUseCase>();
+builder.Services.AddScoped<CentroDeportivo.Aplicacion.Casos_de_uso.PagoUseCase.ConsultarPagosUseCase>();
+builder.Services.AddScoped<CentroDeportivo.Aplicacion.Casos_de_uso.PagoUseCase.DescargarComprobanteUseCase>();
+builder.Services.AddScoped<CompletarPagoReservaOcasionalUseCase>();
+builder.Services.AddScoped<IniciarPagoListaEsperaUseCase>();
+builder.Services.AddScoped<CrearReservaListaEsperaUseCase>();
+builder.Services.AddScoped<ConfirmarPagoRestanteReservaOcasionalUseCase>();
+
 builder.Services.AddScoped<UsuarioValidadorBase, UsuarioEmpleadoValidador>();
 
 builder.Services.AddScoped<CrearActividadUseCase>();
