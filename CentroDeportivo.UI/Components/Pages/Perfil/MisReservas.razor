@@ -216,8 +216,12 @@
 }
 
 @code {
-    private Guid? paqueteIdDesplegado = null;
+    [SupplyParameterFromQuery] private bool? pagoExitoso { get; set; }
+    [SupplyParameterFromQuery] private int? reservaId { get; set; }
+    [SupplyParameterFromQuery] private string? tipo { get; set; }
+    [SupplyParameterFromQuery(Name = "payment_id")] private string? paymentId { get; set; }
 
+    private Guid? paqueteIdDesplegado = null;
     public class PaqueteAgrupadoDTO
     {
         public Guid CodigoPaquete { get; set; }
@@ -262,6 +266,22 @@
     protected override async Task OnInitializedAsync()
     {
         error = "";
+
+        if (pagoExitoso == true
+            && reservaId.HasValue
+            && tipo == "confirmarOcasional"
+            && !string.IsNullOrEmpty(paymentId))
+        {
+            try
+            {
+                await ConfirmarPagoRestanteReservaOcasionalUseCase.Ejecutar(reservaId.Value, paymentId);
+            }
+            catch (Exception ex)
+            {
+                error = ex.Message;
+            }
+        }
+
         await CargarReservas();
     }
 
