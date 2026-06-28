@@ -142,11 +142,14 @@ else
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender && volviMP && UsuarioSesion.UsuarioActual is null && UserId.HasValue)
+        if (firstRender && volviMP)
         {
-            var usuario = await ObtenerUsuarioPorId.Ejecutar(UserId.Value);
-            if (usuario != null)
-                UsuarioSesion.RestaurarSesion(usuario);
+            if (UsuarioSesion.UsuarioActual is null && UserId.HasValue)
+            {
+                var usuario = await ObtenerUsuarioPorId.Ejecutar(UserId.Value);
+                if (usuario != null)
+                    UsuarioSesion.RestaurarSesion(usuario);
+            }
 
             await ProcesarVueltaDeMP();
             StateHasChanged();
@@ -155,33 +158,31 @@ else
 
     protected override async Task OnParametersSetAsync()
     {
-        if (UsuarioSesion.UsuarioActual is null) return;
+        // siempre parseamos los parámetros de fecha y actividad si vienen
+        if (ActividadId is > 0 && !string.IsNullOrWhiteSpace(Fecha)
+            && DateOnly.TryParse(Fecha, CultureInfo.InvariantCulture, out var fp))
+        {
+            parametrosOk = true;
+            fechaElegida = fp;
+            fechaFormateada = fechaElegida.Value.ToString("dddd d MMMM yyyy", new CultureInfo("es-AR"));
+        }
 
         if (UsuarioSesion.UsuarioActual is null) return;
         if (volviMP) return; // lo maneja OnAfterRenderAsync
-
-       
 
         creditosUsuario = (await ConsultarCreditosUseCase.Ejecutar(UsuarioSesion.UsuarioActual!.Id)).ToList();
         procesando = true;
         mensajeError = mensajeExito = null;
 
-        if (UsuarioSesion.UsuarioActual is null) return;
-
-        if (ActividadId is not > 0 || string.IsNullOrWhiteSpace(Fecha) || !DateOnly.TryParse(Fecha, CultureInfo.InvariantCulture, out var fp))
+        if (!parametrosOk)
         {
-            parametrosOk = false;
             procesando = false;
             return;
         }
 
-        parametrosOk = true;
-        fechaElegida = fp;
-        fechaFormateada = fechaElegida.Value.ToString("dddd d MMMM yyyy", new CultureInfo("es-AR"));
-
         try
         {
-            var act = await ObtenerActividadPorId.Ejecutar(ActividadId.Value);
+            var act = await ObtenerActividadPorId.Ejecutar(ActividadId!.Value);
             actividadNombre = act?.Nombre ?? "Actividad";
             await CargarTurnos();
         }
@@ -199,6 +200,13 @@ else
     {
         if (!volviMP) return;
 
+        // cargar nombre de actividad para que la vista lo muestre
+        if (ActividadId.HasValue)
+        {
+            var act = await ObtenerActividadPorId.Ejecutar(ActividadId.Value);
+            actividadNombre = act?.Nombre ?? "Actividad";
+        }
+
         if (pagoExitoso)
         {
             var nuevaReserva = new Reserva()
@@ -213,6 +221,7 @@ else
         else
         {
             mensajeError = "El pago no se pudo realizar. Intente nuevamente.";
+            await CargarTurnos();
         }
     }
 

@@ -12,7 +12,7 @@
 <div class="container py-5">
     <div class="row justify-content-center">
         <div class="col-12 col-md-10 col-lg-7">
-            
+
             <div class="text-center mb-4">
                 <h1 class="fw-bold text-primary">Mi Perfil</h1>
                 <p class="text-muted">Gestiona la información y el historial de tu cuenta</p>
@@ -59,14 +59,14 @@
                 </div>
 
                 <div class="card border-0 shadow-sm bg-white overflow-hidden" style="border-radius: 16px;">
-                    
+
                     @if (pestanaActiva == 1)
                     {
                         <div class="card-body p-4 p-md-5">
                             <h4 class="card-title fw-bold text-dark mb-4 text-center text-md-start">
                                 <i class="bi bi-person-lines-fill me-2 text-primary"></i>Datos Personales
                             </h4>
-                            
+
                             <div class="list-group list-group-flush mb-4">
                                 <div class="list-group-item border-0 px-0 d-flex justify-content-between align-items-center">
                                     <span class="text-muted"><i class="bi bi-person me-2"></i>Nombre</span>
@@ -92,7 +92,7 @@
                                 <NavLink class="btn btn-warning px-4 shadow-sm text-dark fw-bold" href="@($"/editar-usr/{UsuarioSesion.UsuarioActual.Id}")" style="border-radius: 8px;">
                                     <i class="bi bi-pencil-square me-2"></i>Editar perfil
                                 </NavLink>
-                                
+
                                 <NavLink class="btn btn-outline-secondary px-4 shadow-sm" href="@($"/cambiar-contrasenia/{UsuarioSesion.UsuarioActual.Id}")" style="border-radius: 8px;">
                                     <i class="bi bi-shield-lock me-2"></i>Contraseña
                                 </NavLink>
@@ -109,7 +109,7 @@
                             <h4 class="card-title fw-bold text-dark mb-4 text-center text-md-start">
                                 <i class="bi bi-clock-history me-2 text-primary"></i>Historial de Actividad
                             </h4>
-                            
+
                             @if (historial != null && historial.Any())
                             {
                                 <div class="table-responsive border rounded-3 bg-white">
@@ -151,13 +151,13 @@
                             <h4 class="card-title fw-bold text-dark mb-4 text-center text-md-start">
                                 <i class="bi bi-receipt me-2 text-primary"></i>Comprobantes de Pago
                             </h4>
-                            
+
                             <div class="text-center py-5 text-muted bg-light rounded-3 border border-dashed">
                                 <i class="bi bi-credit-card-2-back fs-2 text-primary mb-3 d-block"></i>
                                 <p class="mb-0">Aquí se listarán tus facturas y órdenes de Mercado Pago.</p>
                                 <small class="text-muted">Próximamente disponible para impresión.</small>
                             </div>
-                        </div>  
+                        </div>
                     }
                     else if (pestanaActiva == 4)
                     {
@@ -204,10 +204,10 @@
             historial = resultado?.ToList() ?? new List<HistorialUsuarioActividadDTO>();
 
             var creditos = await ConsultarCreditosUseCase.Ejecutar(UsuarioSesion.UsuarioActual.Id);
-            
+
             if (creditos != null)
             {
-                // Filtramos por el Enum de EstadoCredito y la fecha de vencimiento vigente
+
                 cantidadCreditosDisponibles = creditos
                     .Count(c => c.Estado == EstadoCredito.Disponible && c.FechaVencimiento >= DateTime.Now);
             }
@@ -230,8 +230,8 @@
 
     void CerrarSesion()
     {
-        UsuarioSesion.CerrarSesion(); 
-        UsuarioSesion.NotificarCambio(); 
+        UsuarioSesion.CerrarSesion();
+        UsuarioSesion.NotificarCambio();
         Navegador.NavigateTo("/Login", true);
     }
 }

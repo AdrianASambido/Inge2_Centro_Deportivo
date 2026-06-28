@@ -1,6 +1,7 @@
 ﻿@page "/Turno/adelantada"
 @rendermode InteractiveServer
 @inject NavigationManager Navegador
+@inject IJSRuntime JS
 @using System.Globalization
 @inject Sesion UsuarioSesion
 @inject ObtenerClasesAdelantadasDisponiblesUseCase ObtenerClasesAdelantadasDisponiblesUseCase
@@ -8,6 +9,7 @@
 @inject CrearReservaAdelantadaUseCase CrearReservaAdelantadaUseCase
 @inject IniciarReservaAdelantadaUseCase IniciarReservaAdelantadaUseCase
 @inject ObtenerTurnoId ObtenerTurnoPorId
+@inject ObtenerUsuarioPorId ObtenerUsuarioPorId
 
 <PageTitle>Horarios del mes</PageTitle>
 
@@ -39,6 +41,14 @@ else
             <div class="alert alert-danger shadow-sm">@mensajeError</div>
         }
 
+        <div class="mb-3">
+            <label class="form-label fw-bold">Mes a reservar</label>
+            <select class="form-select" style="max-width: 250px;" @bind="mesSeleccionado" @bind:after="CargarTurnos">
+                <option value="@MesActual()">@NombreMes(DateTime.Now.Year, DateTime.Now.Month)</option>
+                <option value="@MesProximo()">@NombreMes(AnioProximo(), NumeroMesProximo())</option>
+            </select>
+        </div>
+
         <div class="row">
             <div class="col-12 mb-4">
                 <div class="card shadow-sm">
@@ -49,33 +59,16 @@ else
                             @foreach (var clase in clasesDisponibles)
                             {
                                 var t = clase.TurnoRepresentativo;
-
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
                                     <div>
                                         <span class="fw-bold">@Transformar()</span>
-
                                         <span class="fw-bold">
-                                            @t.HoraInicio.ToString("HH:mm")
-                                            –
-                                            @t.HoraFin.ToString("HH:mm")
+                                            @t.HoraInicio.ToString("HH:mm") – @t.HoraFin.ToString("HH:mm")
                                         </span>
-
-                                        <div class="small text-muted">
-                                            Profesor: @t.Profesor.Nombre
-                                        </div>
-
-                                        <div class="small text-muted">
-                                            Cupo mínimo disponible:
-                                            @clase.CupoMinimoDisponible
-                                        </div>
-
-                                        <div class="small text-muted">
-                                            Cantidad de clases:
-                                            @clase.TurnosDelMes.Count
-                                        </div>
-
+                                        <div class="small text-muted">Profesor: @t.Profesor.Nombre</div>
+                                        <div class="small text-muted">Cupo mínimo disponible: @clase.CupoMinimoDisponible</div>
+                                        <div class="small text-muted">Cantidad de clases: @clase.TurnosDelMes.Count</div>
                                     </div>
-
                                     <button class="btn btn-success"
                                             disabled="@procesando"
                                             @onclick="() => Reservar(clase)">
@@ -87,7 +80,7 @@ else
                         else
                         {
                             <li class="list-group-item text-center py-4 text-muted">
-                                No hay turnos disponibles para reservar en esta fecha.
+                                No hay turnos disponibles para reservar en este mes.
                             </li>
                         }
                     </ul>
@@ -98,88 +91,94 @@ else
         <button type="button" class="btn btn-secondary mt-2" @onclick="VolverTurnos">Volver a turnos</button>
     </div>
 }
+
 @code {
     [SupplyParameterFromQuery] public int? ActividadId { get; set; }
     [SupplyParameterFromQuery] public int? DiaSemana { get; set; }
-
-    private string NombreDia(DayOfWeek dia)
-    {
-        var nombre = CultureInfo.GetCultureInfo("es-AR").DateTimeFormat.GetDayName(dia);
-        return char.ToUpper(nombre[0]) + nombre[1..];
-    }
-
-    private string Transformar()
-    {
-        var dia = (DayOfWeek)DiaSemana.Value;
-        return NombreDia(dia);
-    }
+    [SupplyParameterFromQuery] public bool pagoExitoso { get; set; }
+    [SupplyParameterFromQuery] public bool volviMP { get; set; }
+    [SupplyParameterFromQuery(Name = "payment_id")] public string? PaymentId { get; set; }
+    [SupplyParameterFromQuery] public string? turnosId { get; set; }
+    [SupplyParameterFromQuery] public int? UserId { get; set; }
+    [SupplyParameterFromQuery] public int? anio { get; set; }
+    [SupplyParameterFromQuery] public int? mes { get; set; }
 
     private bool parametrosOk;
     private string actividadNombre = "";
     private bool procesando;
     private string? mensajeExito;
     private string? mensajeError;
-
-    private ClaseAdelantada? seleccion;
     private List<ClaseAdelantada> clasesDisponibles = new();
-    [SupplyParameterFromQuery] public bool pagoExitoso { get; set; }
-    [SupplyParameterFromQuery] public bool volviMP { get; set; }
-    [SupplyParameterFromQuery] public string? payment_id { get; set; }
-    [SupplyParameterFromQuery] public string? turnosId { get; set; }
+
+    // mes seleccionado: formato "yyyy-MM"
+    private string mesSeleccionado = $"{DateTime.Now.Year}-{DateTime.Now.Month:D2}";
+
+    // helpers de mes
+    private string MesActual() => $"{DateTime.Now.Year}-{DateTime.Now.Month:D2}";
+    private string MesProximo() => $"{AnioProximo()}-{NumeroMesProximo():D2}";
+    private int NumeroMesProximo() => DateTime.Now.Month == 12 ? 1 : DateTime.Now.Month + 1;
+    private int AnioProximo() => DateTime.Now.Month == 12 ? DateTime.Now.Year + 1 : DateTime.Now.Year;
+    private string NombreMes(int anio, int mes)
+    {
+        var nombre = new DateTime(anio, mes, 1).ToString("MMMM yyyy", new CultureInfo("es-AR"));
+        return char.ToUpper(nombre[0]) + nombre[1..];
+    }
+    private (int anio, int mes) ParsearMes()
+    {
+        var partes = mesSeleccionado.Split('-');
+        return (int.Parse(partes[0]), int.Parse(partes[1]));
+    }
+
+    private string NombreDia(DayOfWeek dia)
+    {
+        var nombre = CultureInfo.GetCultureInfo("es-AR").DateTimeFormat.GetDayName(dia);
+        return char.ToUpper(nombre[0]) + nombre[1..];
+    }
+    private string Transformar()
+    {
+        if (DiaSemana is null) return "";
+        return NombreDia((DayOfWeek)DiaSemana.Value);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && volviMP)
+        {
+            if (UsuarioSesion.UsuarioActual is null && UserId.HasValue)
+            {
+                var usuario = await ObtenerUsuarioPorId.Ejecutar(UserId.Value);
+                if (usuario != null)
+                    UsuarioSesion.RestaurarSesion(usuario);
+            }
+
+            await ProcesarVueltaDeMP();
+            StateHasChanged();
+        }
+    }
 
     protected override async Task OnParametersSetAsync()
     {
-        if (volviMP)
-        {
-            if (pagoExitoso)
-            {
-                var idsTurnos = turnosId?
-                    .Split(',', StringSplitOptions.RemoveEmptyEntries)
-                    .Select(int.Parse)
-                    .ToList() ?? new();
+        // parseamos parámetros siempre para que parametrosOk sea correcto al volver de MP
+        if (ActividadId is > 0 && DiaSemana is >= 0 and <= 6)
+            parametrosOk = true;
+        else
+            parametrosOk = false;
 
-                var turnos = new List<Turno>();
-
-                foreach (var id in idsTurnos)
-                {
-                    var turno = await ObtenerTurnoPorId.Ejecutar(id);
-
-                    if (turno != null)
-                        turnos.Add(turno);
-                }
-
-                await CrearReservaAdelantadaUseCase.Ejecutar(
-                    UsuarioSesion.UsuarioActual!.Id,
-                    turnos,
-                    payment_id!);
-
-                mensajeExito = "Pago y reserva realizados con éxito.";
-
-                await CargarTurnos();
-            }
-            else
-            {
-                mensajeError = "El pago no se pudo realizar. Intente nuevamente.";
-            }
-        }
+        if (UsuarioSesion.UsuarioActual is null) return;
+        if (volviMP) return; // lo maneja OnAfterRenderAsync
 
         procesando = true;
         mensajeError = mensajeExito = null;
 
-        if (UsuarioSesion.UsuarioActual is null) return;
-
-        if (ActividadId is not > 0 || DiaSemana is null || DiaSemana < 0 || DiaSemana > 6)
+        if (!parametrosOk)
         {
-            parametrosOk = false;
             procesando = false;
             return;
         }
 
-        parametrosOk = true;
-
         try
         {
-            var act = await ObtenerActividadPorId.Ejecutar(ActividadId.Value);
+            var act = await ObtenerActividadPorId.Ejecutar(ActividadId!.Value);
             actividadNombre = act?.Nombre ?? "Actividad";
             await CargarTurnos();
         }
@@ -193,19 +192,59 @@ else
         }
     }
 
+    private async Task ProcesarVueltaDeMP()
+    {
+        if (!volviMP) return;
+
+        if (ActividadId.HasValue)
+        {
+            var act = await ObtenerActividadPorId.Ejecutar(ActividadId.Value);
+            actividadNombre = act?.Nombre ?? "Actividad";
+        }
+
+        if (pagoExitoso)
+        {
+            var idsTurnos = turnosId?
+                .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                .Select(int.Parse)
+                .ToList() ?? new();
+
+            var turnos = new List<Turno>();
+            foreach (var id in idsTurnos)
+            {
+                var turno = await ObtenerTurnoPorId.Ejecutar(id);
+                if (turno != null)
+                    turnos.Add(turno);
+            }
+
+            await CrearReservaAdelantadaUseCase.Ejecutar(
+                UsuarioSesion.UsuarioActual!.Id,
+                turnos,
+                PaymentId!);
+
+            mensajeExito = "Pago y reserva realizados con éxito.";
+            await CargarTurnos();
+        }
+        else
+        {
+            mensajeError = "El pago no se pudo realizar. Intente nuevamente.";
+            await CargarTurnos();
+        }
+    }
 
     private async Task CargarTurnos()
     {
-        if (!parametrosOk || DiaSemana is null || ActividadId is null)
-            return;
+        if (!parametrosOk || DiaSemana is null || ActividadId is null) return;
 
-        var idUsuario = UsuarioSesion.UsuarioActual!.Id;
+        int anioBusqueda = anio ?? int.Parse(mesSeleccionado.Split('-')[0]);
+        int mesBusqueda = mes ?? int.Parse(mesSeleccionado.Split('-')[1]);
+
+        mesSeleccionado = $"{anioBusqueda}-{mesBusqueda:D2}";
+
         var dia = (DayOfWeek)DiaSemana.Value;
-        clasesDisponibles =
-            (await ObtenerClasesAdelantadasDisponiblesUseCase.Ejecutar(
-                ActividadId.Value,
-                dia,
-                idUsuario)).ToList();
+
+        clasesDisponibles = (await ObtenerClasesAdelantadasDisponiblesUseCase.Ejecutar(
+            ActividadId.Value, dia, UsuarioSesion.UsuarioActual!.Id, anioBusqueda, mesBusqueda)).ToList();
     }
 
     private async Task Reservar(ClaseAdelantada clase)
@@ -219,21 +258,15 @@ else
                 UsuarioSesion.UsuarioActual!.Id,
                 clase.TurnosDelMes
             );
-
             Navegador.NavigateTo(urlPagoMercadoPago, forceLoad: true);
         }
         catch (Exception ex)
         {
- 
             mensajeError = ex.Message;
             procesando = false;
             StateHasChanged();
         }
     }
 
-    private void VolverTurnos()
-    {
-        Navegador.NavigateTo("/Turnos");
-    }
-
+    private void VolverTurnos() => Navegador.NavigateTo("/Turnos");
 }

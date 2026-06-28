@@ -114,6 +114,13 @@
                         </select>
                     </div>
                 </div>
+                <div class="mb-3">
+                    <label class="form-label">Mes</label>
+                    <select class="form-select" @bind="mesSeleccionado">
+                        <option value="@MesActual()">@NombreMes(DateTime.Now.Year, DateTime.Now.Month)</option>
+                        <option value="@MesProximo()">@NombreMes(AnioProximo(), NumeroMesProximo())</option>
+                    </select>
+                </div>
             </div>
 
             @if (int.TryParse(SeleccionActividad, out var aid2) && aid2 > 0)
@@ -142,6 +149,18 @@
     private string SeleccionActividad = "";
     private bool mostrarCalendarioMini;
     private bool mostrarCalendarioCompleto;
+
+    private string mesSeleccionado = $"{DateTime.Now.Year}-{DateTime.Now.Month:D2}";
+
+    private string MesActual() => $"{DateTime.Now.Year}-{DateTime.Now.Month:D2}";
+    private string MesProximo() => $"{AnioProximo()}-{NumeroMesProximo():D2}";
+    private int NumeroMesProximo() => DateTime.Now.Month == 12 ? 1 : DateTime.Now.Month + 1;
+    private int AnioProximo() => DateTime.Now.Month == 12 ? DateTime.Now.Year + 1 : DateTime.Now.Year;
+    private string NombreMes(int anio, int mes)
+    {
+        var nombre = new DateTime(anio, mes, 1).ToString("MMMM yyyy", new CultureInfo("es-AR"));
+        return char.ToUpper(nombre[0]) + nombre[1..];
+    }
 
     private DateOnly ReferenciaMes = new(DateTime.Today.Year, DateTime.Today.Month, 1);
 
@@ -238,7 +257,11 @@
 
     private void IrAActividad(int actividadId, DayOfWeek diaSemana)
     {
-        Navegador.NavigateTo($"/Turno/adelantada?actividadId={actividadId}&diaSemana={(int)diaSemana}");
+        var partes = mesSeleccionado.Split('-');
+        var anio = partes[0];
+        var mes = partes[1];
+
+        Navegador.NavigateTo($"/Turno/adelantada?actividadId={actividadId}&diaSemana={(int)diaSemana}&anio={anio}&mes={mes}");
     }
 
     private RenderFragment TablaCalendario(bool esMini, int actividadParaNavegar) => __builder =>

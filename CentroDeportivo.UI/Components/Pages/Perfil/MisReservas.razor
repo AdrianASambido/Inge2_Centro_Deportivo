@@ -5,7 +5,8 @@
 @inject Sesion UsuarioSesion
 @inject ListarReservasUseCase listarReservasUseCase
 @inject CancelarReservaUseCase cancelarReservasUseCase
-@inject CompletarPagoReservaOcasionalUseCase CompletarPagoReservaCase // <-- 1. Inyectamos el caso de uso
+@inject CompletarPagoReservaOcasionalUseCase CompletarPagoReservaCase 
+@inject ConfirmarPagoRestanteReservaOcasionalUseCase ConfirmarPagoRestanteReservaOcasionalUseCase
 @inject NavigationManager Navigation
 
 <PageTitle>Mis Reservas</PageTitle>
@@ -24,11 +25,11 @@
         else
         {
             <div class="d-flex gap-2 mb-4">
-                <button class="btn @(tipoFiltroActivo == 1 ? "btn-primary" : "btn-outline-primary")" 
+                <button class="btn @(tipoFiltroActivo == 1 ? "btn-primary" : "btn-outline-primary")"
                         @onclick="() => tipoFiltroActivo = 1">
                     <i class="bi bi-calendar-event me-2"></i>Reservas Ocasionales
                 </button>
-                <button class="btn @(tipoFiltroActivo == 2 ? "btn-primary" : "btn-outline-primary")" 
+                <button class="btn @(tipoFiltroActivo == 2 ? "btn-primary" : "btn-outline-primary")"
                         @onclick="() => tipoFiltroActivo = 2">
                     <i class="bi bi-box-seam me-2"></i>Paquetes Adelantados
                 </button>
@@ -128,10 +129,10 @@
                                     </div>
                                     <div class="d-flex gap-2">
                                         <button class="btn btn-light btn-sm text-primary fw-bold" @onclick="() => AlternarDetallePaquete(paquete.CodigoPaquete)">
-                                            <i class="bi @(paqueteIdDesplegado == paquete.CodigoPaquete ? "bi-eye-slash-fill" : "bi-eye-fill") me-1"></i> 
+                                            <i class="bi @(paqueteIdDesplegado == paquete.CodigoPaquete ? "bi-eye-slash-fill" : "bi-eye-fill") me-1"></i>
                                             @(paqueteIdDesplegado == paquete.CodigoPaquete ? "Ocultar reservas" : "Ver reservas")
                                         </button>
-                                        
+
                                         <button class="btn btn-warning btn-sm fw-bold text-dark" @onclick="() => RenovarPaquete(paquete.CodigoPaquete)">
                                             <i class="bi bi-arrow-repeat me-1"></i> Renovar reserva
                                         </button>
@@ -168,7 +169,7 @@
                                                             </td>
                                                             <td class="text-end pe-3 position-relative">
                                                                 <button class="btn btn-primary btn-sm me-1"
-                                                                        @onclick="() => GenerarQr(r.Id)" 
+                                                                        @onclick="() => GenerarQr(r.Id)"
                                                                         disabled="@(!PuedeGenerarQr(r))">
                                                                     <i class="bi bi-qr-code"></i> QR
                                                                 </button>
@@ -253,8 +254,8 @@
     }
 
     List<Reserva>? reservasActivas;
-    private int tipoFiltroActivo = 1; 
-    private int? reservaSeleccionadaId; 
+    private int tipoFiltroActivo = 1;
+    private int? reservaSeleccionadaId;
     private byte[] qrCode = Array.Empty<byte>();
     private string error = "";
 
@@ -287,7 +288,7 @@
         {
             error = "";
             string urlRedireccion = await CompletarPagoReservaCase.Ejecutar(idReserva);
-            
+
             if (!string.IsNullOrEmpty(urlRedireccion))
             {
                 // Navegación forzada (true) hacia el checkout pro externo de Mercado Pago
@@ -308,7 +309,7 @@
     {
         if (reservasActivas == null) return Enumerable.Empty<Reserva>();
 
-        return tipoFiltroActivo == 1 
+        return tipoFiltroActivo == 1
             ? reservasActivas.Where(r => r.TipoReserva == TipoReserva.Ocasional)
             : reservasActivas.Where(r => r.TipoReserva == TipoReserva.Adelantado);
     }
@@ -325,12 +326,12 @@
         try
         {
             qrCode = await GenerarQRUseCase.Ejecutar(reservaId);
-            reservaSeleccionadaId = reservaId; 
+            reservaSeleccionadaId = reservaId;
         }
         catch (Exception ex)
         {
             error = ex.Message;
-            StateHasChanged(); 
+            StateHasChanged();
         }
     }
 
