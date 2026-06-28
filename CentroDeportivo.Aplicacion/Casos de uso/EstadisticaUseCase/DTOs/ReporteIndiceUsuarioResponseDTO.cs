@@ -15,5 +15,6 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.EstadisticaUseCase.DTOs
         public double PorcentajeAsistencia { get; set; }
         public double PorcentajeInasistencia { get; set; }
         public double PorcentajeCancelacion { get; set; }
+
     }
 }

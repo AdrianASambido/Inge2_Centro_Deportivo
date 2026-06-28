@@ -1,0 +1,82 @@
+﻿@page "/estadisticas"
+@using Blazor_ApexCharts
+
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-3 bg-light min-vh-100 p-3 (barra-lateral)">
+            <h4 class="mb-4 text-center">Estadísticas</h4>
+            <div class="nav flex-column nav-pills">
+                <button class="nav-link boton-menu @(seccionActiva == "ingresos" ? "active" : "")" @onclick='() => CambiarSeccion("ingresos")'>Ingresos Generales</button>
+                <button class="nav-link boton-menu @(seccionActiva == "asistencia" ? "active" : "")" @onclick='() => CambiarSeccion("asistencia")'>Asistencia y Cancelaciones</button>
+                <button class="nav-link boton-menu @(seccionActiva == "historial" ? "active" : "")" @onclick='() => CambiarSeccion("historial")'>Historial de Usuario</button>
+            </div>
+        </div>
+
+        <div class="col-md-9 p-4">
+            @if (seccionActiva == "ingresos")
+            {
+                <div class="card p-3 shadow-sm">
+                    <h5>Reporte de Ingresos del Negocio</h5>
+                </div>
+            }
+            else if (seccionActiva == "asistencia")
+            {
+                <div class="card p-3 shadow-sm">
+                    <h5>Índices de Asistencia por Actividad</h5>
+                </div>
+            }
+            else if (seccionActiva == "historial")
+            {
+                <div class="card p-3 shadow-sm">
+                    <h5>Consulta de Historial Personal</h5>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    private string seccionActiva = "ingresos";
+
+    private void CambiarSeccion(string nuevaSeccion)
+    {
+        seccionActiva = nuevaSeccion;
+    }
+}
+
+<style>
+    /* Estilo para que todos los botones se vean siempre claros y definidos */
+    .boton-menu {
+        background-color: #f0f0f0; /* Un gris sutil para que se note el botón */
+        color: #333 !important; /* Texto oscuro visible */
+        margin-bottom: 10px; /* Separación entre botones */
+        border: 1px solid #ddd;
+        text-align: left; /* Alinea el texto a la izquierda */
+        padding: 12px 15px;
+        transition: transform 0.2s ease, background-color 0.2s ease; /* Transición suave para el efecto */
+    }
+
+        /* El botón seleccionado/activo mantiene el color destacado de Bootstrap */
+        .boton-menu.active {
+            background-color: #0d6efd !important; /* Azul de Bootstrap */
+            color: white !important;
+            border-color: #0d6efd;
+        }
+
+        /* EFECTO HOVER: Cuando pasás el mouse por arriba */
+        .boton-menu:hover {
+            background-color: #e2e8f0; /* Se oscurece un poquito el fondo */
+            transform: scale(1.04); /* Agranda el botón un 4% de su tamaño */
+            cursor: pointer;
+        }
+
+        /* Si pasás el mouse sobre el botón que YA está activo, que no pierda su fondo azul */
+        .boton-menu.active:hover {
+            background-color: #0b5ed7 !important;
+        }
+
+    .barra-lateral {
+        border-right: 1px solid #dee2e6; /* Línea divisoria sutil con el panel derecho */
+    }
+</style>

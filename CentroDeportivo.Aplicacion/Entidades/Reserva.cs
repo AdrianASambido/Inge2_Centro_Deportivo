@@ -26,5 +26,5 @@ namespace CentroDeportivo.Aplicacion.Entidades
         public Reserva() { }
     }
 
-    
+
 }
