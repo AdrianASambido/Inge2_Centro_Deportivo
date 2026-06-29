@@ -9,7 +9,7 @@ using CentroDeportivo.Aplicacion.Casos_de_uso.ProfesorUseCase;
 using CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase;
 using CentroDeportivo.Aplicacion.Casos_de_uso.TurnoUseCase;
 using CentroDeportivo.Aplicacion.Casos_de_uso.UsuarioUseCase;
-// Usings de las capas de Aplicación e Infraestructura
+
 using CentroDeportivo.Aplicacion.Interfaces;
 using CentroDeportivo.Aplicacion.Validadores;
 using CentroDeportivo.Infraestructura.Persistencia.Contexto;
@@ -17,7 +17,7 @@ using CentroDeportivo.Infraestructura.Persistencia.Repositorios;
 using CentroDeportivo.Infraestructura.Servicios;
 using CentroDeportivo.UI.Components;
 using CentroDeportivo.UI.Servicios;
-using Microsoft.EntityFrameworkCore; // Necesario para .UseSqlite
+using Microsoft.EntityFrameworkCore; 
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -44,6 +44,7 @@ builder.Services.AddScoped<IPagoRepositorio, PagoRepositorio>();
 builder.Services.AddScoped<ICreditoRepositorio, CreditoRepositorio>();
 builder.Services.AddScoped<IListaDeEsperaRepositorio, ListaDeEsperaRepositorio>();
 builder.Services.AddScoped<IPagoServicio, MercadoPagoServicio>();
+builder.Services.AddScoped<IPDFServicio, PdfServicio>();
 
 // --- 3. REGISTRAR VALIDADORES (Lógica de Negocio) ---
 builder.Services.AddScoped<UsuarioClienteValidador>();
@@ -102,15 +103,17 @@ builder.Services.AddScoped<RegistrarAsistenciaManualUseCase>();
 builder.Services.AddScoped<RegistrarAsistenciaQrUseCase>();
 builder.Services.AddScoped<GenerarQrUseCase>();
 builder.Services.AddScoped<ConfirmarPagoReservaUseCase>();
+builder.Services.AddScoped<IniciarReservaAdelantadaUseCase>();
+builder.Services.AddScoped<IniciarReservaOcasionalUseCase>();
+builder.Services.AddScoped <ConfirmarPagoRestanteReservaOcasionalUseCase>();
 
 builder.Services.AddScoped<CrearTurnoUseCase>();
 builder.Services.AddScoped<EditarTurnoUseCase>();
-builder.Services.AddScoped<EliminarTurnoUseCase>();
+builder.Services.AddScoped<CancelarTurnoUseCase>();
 builder.Services.AddScoped<ListarTurnosUseCase>();
 builder.Services.AddScoped<ListarTurnosCalendarioUseCase>();
 builder.Services.AddScoped<ConsultarDisponibilidadUseCase>();
 builder.Services.AddScoped<EliminarInscriptoUseCase>();
-builder.Services.AddScoped<CancelarTurnoUseCase>();
 
 builder.Services.AddScoped<ConfirmarDevolucionUseCase>();
 builder.Services.AddScoped<ListarDevolucionesPendientesUseCase>();
@@ -141,11 +144,16 @@ builder.Services.AddScoped<CrearReservaConCreditoUseCase>();
 builder.Services.AddScoped<RenovarReservaAdelantadaUseCase>();
 builder.Services.AddScoped<ObtenerClasesAdelantadasDisponiblesUseCase>();
 
+builder.Services.AddScoped<DescargarComprobanteUseCase>();
+
 builder.Services.AddScoped<Sesion>();
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents();
+    .AddInteractiveServerComponents(options =>
+    {
+        options.DisconnectedCircuitRetentionPeriod = TimeSpan.FromMinutes(10);
+    });
 
 var app = builder.Build();
 

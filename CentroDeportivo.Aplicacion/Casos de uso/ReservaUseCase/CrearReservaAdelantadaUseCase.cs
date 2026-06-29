@@ -13,33 +13,16 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
     IPagoRepositorio repoPago
 
 )
-    {
+    { 
         public async Task Ejecutar(int idUsuario, List<Turno> clasesDisponibles, string idPayment)
         {
             DateOnly hoy = DateOnly.FromDateTime(DateTime.Now);
-            DateOnly finDeMes = new DateOnly(hoy.Year, hoy.Month, DateTime.DaysInMonth(hoy.Year, hoy.Month));
-
-            List<Turno> clasesDisponibles = await repoTurno.ObtenerTurnosDisponiblesRangoAsync(idTurnoSeleccionado, idUsuario, hoy, finDeMes);
-
-            if (clasesDisponibles == null || !clasesDisponibles.Any())
-            {
-                throw new Exception("No quedan clases disponibles para reservar por adelantado.");
-            }
 
             Guid codigoPaquete = Guid.NewGuid();
 
             decimal precioBaseTurno = clasesDisponibles.First().PrecioTurno;
             decimal precioConDescuento = precioBaseTurno * 0.80m;
-
             decimal montoTotalAPagar = precioConDescuento * clasesDisponibles.Count;
-
-    
-            bool cobroExitoso = await pagoServicio.ProcesarCobroAsync(idUsuario, montoTotalAPagar, tarjetaToken);
-
-            if (!cobroExitoso)
-            {
-                throw new Exception("El pago del paquete adelantado fue rechazado por la entidad bancaria. Operación cancelada.");
-            }
 
             List<Reserva> nuevasReservas = new List<Reserva>();
 
@@ -69,10 +52,10 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
                 }
             }
 
-
+   
             var nuevoPago = new Pago(idUsuario, montoTotalAPagar, null, null, codigoPaquete);
             nuevoPago.MercadoPagoTransactionId = idPayment;
-
+    
             await repoReserva.GuardarMuchasReservasAsync(nuevasReservas);
             await repoTurno.ActualizarMuchosAsync(clasesDisponibles);
             await repoPago.AgregarAsync(nuevoPago);

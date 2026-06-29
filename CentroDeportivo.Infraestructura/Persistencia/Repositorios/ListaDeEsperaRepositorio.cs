@@ -27,8 +27,7 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
         public async Task EliminarAsync(int idLista)
         {
             var lista = await this.ObtenerPorIdAsync(idLista);
-            if (lista != null)
-            {
+            if (lista != null) {
                 contexto.InscripcionListaEsperas.Remove(lista);
                 await contexto.SaveChangesAsync();
             }
@@ -74,7 +73,7 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
             return await contexto.InscripcionListaEsperas
                             .Include(x => x.Usuario)
                             .Include(x => x.Turno)
-                            .Where(x => x.Id_Turno == idTurno && (x.Estado == EstadoListaEspera.Esperando || x.Estado == EstadoListaEspera.Notificado))
+                            .Where(x => x.Id_Turno == idTurno && (x.Estado == EstadoListaEspera.Esperando  || x.Estado == EstadoListaEspera.Notificado))
                             .AsNoTracking().ToListAsync();
         }
 

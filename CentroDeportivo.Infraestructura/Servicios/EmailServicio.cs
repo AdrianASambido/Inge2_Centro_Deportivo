@@ -33,20 +33,6 @@ namespace CentroDeportivo.Infraestructura.Servicios
 
             var mensaje = new MimeMessage();
             mensaje.From.Add(new MailboxAddress("Centro Deportivo", _username));
-
-            mensaje.To.Add(new MailboxAddress("Socios Centro Deportivo", _username));
-
-            foreach (var email in emailsDestinatarios)
-            {
-                mensaje.Bcc.Add(new MailboxAddress("", email));
-            }
-
-        public async Task EnviarAvisoCancelacionMasivo(IEnumerable<string> emailsDestinatarios, Turno turno)
-        {
-            if (emailsDestinatarios == null || !emailsDestinatarios.Any()) return;
-
-            var mensaje = new MimeMessage();
-            mensaje.From.Add(new MailboxAddress("Centro Deportivo", _username));
             mensaje.To.Add(new MailboxAddress("Socios Centro Deportivo", _username));
 
             foreach (var email in emailsDestinatarios)
@@ -84,7 +70,7 @@ namespace CentroDeportivo.Infraestructura.Servicios
         public async Task EnviarContraseniaTemporalAsync(string emailDestino, string contraseniaTemporal)
         {
             var mensaje = new MimeMessage();
-            mensaje.From.Add(new MailboxAddress("Centro Deportivo",_username));
+            mensaje.From.Add(new MailboxAddress("Centro Deportivo", _username));
             mensaje.To.Add(new MailboxAddress("", emailDestino));
             mensaje.Subject = "Bienvenido - Tu contraseña temporal";
 

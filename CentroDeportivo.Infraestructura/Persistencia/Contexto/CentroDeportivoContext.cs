@@ -15,7 +15,6 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Contexto
         {
         }
 
-        // Definimos las tablas
         public DbSet<Usuario> Usuarios { get; set; }
         public DbSet<Reserva> Reservas { get; set; }
         public DbSet<Turno> Turnos { get; set; }
@@ -68,7 +67,20 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Contexto
                         .WithMany()
                         .HasForeignKey(t => t.Id_Profesor);
 
+            modelBuilder.Entity<Pago>()
+    .HasOne(p => p.Usuario)
+    .WithMany()
+    .HasForeignKey(p => p.Id_Usuario);
 
+            modelBuilder.Entity<Pago>()
+                .HasOne(p => p.Reserva)
+                .WithMany()
+                .HasForeignKey(p => p.Id_Reserva);
+
+            modelBuilder.Entity<Pago>()
+                .HasOne(p => p.Turno)
+                .WithMany()
+                .HasForeignKey(p => p.Id_Turno);
 
             modelBuilder.Entity<Devolucion>()
                 .HasOne(d => d.Usuario)
@@ -79,6 +91,28 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Contexto
                 .HasOne(d => d.Reserva)
                 .WithMany()
                 .HasForeignKey(d => d.Id_Reserva);
+
+            // InscripcionListaEspera
+            modelBuilder.Entity<InscripcionListaEspera>()
+                .HasOne(i => i.Usuario)
+                .WithMany()
+                .HasForeignKey(i => i.Id_Usuario);
+
+            modelBuilder.Entity<InscripcionListaEspera>()
+                .HasOne(i => i.Turno)
+                .WithMany()
+                .HasForeignKey(i => i.Id_Turno);
+
+            // Credito
+            modelBuilder.Entity<Credito>()
+                .HasOne(c => c.Usuario)
+                .WithMany()
+                .HasForeignKey(c => c.Id_Usuario);
+
+            modelBuilder.Entity<Credito>()
+                .HasOne(c => c.Actividad)
+                .WithMany()
+                .HasForeignKey(c => c.Id_Actividad);
 
             base.OnModelCreating(modelBuilder);
         }

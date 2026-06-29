@@ -23,6 +23,6 @@ namespace CentroDeportivo.Aplicacion.Interfaces
         Task ActualizarAsync(Reserva reserva);
         Task<bool> TieneExcesoCancelacionesAsync(int idUsuario, DateOnly fechaLimite);
         Task<ReporteIndicesActividadDTO> ObtenerTotalesPorActividadAsync(int idActividad, DateOnly desde, DateOnly hasta);
-        Task<IEnumerable<HistorialUsuarioActividadDTO>> ObtenerTotalesPorUsuarioAsync(int idUsuario, DateOnly? desde = null, DateOnly? hasta = null);
+        Task<IEnumerable<HistorialUsuarioActividadDTO>> ObtenerTotalesPorUsuarioAsync(int idUsuario, DateOnly? desde=null, DateOnly? hasta=null);
     }
 }

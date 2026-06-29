@@ -1,12 +1,16 @@
-﻿using System;
+﻿using CentroDeportivo.Aplicacion.Interfaces;
+using MercadoPago.Client.Payment;
+using MercadoPago.Client.Preference;
+using MercadoPago.Config;
+using MercadoPago.Client.PaymentMethod;
+using MercadoPago.Client.DisbursementRefund;
+using MercadoPago.Resource.Preference;
+using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using CentroDeportivo.Aplicacion.Interfaces;
-using MercadoPago.Config;
-using MercadoPago.Client.Preference;
-using MercadoPago.Resource.Preference;
 
 namespace CentroDeportivo.Infraestructura.Servicios
 {
@@ -16,7 +20,7 @@ namespace CentroDeportivo.Infraestructura.Servicios
         public MercadoPagoServicio()
         {
 
-            // MercadoPagoConfig.AccessToken = "";
+              //  MercadoPagoConfig.AccessToken = "";
         }
 
         public async Task<string> CrearPreferenciaPagoAsync(
@@ -70,5 +74,35 @@ namespace CentroDeportivo.Infraestructura.Servicios
         {
             throw new NotImplementedException();
         }
+
+       /* public async Task<bool> RealizarReembolsoAsync(string idTransaccion)
+        {
+            Console.WriteLine($"[Reembolso] Intentando reembolsar payment_id: {idTransaccion}");
+            try
+            {
+                var client = new MercadoPago.Client.Payment.PaymentClient();
+
+                var requestOptions = new MercadoPago.Http.MercadoPagoRequest(
+                    MercadoPago.Http.HttpMethod.Post,
+                    $"/v1/payments/{idTransaccion}/refunds",
+                    null
+                );
+
+                var refund = await client.RefundAsync(long.Parse(idTransaccion));
+                return refund != null;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error en reembolso: {ex.Message}");
+                return false;
+            }
+        }*/
+
+        public async Task<bool> RealizarReembolsoAsync(string idTransaccion)
+          {
+              Console.WriteLine($"[Reembolso SIMULADO] payment_id: {idTransaccion}");
+              await Task.CompletedTask;
+              return true;
+          } 
     }
 }

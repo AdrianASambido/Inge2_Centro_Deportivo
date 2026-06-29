@@ -12,7 +12,8 @@ namespace CentroDeportivo.Aplicacion.Interfaces
         Task AgregarAsync(Pago pago);
         Task<IEnumerable<Pago>> ObtenerTodosPorTurnoAsync(int idTurno);
         Task<Pago?> ObtenerPorReservaAsync(int idReserva);
-        Task<Pago?> ObtenerPorIdAsync(int idPago);
+        Task<IEnumerable<Pago>> ObtenerTodosPorReservaAsync(int idReserva);
+        Task<Pago?> ObtenerPorIdAsync (int  idPago);
         Task<Pago?> ObtenerPorPaqueteAsync(Guid codigo); //codigo guid
         Task<Pago?> ObtenerPorUsuarioAsync(int idUsuario);
         Task<IEnumerable<Pago>> ObtenerTodosPorUsuarioAsync(int idUsuario);

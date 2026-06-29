@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
 {
-    public class CreditoRepositorio(CentroDeportivoContext contexto) : ICreditoRepositorio
+    public class CreditoRepositorio (CentroDeportivoContext contexto): ICreditoRepositorio
     {
         public async Task ActualizarAsync(Credito credito)
         {

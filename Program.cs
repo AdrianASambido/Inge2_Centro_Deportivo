@@ -1,6 +1,7 @@
 using CentroDeportivo.Infraestructura.Persistencia.Contexto;
 using CentroDeportivo.UI.Components;
 using Microsoft.EntityFrameworkCore; // Necesario para .UseSqlite
+using CentroDeportivo.Aplicacion.Entidades;
 // Usings de las capas de Aplicación e Infraestructura
 using CentroDeportivo.Aplicacion.Interfaces;
 using CentroDeportivo.Aplicacion.Validadores;
@@ -108,6 +109,19 @@ using (var scope = app.Services.CreateScope())
         var context = services.GetRequiredService<CentroDeportivoContext>();
         // Llamamos a la clase dee infraestructura para crear tablas y el Admin
         DbInicializador.Initialize(context);
+            // Verificación rápida para debugging: contar turnos/reservas/pagos existentes
+            try
+            {
+                var turnosFinalizados = context.Turnos.Count(t => t.Estado == EstadoTurno.Finalizado);
+                var reservasConfirmadas = context.Reservas.Include(r => r.Turno)
+                    .Count(r => r.Estado == EstadoReserva.Confirmado && r.Turno != null && r.Turno.Estado == EstadoTurno.Finalizado);
+                var totalPagos = context.Pagos.Any() ? context.Pagos.Sum(p => p.Monto) : 0m;
+                Console.WriteLine($"SEED-VERIF: TurnosFinalizados={turnosFinalizados}, ReservasConfirmadasEnFinalizados={reservasConfirmadas}, TotalPagos={totalPagos}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"SEED-VERIF-ERROR: {ex.Message}");
+            }
     }
     catch (Exception ex)
     {

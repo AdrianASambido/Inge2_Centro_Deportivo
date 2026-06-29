@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace CentroDeportivo.Aplicacion.Casos_de_uso.ListaEsperaUseCase
 {
-    public class ConsultarListaEsperaUseCase(IListaDeEsperaRepositorio repoLista)
+    public class ConsultarListaEsperaUseCase (IListaDeEsperaRepositorio repoLista)
     {
         public async Task<List<InscripcionListaEspera>> Ejecutar(int idUsuario)
         {

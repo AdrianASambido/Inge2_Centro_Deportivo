@@ -10,26 +10,22 @@ using CentroDeportivo.Aplicacion.Validadores;
 
 namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
 {
-    public class CrearReservaConCreditoUseCase(IReservaRepositorio repoReserva, ITurnoRepositorio repoTurno, ICreditoRepositorio repoCredito, ReservaValidador validador)
+    public class CrearReservaConCreditoUseCase (IReservaRepositorio repoReserva, ITurnoRepositorio repoTurno, ICreditoRepositorio repoCredito, ReservaValidador validador)
     {
-        public async Task Ejecutar(Reserva reserva)
-        {
+        public async Task Ejecutar(Reserva reserva) {
             var (esValido, mensaje) = await validador.ValidarReserva(reserva);
 
-            if (!esValido)
-            {
+            if (!esValido) {
                 throw new Exception(mensaje);
             }
 
             var turno = await repoTurno.ObtenerPorIdAsync(reserva.Id_Turno);
-            if (turno == null)
-            {
+            if (turno == null) {
                 throw new Exception("Error, turno inexistente.");
             }
 
             var creditos = await repoCredito.ObtenerDisponiblesAsync(reserva.Id_Usuario, turno.Id_Actividad);
-            if (creditos == null || !creditos.Any())
-            {
+            if (creditos == null || !creditos.Any()) {
                 throw new Exception("Error: no dispone de creditos para esta actividad");
             }
 
@@ -37,8 +33,7 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
             creditoAConsumir!.Estado = EstadoCredito.Utilizado;
 
             turno.CupoDisponible--;
-            if (turno.CupoDisponible == 0)
-            {
+            if (turno.CupoDisponible == 0) {
                 turno.Estado = EstadoTurno.Lleno;
             }
 
