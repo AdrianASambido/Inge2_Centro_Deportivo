@@ -1,9 +1,12 @@
 ﻿@page "/estadisticas"
-@using Blazor_ApexCharts
-@using CentroDeportivo.Aplicacion.Casos_de_uso.EstadisticaUseCase.DTOs
 @using CentroDeportivo.Aplicacion.Casos_de_uso.EstadisticaUseCase
 @inject ConsultarIngresosDelNegocioUseCase ConsultarIngresosDelNegocioUseCase
 @inject ConsultarIndicesUsuarioUseCase ConsultarIndicesUsuarioUseCase
+@inject ConsultarIndicesActividadUseCase ConsultarIndicesActividadUseCase
+@inject ConsultarIngresosActividadUseCase ConsultarIngresosActividadUseCase
+@inject ConsultarHistorialUsuarioUseCase ConsultarHistorialUsuarioUseCase
+
+
 
 
 <div class="container-fluid">
@@ -14,6 +17,9 @@
                 <button class="nav-link boton-menu @(seccionActiva == "ingresos" ? "active" : "")" @onclick='() => CambiarSeccion("ingresos")'>Ingresos Generales</button>
                 <button class="nav-link boton-menu @(seccionActiva == "asistencia" ? "active" : "")" @onclick='() => CambiarSeccion("asistencia")'>Asistencia y Cancelaciones</button>
                 <button class="nav-link boton-menu @(seccionActiva == "historialUsuario" ? "active" : "")" @onclick='() => CambiarSeccion("historialUsuario")'>Historial de Usuario</button>
+                <button class="nav-link boton-menu @(seccionActiva == "indicesUsuario" ? "active" : "")" @onclick='() => CambiarSeccion("indicesUsuario")'>Indices usuario </button>
+                <button class="nav-link boton-menu @(seccionActiva == "ingresoPorActividad" ? "active" : "")" @onclick='() => CambiarSeccion("ingresoPorActividad")'>Ingresos por actividad</button>
+                <button class="nav-link boton-menu @(seccionActiva == "indicesActividad" ? "active" : "")" @onclick='() => CambiarSeccion("indicesActividad")'>Indices por actividad</button>
             </div>
         </div>
 
@@ -109,6 +115,105 @@
                     }
                     else
                     {
+                        @* 3. Gráfico: Historial usuario*@
+                        <ApexChart TItem="int" Height="320" Title="Asistencias vs Cancelaciones">
+                            <ApexSeries TItem="int" Name="Asistieron" Items="asistenciasSeries" />
+                            <ApexSeries TItem="int" Name="Cancelaron" Items="cancelacionesSeries" />
+                            <ApexXAxis Categories="actividadesCategories" />
+                        </ApexChart>
+                    }
+                </div>
+            }                       //------------------------------ Desde acá corregir ------------------------------
+            else if (seccionActiva == "indicesUsuario")
+            {
+                <div class="card p-3 shadow-sm">
+                    <h5>Consulta de Historial Personal</h5>
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label>Desde</label>
+                            <input type="date" class="form-control" @bind="desdeDate" />
+                        </div>
+                        <div class="col-md-4">
+                            <label>Hasta</label>
+                            <input type="date" class="form-control" @bind="hastaDate" />
+                        </div>
+                        <div class="col-md-4 d-flex align-items-end">
+                            <button class="btn btn-primary" @onclick="FetchHistorialAsync">Buscar</button>
+                        </div>
+                    </div>
+
+                    @if (datosIndicesUsuario == null || datosIndicesUsuario.Count == 0)
+                    {
+                        <p><em>No hay datos de historial para mostrar.</em></p>
+                    }
+                    else
+                    {
+                        @* 3. ARREGLAR ESTE --- Gráfico de barras: Asistencias vs Cancelaciones por actividad *@
+                        <ApexChart TItem="int" Height="320" Title="Asistencias vs Cancelaciones">
+                            <ApexSeries TItem="int" Name="Asistieron" Items="asistenciasSeries" />
+                            <ApexSeries TItem="int" Name="Cancelaron" Items="cancelacionesSeries" />
+                            <ApexXAxis Categories="actividadesCategories" />
+                        </ApexChart>
+                    }
+                </div>
+            }
+            else if (seccionActiva == "ingresoPorActividad")
+            {
+                <div class="card p-3 shadow-sm">
+                    <h5>Consulta de Historial Personal</h5>
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label>Desde</label>
+                            <input type="date" class="form-control" @bind="desdeDate" />
+                        </div>
+                        <div class="col-md-4">
+                            <label>Hasta</label>
+                            <input type="date" class="form-control" @bind="hastaDate" />
+                        </div>
+                        <div class="col-md-4 d-flex align-items-end">
+                            <button class="btn btn-primary" @onclick="FetchHistorialAsync">Buscar</button>
+                        </div>
+                    </div>
+
+                    @if (datosIngresosActividad == null || datosIngresosActividad.Count == 0)
+                    {
+                        <p><em>No hay datos de historial para mostrar.</em></p>
+                    }
+                    else
+                    {
+                        @* 3. ARREGLAR ESTE --- Gráfico de barras: Asistencias vs Cancelaciones por actividad *@
+                        <ApexChart TItem="int" Height="320" Title="Asistencias vs Cancelaciones">
+                            <ApexSeries TItem="int" Name="Asistieron" Items="asistenciasSeries" />
+                            <ApexSeries TItem="int" Name="Cancelaron" Items="cancelacionesSeries" />
+                            <ApexXAxis Categories="actividadesCategories" />
+                        </ApexChart>
+                    }
+                </div>
+            }
+            else if (seccionActiva == "indicesActividad")
+            {
+                <div class="card p-3 shadow-sm">
+                    <h5>Consulta de Historial Personal</h5>
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label>Desde</label>
+                            <input type="date" class="form-control" @bind="desdeDate" />
+                        </div>
+                        <div class="col-md-4">
+                            <label>Hasta</label>
+                            <input type="date" class="form-control" @bind="hastaDate" />
+                        </div>
+                        <div class="col-md-4 d-flex align-items-end">
+                            <button class="btn btn-primary" @onclick="FetchHistorialAsync">Buscar</button>
+                        </div>
+                    </div>
+
+                    @if (datosIndicesActividad == null || datosIndicesActividad.Count == 0)
+                    {
+                        <p><em>No hay datos de historial para mostrar.</em></p>
+                    }
+                    else
+                    {
                         @* 3. ARREGLAR ESTE --- Gráfico de barras: Asistencias vs Cancelaciones por actividad *@
                         <ApexChart TItem="int" Height="320" Title="Asistencias vs Cancelaciones">
                             <ApexSeries TItem="int" Name="Asistieron" Items="asistenciasSeries" />
@@ -129,6 +234,11 @@
     private List<IngresoPorMesDto>? datosIngresos;
     private List<AsistenciaDto>? datosAsistencia;
     private List<AsistenciaDto>? datosHistorial;
+    private List<AsistenciaDto>? datosIndicesUsuario;
+    private List<IngresoPorMesDto>? datosIngresosActividad;
+    private List<AsistenciaDto>? datosIndicesActividad;
+
+
     // Rango de búsqueda seleccionable por el usuario (usamos DateTime en inputs y convertimos a DateOnly)
     private DateTime desdeDate = DateTime.Today.AddMonths(-5);
     private DateTime hastaDate = DateTime.Today;
@@ -155,6 +265,54 @@
     // ----- Métodos para buscar según rango de fechas seleccionadas -----
     private async Task FetchIngresosAsync()
     {
+        // 1. Validar fechas para evitar rangos imposibles
+        if (hastaDate < desdeDate) return;
+
+        var start = DateOnly.FromDateTime(new DateTime(desdeDate.Year, desdeDate.Month, 1));
+        var endMonth = new DateTime(hastaDate.Year, hastaDate.Month, 1);
+
+        // Calculamos de forma segura cuántos meses hay de diferencia
+        int totalMeses = ((endMonth.Year - start.Year) * 12) + endMonth.Month - start.Month;
+
+        // Si el rango es ridículamente largo, le ponemos un tope por seguridad
+        if (totalMeses > 24) totalMeses = 24;
+
+        // Generamos la lista de tareas para ejecutarlas en paralelo
+        var tareas = new List<Task<IngresoPorMesDto>>();
+
+        for (int i = 0; i <= totalMeses; i++)
+        {
+            var dt = new DateTime(start.Year, start.Month, 1).AddMonths(i);
+            var mesStart = DateOnly.FromDateTime(dt);
+            var mesEnd = mesStart.AddMonths(1).AddDays(-1);
+
+            // Agregamos la Promesa (Task) a la lista sin esperarla todavía
+            tareas.Add(Task.Run(async () =>
+            {
+                var total = await ConsultarIngresosDelNegocioUseCase.Ejecutar(mesStart, mesEnd);
+                return new IngresoPorMesDto
+                {
+                    Mes = mesStart.ToString("MMM yyyy"),
+                    MontoTotal = total
+                };
+            }));
+        }
+
+        // 🔥 LA MAGIA: Ejecuta TODAS las consultas a la DB al mismo tiempo
+        var resultados = await Task.WhenAll(tareas);
+
+        // Ordenamos cronológicamente y asignamos a la lista del gráfico
+        datosIngresos = resultados.OrderBy(r => DateTime.Parse(r.Mes)).ToList();
+
+        // Le avisamos a Blazor que refresque la pantalla con los datos nuevos
+        StateHasChanged();
+    }
+
+
+
+
+  /* private async Task FetchIngresosAsync()
+    {
         var start = DateOnly.FromDateTime(new DateTime(desdeDate.Year, desdeDate.Month, 1));
         var endMonth = new DateTime(hastaDate.Year, hastaDate.Month, 1);
         var months = new List<DateTime>();
@@ -178,7 +336,7 @@
         ingresosValues = datosIngresos.Select(d => d.MontoTotal).ToList();
         ingresosCategories = datosIngresos.Select(d => d.Mes).ToList();
         StateHasChanged();
-    }
+    }*/
 
     private async Task FetchAsistenciaAsync()
     {
