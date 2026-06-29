@@ -96,6 +96,13 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
                 .Select(r => new { r.Turno.HoraInicio, r.Turno.HoraFin })
                 .ToListAsync();
 
+            var turnosEnListaEspera = await contexto.InscripcionListaEsperas
+       .Where(i => i.Id_Usuario == usuarioId &&
+                   (i.Estado == EstadoListaEspera.Esperando ||
+                    i.Estado == EstadoListaEspera.Notificado))
+       .Select(i => i.Id_Turno)
+       .ToListAsync();
+
             var turnosCandidatos = await contexto.Turnos
                 .Include(t => t.Actividad)
                 .Include(t => t.Profesor)
@@ -103,8 +110,11 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
                 .Where(t => t.Id_Actividad == actividadId
                          && t.Fecha == fecha
                          && (t.Estado == EstadoTurno.Disponible || t.Estado == EstadoTurno.Lleno)
+                         && !turnosEnListaEspera.Contains(t.Id)
                          && t.Fecha >= hoy)
                 .ToListAsync();
+
+           
 
             var filtrados = turnosCandidatos.Where(t =>
                 !reservasCliente.Any(r =>

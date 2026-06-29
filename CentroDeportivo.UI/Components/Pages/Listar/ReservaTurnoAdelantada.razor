@@ -148,7 +148,10 @@ else
             {
                 var usuario = await ObtenerUsuarioPorId.Ejecutar(UserId.Value);
                 if (usuario != null)
+                {
                     UsuarioSesion.RestaurarSesion(usuario);
+                    UsuarioSesion.NotificarCambio();
+                }
             }
 
             await ProcesarVueltaDeMP();

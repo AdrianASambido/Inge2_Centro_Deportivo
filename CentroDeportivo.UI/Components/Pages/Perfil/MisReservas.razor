@@ -6,7 +6,13 @@
 @inject ListarReservasUseCase listarReservasUseCase
 @inject CancelarReservaUseCase cancelarReservasUseCase
 @inject CompletarPagoReservaOcasionalUseCase CompletarPagoReservaCase 
+@inject CancelarReservaAdelantadaUseCase CancelarReservaAdelantadaUseCase
+@inject IniciarPagoListaEsperaUseCase IniciarPagoListaEsperaUseCase
+@inject CrearReservaListaEsperaUseCase CrearReservaListaEsperaUseCase
+@inject AbandonarListaEsperaUseCase AbandonarListaEsperaUseCase
+@inject ConsultarListaEsperaUseCase ConsultarListaEsperaUseCase
 @inject ConfirmarPagoRestanteReservaOcasionalUseCase ConfirmarPagoRestanteReservaOcasionalUseCase
+@inject ObtenerUsuarioPorId ObtenerUsuarioPorId
 @inject NavigationManager Navigation
 
 <PageTitle>Mis Reservas</PageTitle>
@@ -31,7 +37,11 @@
                 </button>
                 <button class="btn @(tipoFiltroActivo == 2 ? "btn-primary" : "btn-outline-primary")"
                         @onclick="() => tipoFiltroActivo = 2">
-                    <i class="bi bi-box-seam me-2"></i>Paquetes Adelantados
+                    <i class="bi bi-box-seam me-2"></i>Reservas Mensuales
+                </button>
+                <button class="btn @(tipoFiltroActivo == 3 ? "btn-primary" : "btn-outline-primary")"
+                        @onclick="() => tipoFiltroActivo = 3">
+                    <i class="bi bi-hourglass-split me-2"></i>Lista de Espera
                 </button>
             </div>
 
@@ -130,7 +140,7 @@
                                     <div class="d-flex gap-2">
                                         <button class="btn btn-light btn-sm text-primary fw-bold" @onclick="() => AlternarDetallePaquete(paquete.CodigoPaquete)">
                                             <i class="bi @(paqueteIdDesplegado == paquete.CodigoPaquete ? "bi-eye-slash-fill" : "bi-eye-fill") me-1"></i>
-                                            @(paqueteIdDesplegado == paquete.CodigoPaquete ? "Ocultar reservas" : "Ver reservas")
+                                            @(paqueteIdDesplegado == paquete.CodigoPaquete ? "Ocultar turnos" : "Ver turnos")
                                         </button>
 
                                         <button class="btn btn-warning btn-sm fw-bold text-dark" @onclick="() => RenovarPaquete(paquete.CodigoPaquete)">
@@ -183,7 +193,7 @@
                                                                 }
 
                                                                 <button class="btn btn-danger btn-sm"
-                                                                        @onclick="() => Cancelar(r.Id)"
+                                                                        @onclick="() => CancelarAdelantada(r.Id)"
                                                                         disabled="@(!PuedeCancelar(r))">
                                                                     Cancelar
                                                                 </button>
@@ -201,7 +211,63 @@
                     else
                     {
                         <div class="card p-4 text-center text-muted bg-white shadow-sm" style="border-radius: 8px;">
-                            No registra paquetes adelantados activos.
+                            No registra reservas mensuales activas.
+                        </div>
+                    }
+                </div>
+
+            }
+            else if (tipoFiltroActivo == 3)
+            {
+                <div class="table-responsive shadow-sm" style="background: white; border-radius: 8px;">
+                    @if (listaEspera != null && listaEspera.Any())
+                    {
+                        <table class="table table-hover align-middle m-0">
+                            <thead>
+                                <tr>
+                                    <th>Actividad</th>
+                                    <th>Fecha</th>
+                                    <th>Horario</th>
+                                    <th>Profesor</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var inscripcion in listaEspera)
+                                {
+                                    <tr>
+                                        <td>@inscripcion.Turno?.Actividad?.Nombre</td>
+                                        <td>@inscripcion.Turno?.Fecha.ToShortDateString()</td>
+                                        <td>@inscripcion.Turno?.HoraInicio hs</td>
+                                        <td>Cancha @inscripcion.Turno?.Profesor?.Nombre</td>
+                                        <td>
+                                            <span class="badge @(inscripcion.Estado == EstadoListaEspera.Notificado ? "bg-success" : "bg-warning text-dark")">
+                                                @(inscripcion.Estado == EstadoListaEspera.Notificado ? "Lugar disponible" : "En espera")
+                                            </span>
+                                        </td>
+                                        <td>
+                                            @if (inscripcion.Estado == EstadoListaEspera.Notificado)
+                                            {
+                                                <button class="btn btn-success btn-sm me-1"
+                                                        @onclick="() => ReservarLugarLiberado(inscripcion.Id_Turno)">
+                                                    <i class="bi bi-credit-card me-1"></i> Reservar
+                                                </button>
+                                            }
+                                            <button class="btn btn-danger btn-sm"
+                                                    @onclick="() => AbandonarLista(inscripcion.Id_Turno)">
+                                                <i class="bi bi-x-circle me-1"></i> Abandonar lista
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <div class="text-center py-4 text-muted">
+                            No registra turnos en lista de espera.
                         </div>
                     }
                 </div>
@@ -217,12 +283,65 @@
 
 @code {
     private Guid? paqueteIdDesplegado = null;
+    [SupplyParameterFromQuery] public bool pagoExitoso { get; set; }
+    [SupplyParameterFromQuery] public int? reservaId { get; set; }
+    [SupplyParameterFromQuery] public string? tipo { get; set; }
+    [SupplyParameterFromQuery(Name = "payment_id")] public string? PaymentId { get; set; }
+    [SupplyParameterFromQuery] public int? userId { get; set; }
+    private List<InscripcionListaEspera>? listaEspera;
+    [SupplyParameterFromQuery] public int? turnoId { get; set; }
 
     public class PaqueteAgrupadoDTO
     {
         public Guid CodigoPaquete { get; set; }
         public string NombreActividad { get; set; } = string.Empty;
         public List<Reserva> ReservasAsociadas { get; set; } = new();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+
+        if (UsuarioSesion.UsuarioActual == null && userId.HasValue)
+        {
+            var usuario = await ObtenerUsuarioPorId.Ejecutar(userId.Value);
+            if (usuario != null){
+                UsuarioSesion.RestaurarSesion(usuario);
+                UsuarioSesion.NotificarCambio();
+            }
+        }
+
+        if (reservaId.HasValue && tipo == "confirmarOcasional")
+        {
+            await ProcesarVueltaDeMP();
+        }
+        else if (turnoId.HasValue && tipo == "listaEspera")
+        {
+            await ProcesarVueltaMPListaEspera();
+        }
+    }
+
+    private async Task ProcesarVueltaDeMP()
+    {
+        if (pagoExitoso && !string.IsNullOrEmpty(PaymentId))
+        {
+            try
+            {
+                await ConfirmarPagoRestanteReservaOcasionalUseCase.Ejecutar(reservaId!.Value, PaymentId);
+                error = "¡Pago procesado con éxito! Reserva confirmada.";
+            }
+            catch (Exception ex)
+            {
+                error = $"Error al confirmar el pago: {ex.Message}";
+            }
+        }
+        else
+        {
+            error = "El pago fue cancelado o no pudo procesarse.";
+        }
+
+        await CargarReservas();
+        StateHasChanged();
     }
 
     private IEnumerable<PaqueteAgrupadoDTO> ObtenerPaquetesAdelantados()
@@ -273,6 +392,7 @@
             {
                 var resultado = await listarReservasUseCase.Ejecutar(UsuarioSesion.UsuarioActual.Id);
                 reservasActivas = resultado.Where(r => r.Estado != EstadoReserva.Cancelado).ToList();
+                listaEspera = await ConsultarListaEsperaUseCase.Ejecutar(UsuarioSesion.UsuarioActual.Id);
             }
         }
         catch (Exception ex)
@@ -303,6 +423,32 @@
         {
             error = ex.Message;
         }
+    }
+
+    private async Task ProcesarVueltaMPListaEspera()
+    {
+        if (pagoExitoso && !string.IsNullOrEmpty(PaymentId))
+        {
+            try
+            {
+                await CrearReservaListaEsperaUseCase.Ejecutar(
+                    UsuarioSesion.UsuarioActual!.Id,
+                    turnoId!.Value,
+                    PaymentId);
+                error = "¡Reserva confirmada! Ya tenés tu lugar en el turno.";
+            }
+            catch (Exception ex)
+            {
+                error = $"Error al confirmar la reserva: {ex.Message}";
+            }
+        }
+        else
+        {
+            error = "El pago fue cancelado o no pudo procesarse.";
+        }
+
+        await CargarReservas();
+        StateHasChanged();
     }
 
     private IEnumerable<Reserva> ObtenerReservasFiltradas()
@@ -360,6 +506,22 @@
         }
     }
 
+    async Task CancelarAdelantada(int idReserva)
+    {
+        try
+        {
+            var (seOtorgoCredito, mensaje) = await CancelarReservaAdelantadaUseCase.Ejecutar(
+                UsuarioSesion.UsuarioActual!.Id, idReserva);
+            error = mensaje;
+            await CargarReservas();
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            error = ex.Message;
+        }
+    }
+
     private bool PuedeGenerarQr(Reserva r)
     {
         if (r.Estado != EstadoReserva.Confirmado && r.Estado != EstadoReserva.Reservado)
@@ -382,5 +544,41 @@
 
         var fechaHoraTurno = r.Turno.Fecha.ToDateTime(r.Turno.HoraInicio);
         return DateTime.Now < fechaHoraTurno;
+    }
+
+    private async Task ReservarLugarLiberado(int idTurno)
+    {
+        try
+        {
+            error = "";
+            string urlRedireccion = await IniciarPagoListaEsperaUseCase.Ejecutar(
+                UsuarioSesion.UsuarioActual!.Id, idTurno);
+
+            if (!string.IsNullOrEmpty(urlRedireccion))
+                Navigation.NavigateTo(urlRedireccion, true);
+            else
+                error = "No se pudo generar la pasarela de pago en este momento.";
+        }
+        catch (Exception ex)
+        {
+            error = ex.Message;
+        }
+    }
+
+    private async Task AbandonarLista(int idTurno)
+    {
+        try
+        {
+            error = "";
+            await AbandonarListaEsperaUseCase.Ejecutar(UsuarioSesion.UsuarioActual!.Id, idTurno);
+            error = "Abandonaste la lista de espera exitosamente.";
+            var inscripciones = await ConsultarListaEsperaUseCase.Ejecutar(UsuarioSesion.UsuarioActual.Id);
+            listaEspera = inscripciones;
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            error = ex.Message;
+        }
     }
 }

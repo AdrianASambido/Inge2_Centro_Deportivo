@@ -14,7 +14,7 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
         public async Task<string> Ejecutar(int idUsuario, int idTurno)
         {
             var turno = await repoTurno.ObtenerPorIdAsync(idTurno);
-            if (turno == null || turno.CupoDisponible <= 0)
+            if (turno == null)
             {
                 throw new Exception("El turno ya no está disponible.");
             }
@@ -24,8 +24,8 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
 
 
 
-            string urlExito = $"https://localhost:7001/MisReservas?pagoExitoso=true&turnoId={idTurno}&tipo=listaEspera";
-            string urlFallo = $"https://localhost:7001/MisReservas?pagoExitoso=false&turnoId={idTurno}&tipo=listaEspera";
+            string urlExito = $"https://localhost:5001/MisReservas?pagoExitoso=true&tipo=listaEspera&turnoId={idTurno}&userId={idUsuario}";
+            string urlFallo = $"https://localhost:5001/MisReservas?pagoExitoso=false&tipo=listaEspera&turnoId={idTurno}&userId={idUsuario}";
 
             string nombreActividad = $"Pago Total Turno Nro {turno.Id} (Lista de Espera)";
 
