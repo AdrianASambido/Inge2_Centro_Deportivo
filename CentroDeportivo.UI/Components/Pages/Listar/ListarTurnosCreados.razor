@@ -41,6 +41,11 @@ else
             </button>
         </div>
 
+        @if (!string.IsNullOrEmpty(mensajeCancelar))
+        {
+            <div class="alert alert-info mt-3 shadow-sm">@mensajeCancelar</div>
+        }
+
         @if (quiereAgregar)
         {
             @if (!string.IsNullOrEmpty(mensajeTurno))
@@ -389,9 +394,10 @@ else
     private List<Turno> turnos = new();
     private List<Turno> turnosFiltrados = new();
     bool mostrarDialogCancelar = false;
+    private int idAEliminarDeReserva;
 
     void ConfirmarCancelacion(int Id) { idAEliminar = Id; mostrarDialogCancelar = true; }
-    void ConfirmarEliminacion(int Id) { idAEliminar = Id; mostrarDialog = true; }
+    void ConfirmarEliminacion(int Id) { idAEliminarDeReserva = Id; mostrarDialog = true; }
 
     Cancha? canchaSeleccionada => canchasDispo.FirstOrDefault(c => c.Id == t.Id_Cancha);
 
@@ -520,14 +526,14 @@ else
             var horaMinima = new TimeOnly(18, 0); // 18:00
             var horaMaxima = new TimeOnly(23, 0); // 23:00
 
-           /* if (t.HoraInicio < horaMinima || t.HoraInicio > horaMaxima)
+            /* if (t.HoraInicio < horaMinima || t.HoraInicio > horaMaxima)
             {
                 mensajeTurno = "Error: El centro deportivo opera únicamente en el horario de 18:00 a 23:00 hs.";
                 mostrarDisponibles = false;
                 return;
-             }*/
+                }*/
 
-            if (t.Fecha == DateOnly.FromDateTime(DateTime.Now) && t.HoraInicio < TimeOnly.FromDateTime(DateTime.Now))
+    if (t.Fecha == DateOnly.FromDateTime(DateTime.Now) && t.HoraInicio < TimeOnly.FromDateTime(DateTime.Now))
             {
                 mensajeTurno = "Error: La hora seleccionada ya transcurrió.";
                 mostrarDisponibles = false;
@@ -574,7 +580,7 @@ else
 
 
 
-    
+
     private async Task AbrirEscaner()
     {
         mensaje = "";
@@ -703,32 +709,36 @@ else
 
     private async Task EliminarInscripto()
     {
-        /*
         mensajeTabla = "";
         mostrarDialog = false;
         try
         {
-            await EliminarInscriptoUseCase.Ejecutar(idAEliminar)
+            await EliminarInscriptoUseCase.Ejecutar(idAEliminarDeReserva);
+            mensajeTabla = "El inscripto se ha eliminado exitosamente.";
+            await RecargarReservas();
         }
-        */
+        catch (Exception ex)
+        {
+            mensajeTabla = ex.Message;
+        }
     }
 
     private void EditarTurno(int turnoId) => Navegador.NavigateTo($"/editar-turno/{turnoId}");
+    public String mensajeCancelar = "";
 
     private async Task CancelarTurno()
     {
-        mensajeTurno ="";
+        mensajeCancelar ="";
         mostrarDialogCancelar = false;
         try {
             await CancelarTurnoUseCase.Ejecutar(idAEliminar);
-            mensajeTurno = "El turno se ha cancelado exitosamente.";
+            mensajeCancelar = "El turno se ha cancelado exitosamente.";
             turnos = (await ListarTurnosUseCase.Ejecutar(null, null, null, null, null)).ToList();
-            StateHasChanged();
+            await OnInitializedAsync();
         }
         catch (Exception ex){
-            mensajeTurno = ex.Message;   
+            mensajeCancelar = ex.Message;   
         }
     }
 
-}
 }
