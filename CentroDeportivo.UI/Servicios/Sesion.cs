@@ -24,10 +24,14 @@ public class Sesion
     public bool EstaAutenticado()
         => UsuarioActual != null;
 
-    public event Action OnChange;
+    public event Func<Task>? OnChange;
 
-    public void NotificarCambio() => OnChange?.Invoke();
+    public async Task NotificarCambio()
+    {
+        if (OnChange != null)
+            await OnChange.Invoke();
+    }
 
-    
+
 
 }

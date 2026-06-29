@@ -19,9 +19,10 @@ public static class DbInicializador
                 new Usuario("Carlos", "Tevez", "Calle 123", "112345534", BCrypt.Net.BCrypt.HashPassword("Admin1234"), "admin@gmail.com", false, Rol.Administrador),
                 new Usuario("Juan", "Perez", "Calle 456", "30111222", BCrypt.Net.BCrypt.HashPassword("Boca1999"), "juan@gmail.com", false, Rol.Cliente),
                 new Usuario("Maria", "Gomez", "Calle 789", "32444555", BCrypt.Net.BCrypt.HashPassword("Boca1999"), "maria@gmail.com", false, Rol.Cliente),
-                new Usuario("nel", "pin", "Calle10", "123456", BCrypt.Net.BCrypt.HashPassword("Boca1999"), "nelsonjp@gmail.com", false, Rol.Cliente)
+                new Usuario("nel", "pin", "Calle10", "123456", BCrypt.Net.BCrypt.HashPassword("Boca1999"), "nelsonjp1999@gmail.com", false, Rol.Cliente)
             };
             context.Usuarios.AddRange(usuarios);
+            context.SaveChanges();
         }
 
         if (!context.Canchas.Any())
@@ -33,6 +34,7 @@ public static class DbInicializador
                 new Cancha(3, 12)
             };
             context.Canchas.AddRange(canchas);
+            context.SaveChanges();
         }
 
         if (!context.Profesores.Any())
@@ -44,6 +46,7 @@ public static class DbInicializador
                 new Profesor("Juan", "Riquelme", "27000333")
             };
             context.Profesores.AddRange(profesores);
+            context.SaveChanges();
         }
 
         if (!context.Actividades.Any())
@@ -54,6 +57,42 @@ public static class DbInicializador
                 new Actividad("Voley", "Entrenamiento de voley", 30)
             };
             context.Actividades.AddRange(actividades);
+            context.SaveChanges();
+        }
+
+        if (!context.Turnos.Any())
+        {
+            
+            var futbol = context.Actividades.FirstOrDefault(a => a.Nombre == "Futbol");
+            var cancha1 = context.Canchas.FirstOrDefault(c => c.Numero == 1);
+            var profeMessi = context.Profesores.FirstOrDefault(p => p.Nombre == "Lionel");
+
+            var fechasMartesJulio = new List<DateOnly>
+            {
+                new DateOnly(2026, 7, 7),
+                new DateOnly(2026, 7, 14),
+                new DateOnly(2026, 7, 21),
+                new DateOnly(2026, 7, 28)
+            };
+
+            if (futbol != null && cancha1 != null && profeMessi != null)
+            {
+                var turnos = fechasMartesJulio.Select(fecha => new Turno
+                {
+                    Fecha = fecha,
+                    HoraInicio = new TimeOnly(18, 0),
+                    HoraFin = new TimeOnly(19, 0),
+                    PrecioTurno = 5000,
+                    CupoMaximo = 10,
+                    CupoDisponible = 10,
+                    Estado = EstadoTurno.Disponible,
+                    Actividad = futbol,
+                    Cancha = cancha1,
+                    Profesor = profeMessi
+                }).ToList();
+                context.Turnos.AddRange(turnos);
+                context.SaveChanges();
+            }
         }
 
         context.SaveChanges();

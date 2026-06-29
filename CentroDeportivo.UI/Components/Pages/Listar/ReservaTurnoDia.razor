@@ -62,24 +62,38 @@ else
                             @foreach (var t in turnosFiltrados)
                             {
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    @if (t.CupoDisponible == 0)
-                                    {
-                                        <div>
-                                            <span class="fw-bold">@t.HoraInicio.ToString("HH:mm") – @t.HoraFin.ToString("HH:mm")</span>
-                                            <div class="small d-block text-muted">Precio:$@t.PrecioTurno</div>
-                                        </div>
-                                        <button type="button" class="btn btn-sm btn-success" disabled="@procesando" @onclick="() => UnirseListaEspera(t.Id)">
-                                            Unirse a lista de espera
-                                        </button>
-                                    }
                                     <div>
                                         <span class="fw-bold">@t.HoraInicio.ToString("HH:mm") – @t.HoraFin.ToString("HH:mm")</span>
-                                        <div class="small d-block text-muted">Libres: @t.CupoDisponible / @t.CupoMaximo</div>
-                                        <div class="small d-block text-muted">Precio:$@t.PrecioTurno</div>
+                                        <div class="small d-block text-muted">
+                                            @if (t.CupoDisponible == 0)
+                                            {
+                                                <span class="text-danger">Completo</span>
+                                            }
+                                            else
+                                            {
+                                                <span>Libres: @t.CupoDisponible / @t.CupoMaximo</span>
+                                            }
+                                        </div>
+                                        <div class="small d-block text-muted">Precio: $@t.PrecioTurno</div>
                                     </div>
-                                    <button type="button" class="btn btn-sm btn-success" disabled="@procesando" @onclick="() => ConsultarCreditos(t.Id)">
-                                        Reservar
-                                    </button>
+                                    <div>
+                                        @if (t.CupoDisponible == 0)
+                                        {
+                                            <button type="button" class="btn btn-sm btn-warning"
+                                                    disabled="@procesando"
+                                                    @onclick="() => UnirseListaEspera(t.Id)">
+                                                Unirse a lista de espera
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <button type="button" class="btn btn-sm btn-success"
+                                                    disabled="@procesando"
+                                                    @onclick="() => ConsultarCreditos(t.Id)">
+                                                Reservar
+                                            </button>
+                                        }
+                                    </div>
                                 </li>
                             }
                         }
@@ -110,8 +124,8 @@ else
                     <p>¿Desea utilizar un credito disponible para esta reserva?</p>
                 </div>
                 <div class="modal-footer">
-                    <button class="btn btn-secondary" @onclick="() => Reservar(idTurnoAReservar)">No, gracias</button>
-                    <button class="btn btn-success" @onclick="() => ReservarConCredito(idTurnoAReservar)">Si porfavor</button>
+                    <button class="btn btn-secondary" @onclick="() => Reservar(idTurnoAReservar)">No</button>
+                    <button class="btn btn-success" @onclick="() => ReservarConCredito(idTurnoAReservar)">Si</button>
                 </div>
             </div>
         </div>
@@ -148,7 +162,10 @@ else
             {
                 var usuario = await ObtenerUsuarioPorId.Ejecutar(UserId.Value);
                 if (usuario != null)
+                {
                     UsuarioSesion.RestaurarSesion(usuario);
+                    await UsuarioSesion.NotificarCambio();
+                }
             }
 
             await ProcesarVueltaDeMP();

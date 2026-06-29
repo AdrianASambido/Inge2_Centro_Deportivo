@@ -262,6 +262,7 @@ else
                                     <th>DNI</th>
                                     <th>Estado</th>
                                     <th>Asistencia</th>
+                                    <th>Tipo</th>
                                     <th class="text-center">Acciones</th>
                                 </tr>
                             </thead>
@@ -274,6 +275,7 @@ else
                                         <td>@r?.Usuario?.Dni</td>
                                         <td>@r?.Estado</td>
                                         <td>@r?.Asistencia</td>
+                                        <td>@r?.TipoReserva</td>
                                         <td class="text-center">
                                             <button class="btn btn-sm btn-outline-primary" @onclick="() => RegistrarAsistencia(r.Id)" 
                                             disabled="@(!PuedeRegistrarAsistencia(r))">
@@ -703,14 +705,25 @@ else
 
     private async Task EliminarInscripto()
     {
-        /*
-        mensajeTabla = "";
-        mostrarDialog = false;
         try
         {
-            await EliminarInscriptoUseCase.Ejecutar(idAEliminar)
+            mensajeTabla = "";
+
+            await EliminarInscriptoUseCase.Ejecutar(idAEliminar);
+
+            await RecargarReservas();
+
+            mensajeTabla = "El inscripto ha sido eliminado correctamente.";
         }
-        */
+        catch (Exception ex)
+        {
+            mensajeTabla = $"Error al eliminar: {ex.Message}";
+        }
+        finally
+        {
+            mostrarDialog = false;
+            StateHasChanged();
+        }
     }
 
     private void EditarTurno(int turnoId) => Navegador.NavigateTo($"/editar-turno/{turnoId}");
