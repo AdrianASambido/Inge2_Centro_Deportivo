@@ -52,7 +52,7 @@ namespace CentroDeportivo.Infraestructura.Servicios
                         Failure = urlFallo,
                         Pending = urlFallo
                     },
-                    AutoReturn = "approved"
+                    AutoReturn = "approved"s
                 };
 
                 Preference preference = await client.CreateAsync(request);
