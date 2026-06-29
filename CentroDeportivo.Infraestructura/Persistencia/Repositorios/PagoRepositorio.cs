@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+
 namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
 {
     public class PagoRepositorio(CentroDeportivoContext contexto) : IPagoRepositorio

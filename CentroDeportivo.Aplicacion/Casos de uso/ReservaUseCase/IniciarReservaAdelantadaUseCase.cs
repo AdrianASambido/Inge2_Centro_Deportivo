@@ -27,8 +27,8 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
 
             string stringIdsTurnos = string.Join(",", clasesDisponibles.Select(t => t.Id));
 
-            string urlExito = $"https://localhost:5001/Turno/adelantada?volviMP=true&pagoExitoso=true&turnosId={stringIdsTurnos}&userId={idUsuario}&ActividadId={clasesDisponibles.First().Id_Actividad}&DiaSemana={(int)clasesDisponibles.First().Fecha.DayOfWeek}";
-            string urlFallo = $"https://localhost:5001/Turno/adelantada?volviMP=true&pagoExitoso=false&turnosId={stringIdsTurnos}&userId={idUsuario}&ActividadId={clasesDisponibles.First().Id_Actividad}&DiaSemana={(int)clasesDisponibles.First().Fecha.DayOfWeek}";
+            string urlExito = $"https://localhost:5000/Turno/adelantada?volviMP=true&pagoExitoso=true&turnosId={stringIdsTurnos}&userId={idUsuario}&ActividadId={clasesDisponibles.First().Id_Actividad}&DiaSemana={(int)clasesDisponibles.First().Fecha.DayOfWeek}";
+            string urlFallo = $"https://localhost:5000/Turno/adelantada?volviMP=true&pagoExitoso=false&turnosId={stringIdsTurnos}&userId={idUsuario}&ActividadId={clasesDisponibles.First().Id_Actividad}&DiaSemana={(int)clasesDisponibles.First().Fecha.DayOfWeek}";
 
             string nombreProducto = $"Abono Mensual Adelantado ({clasesDisponibles.Count} Clases)";
 
