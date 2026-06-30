@@ -297,7 +297,7 @@
             }));
         }
 
-        // 🔥 LA MAGIA: Ejecuta TODAS las consultas a la DB al mismo tiempo
+        // Ejecuta TODAS las consultas a la DB al mismo tiempo
         var resultados = await Task.WhenAll(tareas);
 
         // Ordenamos cronológicamente y asignamos a la lista del gráfico

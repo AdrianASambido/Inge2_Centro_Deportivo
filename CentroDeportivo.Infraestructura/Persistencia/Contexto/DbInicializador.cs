@@ -94,7 +94,79 @@ public static class DbInicializador
                 context.SaveChanges();
             }
         }
+        // agregado
+        // ====================================================================
+        // NUEVO BLOQUE: Inicializar Reservas de Prueba para los 3 usuarios
+        // ====================================================================
+        if (!context.Reservas.Any()) // Usamos tu DbSet de Reservas
+        {
+            // 1. Buscamos el primer turno de fútbol (7 de Julio)
+            var turnoFutbol = context.Turnos.FirstOrDefault(t => t.Fecha == new DateOnly(2026, 7, 7));
 
+            // 2. Buscamos a tus 3 usuarios clientes reales de la BD
+            var juan = context.Usuarios.FirstOrDefault(u => u.Email == "juan@gmail.com");
+            var maria = context.Usuarios.FirstOrDefault(u => u.Email == "maria@gmail.com");
+            var nelson = context.Usuarios.FirstOrDefault(u => u.Email == "nelsonjp1999@gmail.com");
+
+            if (turnoFutbol != null && juan != null && maria != null && nelson != null)
+            {
+                // El turno sale $5000. Dividimos por 3 para simular la porción de cada uno.
+                decimal montoPorUsuario = Math.Round(5000m / 3m, 2); // 1666.67
+
+                var reservasDePrueba = new List<Reserva>
+                {
+                    // USUARIO 1: Juan (Simulamos que ya pagó exitosamente)
+                    new Reserva
+                    {
+                        Id_Turno = turnoFutbol.Id,
+                        Id_Usuario = juan.Id,
+                        PrecioPagado = montoPorUsuario,
+                        Estado = EstadoReserva.Confirmado, // Tu enum (asumiendo que tenés 'Pagado' o 'Confirmado')
+                        Asistencia = Asistencia.Ausente, // Por defecto al inicializar
+                        FechaReserva = new DateOnly(2026, 6, 29), // Fecha de hoy simulada
+                        TipoReserva = TipoReserva.Ocasional, // Tu enum para reservas comunes
+                        ConCredito = false,    
+                    //    ExternalReferenceMP = $"turno_{turnoFutbol.Id}_user_{juan.Id}"
+
+                    },
+
+                    // USUARIO 2: María (Simulamos reserva pendiente de pago)
+                    new Reserva
+                    {
+                        Id_Turno = turnoFutbol.Id,
+                        Id_Usuario = maria.Id,
+                        PrecioPagado = 0, // Aún no pagó
+                        Estado = EstadoReserva.PendienteDePago, // Tu enum para estados pendientes
+                        Asistencia = Asistencia.Ausente,
+                        FechaReserva = new DateOnly(2026, 6, 29),
+                        TipoReserva = TipoReserva.Ocasional,
+                        ConCredito = false,
+                  //      ExternalReferenceMP = $"turno_{turnoFutbol.Id}_user_{maria.Id}"
+                    },
+
+                    // USUARIO 3: Nelson (Simulamos reserva pendiente de pago)
+                    new Reserva
+                    {
+                        Id_Turno = turnoFutbol.Id,
+                        Id_Usuario = nelson.Id,
+                        PrecioPagado = 0, // Aún no pagó
+                        Estado = EstadoReserva.Reservado,
+                        Asistencia = Asistencia.Ausente,
+                        FechaReserva = new DateOnly(2026, 6, 29),
+                        TipoReserva = TipoReserva.Ocasional,
+                        ConCredito = false,
+                  //      ExternalReferenceMP = $"turno_{turnoFutbol.Id}_user_{nelson.Id}"
+                    }
+                };
+
+                // Descontamos 3 lugares del cupo disponible del turno
+                turnoFutbol.CupoDisponible -= 3;
+
+                context.Reservas.AddRange(reservasDePrueba);
+                context.SaveChanges();
+            }
+        }
+        //hasta acá
         context.SaveChanges();
     }
 }
