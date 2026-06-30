@@ -44,7 +44,7 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ListaEsperaUseCase
                 DateTime ahora = DateTime.Now;
 
                 var siguienteEnFila = await repoLista.ObtenerPrimeroEnFilaAsync(idTurno);
-                var turno = await repoTurno.ObtenerPorIdAsync(idTurno);
+                var turno = inscripcionActual.Turno;
 
                 if (siguienteEnFila != null)
                 {

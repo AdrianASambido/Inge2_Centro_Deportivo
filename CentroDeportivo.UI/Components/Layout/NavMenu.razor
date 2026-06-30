@@ -105,14 +105,17 @@
     </div>
 }
 
-@code{
+@code {
+    private Func<Task> _handler = default!;
+
     protected override void OnInitialized()
     {
-        UsuarioSesion.OnChange += StateHasChanged;
+        _handler = () => InvokeAsync(StateHasChanged);
+        UsuarioSesion.OnChange += _handler;
     }
 
     public void Dispose()
     {
-        UsuarioSesion.OnChange -= StateHasChanged;
+        UsuarioSesion.OnChange -= _handler;
     }
 }

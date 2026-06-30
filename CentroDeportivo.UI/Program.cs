@@ -17,7 +17,8 @@ using CentroDeportivo.Infraestructura.Persistencia.Repositorios;
 using CentroDeportivo.Infraestructura.Servicios;
 using CentroDeportivo.UI.Components;
 using CentroDeportivo.UI.Servicios;
-using Microsoft.EntityFrameworkCore; 
+using Microsoft.EntityFrameworkCore;
+using QuestPDF.Infrastructure;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -162,11 +163,14 @@ builder.Services.AddScoped<CompletarPagoReservaOcasionalUseCase>();
 builder.Services.AddScoped<CrearReservaAdelantadaUseCase>();
 builder.Services.AddScoped<CrearReservaConCreditoUseCase>();
 builder.Services.AddScoped<RenovarReservaAdelantadaUseCase>();
+builder.Services.AddScoped<CrearReservaListaEsperaUseCase>();
+builder.Services.AddScoped<IniciarPagoListaEsperaUseCase>();
 builder.Services.AddScoped<ObtenerClasesAdelantadasDisponiblesUseCase>();
 
 builder.Services.AddScoped<DescargarComprobanteUseCase>();
 
 builder.Services.AddScoped<Sesion>();
+
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
@@ -174,6 +178,7 @@ builder.Services.AddRazorComponents()
     {
         options.DisconnectedCircuitRetentionPeriod = TimeSpan.FromMinutes(10);
     });
+QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
 
 var app = builder.Build();
 

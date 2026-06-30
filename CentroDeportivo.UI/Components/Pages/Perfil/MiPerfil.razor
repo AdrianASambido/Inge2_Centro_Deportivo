@@ -6,9 +6,9 @@
 @inject NavigationManager Navegador
 @inject ConsultarHistorialUsuarioUseCase ConsultarHistorialUsuarioCase
 @inject ConsultarCreditosUseCase ConsultarCreditosUseCase
-@inject CentroDeportivo.Aplicacion.Casos_de_uso.PagoUseCase.DescargarComprobanteUseCase DescargarComprobanteUseCase
-@inject IJSRuntime JS
 @inject ConsultarPagosUseCase ConsultarPagosUseCase
+@inject DescargarComprobanteUseCase DescargarComprobanteUseCase
+@inject IJSRuntime JS
 
 
 <PageTitle>Mi Perfil</PageTitle>
@@ -38,24 +38,22 @@
             else
             {
                 <div class="d-flex justify-content-center gap-2 gap-sm-3 mb-4">
-                    <button class="btn py-2 px-3 text-center transition-all @(pestanaActiva == 1 ? "btn-primary text-white shadow" : "btn-light text-dark")"
+                    <button class="btn py-2 px-3 text-center @(pestanaActiva == 1 ? "btn-primary text-white shadow" : "btn-light text-dark")"
                             style="min-width: 130px; border-radius: 12px;"
                             @onclick="() => pestanaActiva = 1">
                         <span class="fw-bold small">Mi Perfil</span>
                     </button>
-
-                    <button class="btn py-2 px-3 text-center transition-all @(pestanaActiva == 2 ? "btn-primary text-white shadow" : "btn-light text-dark")"
+                    <button class="btn py-2 px-3 text-center @(pestanaActiva == 2 ? "btn-primary text-white shadow" : "btn-light text-dark")"
                             style="min-width: 130px; border-radius: 12px;"
                             @onclick="() => pestanaActiva = 2">
-                        <span class="fw-bold small">Consultar Historial</span>
+                        <span class="fw-bold small">Historial</span>
                     </button>
-
-                    <button class="btn py-2 px-3 text-center transition-all @(pestanaActiva == 3 ? "btn-primary text-white shadow" : "btn-light text-dark")"
+                    <button class="btn py-2 px-3 text-center @(pestanaActiva == 3 ? "btn-primary text-white shadow" : "btn-light text-dark")"
                             style="min-width: 130px; border-radius: 12px;"
                             @onclick="() => pestanaActiva = 3">
-                        <span class="fw-bold small">Listar Comprobantes</span>
+                        <span class="fw-bold small">Comprobantes</span>
                     </button>
-                    <button class="btn py-2 px-3 text-center transition-all @(pestanaActiva == 4 ? "btn-primary text-white shadow" : "btn-light text-dark")"
+                    <button class="btn py-2 px-3 text-center @(pestanaActiva == 4 ? "btn-primary text-white shadow" : "btn-light text-dark")"
                             style="min-width: 130px; border-radius: 12px;"
                             @onclick="() => pestanaActiva = 4">
                         <span class="fw-bold small">Mis Créditos</span>
@@ -70,7 +68,6 @@
                             <h4 class="card-title fw-bold text-dark mb-4 text-center text-md-start">
                                 <i class="bi bi-person-lines-fill me-2 text-primary"></i>Datos Personales
                             </h4>
-
                             <div class="list-group list-group-flush mb-4">
                                 <div class="list-group-item border-0 px-0 d-flex justify-content-between align-items-center">
                                     <span class="text-muted"><i class="bi bi-person me-2"></i>Nombre</span>
@@ -89,18 +86,18 @@
                                     <span class="fw-bold text-dark">@UsuarioSesion.UsuarioActual.Email</span>
                                 </div>
                             </div>
-
                             <hr class="text-muted opacity-25" />
-
                             <div class="d-flex flex-column flex-sm-row justify-content-center gap-2 mt-4">
-                                <NavLink class="btn btn-warning px-4 shadow-sm text-dark fw-bold" href="@($"/editar-usr/{UsuarioSesion.UsuarioActual.Id}")" style="border-radius: 8px;">
+                                <NavLink class="btn btn-warning px-4 shadow-sm text-dark fw-bold"
+                                         href="@($"/editar-usr/{UsuarioSesion.UsuarioActual.Id}")"
+                                         style="border-radius: 8px;">
                                     <i class="bi bi-pencil-square me-2"></i>Editar perfil
                                 </NavLink>
-
-                                <NavLink class="btn btn-outline-secondary px-4 shadow-sm" href="@($"/cambiar-contrasenia/{UsuarioSesion.UsuarioActual.Id}")" style="border-radius: 8px;">
+                                <NavLink class="btn btn-outline-secondary px-4 shadow-sm"
+                                         href="@($"/cambiar-contrasenia/{UsuarioSesion.UsuarioActual.Id}")"
+                                         style="border-radius: 8px;">
                                     <i class="bi bi-shield-lock me-2"></i>Contraseña
                                 </NavLink>
-
                                 <button class="btn btn-danger px-4 shadow-sm" @onclick="CerrarSesion" style="border-radius: 8px;">
                                     <i class="bi bi-box-arrow-left me-2"></i>Salir
                                 </button>
@@ -113,7 +110,6 @@
                             <h4 class="card-title fw-bold text-dark mb-4 text-center text-md-start">
                                 <i class="bi bi-clock-history me-2 text-primary"></i>Historial de Actividad
                             </h4>
-
                             @if (historial != null && historial.Any())
                             {
                                 <div class="table-responsive border rounded-3 bg-white">
@@ -144,7 +140,7 @@
                             {
                                 <div class="text-center py-4 text-muted">
                                     <i class="bi bi-calendar-x fs-3 d-block mb-2"></i>
-                                    @(!string.IsNullOrEmpty(mensaje) ? mensaje : "No registra actividad deportiva en el sistema.")
+                                    No registra actividad deportiva en el sistema.
                                 </div>
                             }
                         </div>
@@ -156,123 +152,120 @@
             <i class="bi bi-receipt me-2 text-primary"></i>Comprobantes de Pago
         </h4>
 
-        @if (comprobantes != null && comprobantes.Any())
-        {
-            <div class="table-responsive border rounded-3 bg-white">
-                <table class="table table-hover align-middle m-0 text-center">
-                    <thead class="table-light">
-                        <tr class="text-muted small text-uppercase">
-                            <th class="text-start ps-3">Nro. Pago</th>
-                            <th>Fecha</th>
-                            <th>Monto</th>
-                            <th>Método</th>
-                            <th class="text-end pe-3">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var pago in comprobantes)
-                        {
-                            <tr>
-                                <td class="fw-bold text-start ps-3">#@pago.Id</td>
-                                <td>@pago.Fecha.ToString("dd/MM/yyyy HH:mm")</td>
-                                <td class="text-success fw-bold">$ @pago.Monto</td>
-                                <td>
-                                    <span class="badge bg-light text-dark border">
-                                        <i class="bi bi-credit-card-2-front me-1"></i>
-                                    </span>
-                                </td>
-                                <td class="text-end pe-3">
-                                    <button class="btn btn-outline-primary btn-sm fw-bold" 
-                                            @onclick="() => DescargarPdf(pago.Id)"
-                                            disabled="@descargandoId.HasValue">
-                                        @if (descargandoId == pago.Id)
-                                        {
-                                            <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
-                                        }
-                                        else
-                                        {
-                                            <i class="bi bi-download me-1"></i>
-                                        }
-                                        Descargar
-                                    </button>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-        }
-        else
-        {
-            <div class="text-center py-5 text-muted bg-light rounded-3 border">
-                <i class="bi bi-file-earmark-x fs-2 text-secondary mb-3 d-block"></i>
-                <p class="mb-0 fw-bold">No posee comprobantes de pago.</p>
-            </div>
-        }
-    </div>  
-}
-                    else if (pestanaActiva == 4)
-{
-    <h5 class="fw-bold mb-4">
-        <i class="bi bi-wallet2 me-2 text-primary"></i>Mis Créditos
-    </h5>
+                            @if (!string.IsNullOrEmpty(mensajePago))
+                            {
+                                <div class="alert alert-danger">@mensajePago</div>
+                            }
 
-    @if (creditos != null && creditos.Any())
-    {
-        <div class="table-responsive border rounded-3">
-            <table class="table table-hover align-middle m-0 text-center tabla-comprobantes">
-                <thead class="table-light">
-                    <tr>
-                        <th class="text-start ps-3">Actividad</th>
-                        <th>Fecha de generación</th>
-                        <th>Vencimiento</th>
-                        <th>Estado</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var credito in creditos)
-                    {
-                        <tr>
-                            <td class="text-start ps-3 fw-bold text-primary">@credito.Actividad?.Nombre</td>
-                            <td class="text-muted">@credito.FechaGeneracion.ToString("dd/MM/yyyy")</td>
-                            <td class="text-muted">@credito.FechaVencimiento.ToString("dd/MM/yyyy")</td>
-                            <td>
-                                <span class="badge @(credito.Estado == EstadoCredito.Disponible ? "bg-success-subtle text-success" : "bg-secondary-subtle text-secondary")">
-                                    @credito.Estado
-                                </span>
-                            </td>
-                        </tr>
+                            @if (pagos != null && pagos.Any())
+                            {
+                                <div class="table-responsive border rounded-3 bg-white">
+                                    <table class="table table-hover align-middle m-0">
+                                        <thead class="table-light">
+                                            <tr class="text-muted small text-uppercase">
+                                                <th class="ps-3">Fecha</th>
+                                                <th>Actividad</th>
+                                                <th>Monto</th>
+                                                <th class="text-end pe-3">Comprobante</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var p in pagos)
+                                            {
+                                                <tr>
+                                                    <td class="ps-3">@p.Fecha.ToString("dd/MM/yyyy")</td>
+                                                    <td>
+                                                        @(p.Reserva?.Turno?.Actividad?.Nombre
+                                                          ?? p.Turno?.Actividad?.Nombre
+                                                          ?? "Pago")
+                                                    </td>
+                                                    <td>
+                                                        <span class="badge bg-success-subtle text-success fs-6 px-3">
+                                                            $ @p.Monto
+                                                        </span>
+                                                    </td>
+                                                    <td class="text-end pe-3">
+                                                        <button class="btn btn-outline-primary btn-sm"
+                                                                @onclick="() => DescargarComprobante(p.Id)">
+                                                            <i class="bi bi-download me-1"></i> Descargar
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="text-center py-4 text-muted">
+                                    <i class="bi bi-credit-card-2-back fs-3 d-block mb-2"></i>
+                                    No registra comprobantes de pago.
+                                </div>
+                            }
+                        </div>
                     }
-                </tbody>
-            </table>
-        </div>
-    }
-    else
-{
-    <div class="text-center py-4 text-muted">
-        <p class="mb-0">Usted no posee créditos en este momento.</p>
-    </div>
-}
-}
+                    else if (pestanaActiva == 4)
+                    {
+                        <div class="card-body p-4 p-md-5">
+                            <h4 class="card-title fw-bold text-dark mb-4 text-md-start">
+                                <i class="bi bi-wallet2 me-2 text-primary"></i>Créditos disponibles
+                            </h4>
+
+                            @if (creditos != null && creditos.Any())
+                            {
+                                <div class="table-responsive border rounded-3 bg-white">
+                                    <table class="table table-hover align-middle m-0">
+                                        <thead class="table-light">
+                                            <tr class="text-muted small text-uppercase">
+                                                <th class="ps-3">Actividad</th>
+                                                <th>Generado</th>
+                                                <th>Vence</th>
+                                                <th>Estado</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var c in creditos)
+                                            {
+                                                <tr>
+                                                    <td class="ps-3 fw-bold text-primary">
+                                                        @(c.Actividad?.Nombre ?? "-")
+                                                    </td>
+                                                    <td>@c.FechaGeneracion.ToString("dd/MM/yyyy")</td>
+                                                    <td>@c.FechaVencimiento.ToString("dd/MM/yyyy")</td>
+                                                    <td>
+                                                        <span class="badge @(c.Estado == EstadoCredito.Disponible ? "bg-success" : "bg-secondary")">
+                                                            @c.Estado
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="text-center py-4 text-muted">
+                                    <i class="bi bi-wallet2 fs-3 d-block mb-2"></i>
+                                    No registra créditos disponibles.
+                                </div>
+                            }
+                        </div>
+                    }
                 </div>
             }
         </div>
     </div>
 </div>
 
-@if (!string.IsNullOrEmpty(mensaje) && pestanaActiva == 1)
-{
-    <div class="alert alert-info mt-3 shadow-sm mx-auto text-center" style="max-width: 500px;">@mensaje</div>
-}
-
 @code {
     private int pestanaActiva = 1;
     private List<HistorialUsuarioActividadDTO>? historial;
     private List<Credito>? creditos;
+    private List<Pago>? pagos;
     private string mensaje = "";
-    private List<Pago>? comprobantes; 
-    private int? descargandoId = null;
-    private string error = "";
+    private string mensajePago = "";
 
     protected override async Task OnInitializedAsync()
 {
@@ -284,61 +277,39 @@
             return;
         }
 
-        var resultado = await ConsultarHistorialUsuarioCase.Ejecutar(UsuarioSesion.UsuarioActual.Id);
-        historial = resultado?.ToList() ?? new List<HistorialUsuarioActividadDTO>();
+            var idUsuario = UsuarioSesion.UsuarioActual.Id;
 
-        creditos = (await ConsultarCreditosUseCase.Ejecutar(UsuarioSesion.UsuarioActual.Id))?.ToList() ?? new();
+            var resultadoHistorial = await ConsultarHistorialUsuarioCase.Ejecutar(idUsuario);
+            historial = resultadoHistorial?.ToList() ?? new();
 
-        var pagos = await ConsultarPagosUseCase.Ejecutar(UsuarioSesion.UsuarioActual.Id);
-        comprobantes = pagos?.ToList() ?? new List<Pago>();
-    }
-    catch (Exception ex)
-    {
-        mensaje = ex.Message;
-    }
-}
-    private async Task DescargarPdf(int pagoId)
-{
-    try
-    {
-        error = "";
-        descargandoId = pagoId;
-        StateHasChanged();
+            var resultadoCreditos = await ConsultarCreditosUseCase.Ejecutar(idUsuario);
+            creditos = resultadoCreditos?.ToList() ?? new();
 
-        byte[] pdfBytes = await DescargarComprobanteUseCase.Ejecutar(pagoId, UsuarioSesion.UsuarioActual!.Id);
-
-        if (pdfBytes is { Length: > 0 })
-        {
-            var base64 = Convert.ToBase64String(pdfBytes);
-            await JS.InvokeVoidAsync("eval", $@"
-                const a = document.createElement('a');
-                a.href = 'data:application/pdf;base64,{base64}';
-                a.download = 'Comprobante_Pago_{pagoId}.pdf';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-            ");
+            var resultadoPagos = await ConsultarPagosUseCase.Ejecutar(idUsuario);
+            pagos = resultadoPagos?.ToList() ?? new();
         }
-        else
+        catch (Exception ex)
         {
-            error = "No se pudo generar el comprobante. Intentá de nuevo.";
+            mensaje = ex.Message;
         }
     }
-    catch (Exception ex)
+
+    private async Task DescargarComprobante(int pagoId)
     {
-        error = "No se pudo generar el comprobante. Intentá de nuevo.";
-        Console.WriteLine($"[PDF ERROR] {ex}");
+        mensajePago = "";
+        try
+        {
+            var pdf = await DescargarComprobanteUseCase.Ejecutar(pagoId, UsuarioSesion.UsuarioActual!.Id);
+            var base64 = Convert.ToBase64String(pdf);
+            await JS.InvokeVoidAsync("downloadFileFromBase64", base64, $"comprobante_{pagoId}.pdf", "application/pdf");
+        }
+        catch (Exception ex)
+        {
+            mensajePago = ex.Message;
+        }
     }
-    finally
-    {
-        descargandoId = null;
-        StateHasChanged();
-    }
-}
-    void IrLogin()
-    {
-        Navegador.NavigateTo("/Login");
-    }
+
+    void IrLogin() => Navegador.NavigateTo("/Login");
 
     void CerrarSesion()
     {
