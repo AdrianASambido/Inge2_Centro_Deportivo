@@ -90,14 +90,17 @@ builder.Services.AddScoped<ConsultarDisponibilidadUseCase>();
 builder.Services.AddScoped<ConfirmarDevolucionUseCase>();
 builder.Services.AddScoped<ListarDevolucionesPendientesUseCase>();
 
+
 builder.Services.AddScoped<Sesion>();
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-var app = builder.Build();
+QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
 
+builder.Logging.AddFilter("Microsoft.EntityFrameworkCore.Database.Command", LogLevel.Warning);
+var app = builder.Build();
 //  INICIALIZAR LA BASE DE DATOS Y EL ADMIN
 // Este bloque se ejecuta antes de que la app empiece a recibir usuarios
 using (var scope = app.Services.CreateScope())

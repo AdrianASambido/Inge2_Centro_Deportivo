@@ -23,8 +23,8 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
             decimal montoRestante = reserva.PrecioPagado;
 
 
-            string urlExito = $"https://localhost:7001/MisReservas?pagoExitoso=true&reservaId={reserva.Id}&tipo=confirmarOcasional";
-            string urlFallo = $"https://localhost:7001/MisReservas?pagoExitoso=false&reservaId={reserva.Id}&tipo=confirmarOcasional";
+            string urlExito = $"https://localhost:5001/MisReservas?pagoExitoso=true&reservaId={reserva.Id}&tipo=confirmarOcasional";
+            string urlFallo = $"https://localhost:5001/MisReservas?pagoExitoso=false&reservaId={reserva.Id}&tipo=confirmarOcasional";
 
             string tituloPago = $"Saldo Restante - Turno Ocasional Nro {reserva.Id_Turno}";
 
