@@ -39,10 +39,12 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
 
         public async Task<IEnumerable<Credito?>> ObtenerDisponiblesAsync(int idUsuario, int idActividad)
         {
-            return await contexto.Creditos.Include(c => c.Usuario)
-                                   .Include(c => c.Actividad)
-                                    .Where(c => c.Id_Actividad == idActividad && c.Id_Usuario == idUsuario && c.Estado == EstadoCredito.Disponible)
-                                    .AsNoTracking().ToListAsync();
+            
+            return await contexto.Creditos
+                                 .Where(c => c.Id_Actividad == idActividad
+                                          && c.Id_Usuario == idUsuario
+                                          && c.Estado == EstadoCredito.Disponible)
+                                 .ToListAsync();
         }
 
         public Task<Credito?> ObtenerPorActividadAsync(int idActividad)

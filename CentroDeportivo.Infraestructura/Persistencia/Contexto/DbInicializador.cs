@@ -16,7 +16,7 @@ public static class DbInicializador
                 new Usuario("Carlos", "Tevez", "Calle 123", "112345534", BCrypt.Net.BCrypt.HashPassword("Admin1234"), "admin@gmail.com", false, Rol.Administrador),
                 new Usuario("Juan", "Perez", "Calle 456", "30111222", BCrypt.Net.BCrypt.HashPassword("Boca1999"), "juan@gmail.com", false, Rol.Cliente),
                 new Usuario("Maria", "Gomez", "Calle 789", "32444555", BCrypt.Net.BCrypt.HashPassword("Boca1999"), "maria@gmail.com", false, Rol.Cliente),
-                new Usuario("nel", "pin", "Calle10", "123456", BCrypt.Net.BCrypt.HashPassword("Boca1999"), "nelsonjp1999@gmail.com", false, Rol.Cliente)
+                new Usuario("nel joaquin", "pin", "Calle10", "123456", BCrypt.Net.BCrypt.HashPassword("Boca1999"), "nelsonjp1999@gmail.com", false, Rol.Cliente)
             };
             context.Usuarios.AddRange(usuarios);
             context.SaveChanges();
@@ -87,6 +87,20 @@ public static class DbInicializador
                     Cancha = cancha1,
                     Profesor = profeMessi
                 }).ToList();
+                var turnoSuelto = new Turno
+                {
+                    Fecha = new DateOnly(2026, 7, 1),
+                    HoraInicio = new TimeOnly(22, 0),
+                    HoraFin = new TimeOnly(23, 0), 
+                    PrecioTurno = 5000,
+                    CupoMaximo = 1,
+                    CupoDisponible = 1,
+                    Estado = EstadoTurno.Disponible,
+                    Actividad = futbol,
+                    Cancha = cancha1,
+                    Profesor = profeMessi
+                };
+                turnos.Add(turnoSuelto);
                 context.Turnos.AddRange(turnos);
                 context.SaveChanges();
             }

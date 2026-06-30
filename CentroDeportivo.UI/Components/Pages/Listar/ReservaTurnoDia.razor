@@ -329,6 +329,7 @@ else
 
             await CrearReservaConCreditoUseCase.Ejecutar(nuevaReserva);
             mensajeExito = "Reserva realizada con éxito utilizando un crédito.";
+            mostrarDialogoReserva = false;
             await CargarTurnos();
         }
         catch (Exception ex)
