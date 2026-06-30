@@ -20,15 +20,15 @@ namespace CentroDeportivo.Infraestructura.Servicios
         public MercadoPagoServicio()
         {
 
-              MercadoPagoConfig.AccessToken = "";
+            //  MercadoPagoConfig.AccessToken = "";
         }
 
         public async Task<string> CrearPreferenciaPagoAsync(
-                    int idUsuario,
-                    decimal monto,
-                    string nombreActividad,
-                    string urlExito,
-                    string urlFallo)
+            int idUsuario,
+            decimal monto,
+            string nombreActividad,
+            string urlExito,
+            string urlFallo)
         {
             try
             {
@@ -50,13 +50,25 @@ namespace CentroDeportivo.Infraestructura.Servicios
                     {
                         Success = urlExito,
                         Failure = urlFallo,
-                        Pending = urlFallo
+                        Pending = urlFallo 
                     },
-                    AutoReturn = "approved"
+                    
+                    
+                    AutoReturn = "all"
                 };
 
                 Preference preference = await client.CreateAsync(request);
-                return preference.SandboxInitPoint;
+
+                Console.WriteLine("InitPoint:");
+                Console.WriteLine(preference.InitPoint);
+
+                Console.WriteLine("Sandbox:");
+                Console.WriteLine(preference.SandboxInitPoint);
+
+                // Usamos InitPoint porque el Access Token ya pertenece a un entorno de pruebas cerrado
+               // return preference.SandboxInitPoint;
+                return preference.InitPoint;
+
             }
             catch (Exception ex)
             {
@@ -75,34 +87,54 @@ namespace CentroDeportivo.Infraestructura.Servicios
             throw new NotImplementedException();
         }
 
-       /* public async Task<bool> RealizarReembolsoAsync(string idTransaccion)
+        public async Task ProbarRefundHttp(string paymentId)
         {
-            Console.WriteLine($"[Reembolso] Intentando reembolsar payment_id: {idTransaccion}");
-            try
-            {
-                var client = new MercadoPago.Client.Payment.PaymentClient();
+            using var http = new HttpClient();
 
-                var requestOptions = new MercadoPago.Http.MercadoPagoRequest(
-                    MercadoPago.Http.HttpMethod.Post,
-                    $"/v1/payments/{idTransaccion}/refunds",
-                    null
-                );
+            http.DefaultRequestHeaders.Authorization =
+                new System.Net.Http.Headers.AuthenticationHeaderValue(
+                    "Bearer",
+                    MercadoPagoConfig.AccessToken);
 
-                var refund = await client.RefundAsync(long.Parse(idTransaccion));
-                return refund != null;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error en reembolso: {ex.Message}");
-                return false;
-            }
-        }*/
+            
+           http.DefaultRequestHeaders.Add("X-Sandbox-Mode", "true");
+
+            var response = await http.PostAsync(
+                $"https://api.mercadopago.com/v1/payments/{paymentId}/refunds",
+                null);
+
+            Console.WriteLine($"HTTP Status: {response.StatusCode}");
+
+            var body = await response.Content.ReadAsStringAsync();
+            Console.WriteLine(body);
+        }
 
         public async Task<bool> RealizarReembolsoAsync(string idTransaccion)
-          {
-              Console.WriteLine($"[Reembolso SIMULADO] payment_id: {idTransaccion}");
-              await Task.CompletedTask;
-              return true;
-          } 
+        {
+            Console.WriteLine($"[Reembolso] Intentando reembolsar payment_id: {idTransaccion}");
+
+            var client = new PaymentClient();
+            var payment = await client.GetAsync(long.Parse(idTransaccion));
+
+            Console.WriteLine($"PaymentId API: {payment.Id}");
+            Console.WriteLine($"CollectorId: {payment.CollectorId}");
+            Console.WriteLine($"Status: {payment.Status}");
+            Console.WriteLine($"LiveMode: {payment.LiveMode}");
+
+           
+           // await ProbarRefundHttp(idTransaccion);
+
+            
+            var refund = await client.RefundAsync(long.Parse(idTransaccion));
+
+            return refund != null;
+        }
+
+        /* public async Task<bool> RealizarReembolsoAsync(string idTransaccion)
+           {
+               Console.WriteLine($"[Reembolso SIMULADO] payment_id: {idTransaccion}");
+               await Task.CompletedTask;
+               return true;
+           } */
     }
 }

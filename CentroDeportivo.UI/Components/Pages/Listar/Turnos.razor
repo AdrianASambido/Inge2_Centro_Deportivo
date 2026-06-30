@@ -93,7 +93,8 @@
         @if (pestañaActiva == 2)
         {
             <div class="row justify-content-center">
-                <div class="col-md-8">
+                <div class="col-12 col-md-5">
+
                     <div class="mb-3">
                         <label class="form-label">Actividad</label>
                         <select class="form-select" @bind="SeleccionActividad" @bind:after="AlActividadCambiada">
@@ -104,32 +105,35 @@
                             }
                         </select>
                     </div>
-                    <div>
-                        <label class="form-label">Dia de la semana</label>
+
+                    <div class="mb-3">
+                        <label class="form-label">Día de la semana</label>
                         <select class="form-select" @bind="diaSemana">
-                            @foreach (var d in Enum.GetValues<DayOfWeek>())
-                                {
-                                    <option value="@d">@NombreDia(d)</option>
-                                }
+                            @foreach (var d in Enum.GetValues<DayOfWeek>().Where(d => d != DayOfWeek.Saturday && d != DayOfWeek.Sunday))
+                            {
+                                <option value="@d">@NombreDia(d)</option>
+                            }
                         </select>
                     </div>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Mes</label>
-                    <select class="form-select" @bind="mesSeleccionado">
-                        <option value="@MesActual()">@NombreMes(DateTime.Now.Year, DateTime.Now.Month)</option>
-                        <option value="@MesProximo()">@NombreMes(AnioProximo(), NumeroMesProximo())</option>
-                    </select>
+
+                    <div class="mb-3">
+                        <label class="form-label">Mes</label>
+                        <select class="form-select" @bind="mesSeleccionado">
+                            <option value="@MesActual()">@NombreMes(DateTime.Now.Year, DateTime.Now.Month)</option>
+                            <option value="@MesProximo()">@NombreMes(AnioProximo(), NumeroMesProximo())</option>
+                        </select>
+                    </div>
+
+                    @if (int.TryParse(SeleccionActividad, out var aid2) && aid2 > 0)
+                    {
+                        <div class="mt-4 text-center">
+                            <button class="btn btn-primary w-100" @onclick="() => IrAActividad(aid2, diaSemana)">
+                                Continuar
+                            </button>
+                        </div>
+                    }
                 </div>
             </div>
-
-            @if (int.TryParse(SeleccionActividad, out var aid2) && aid2 > 0)
-            {
-                <button class="btn btn-primary"
-                @onclick="() => IrAActividad(aid2, diaSemana)">
-                    Continuar
-                </button>
-            }
         }
     }
 </div>
