@@ -307,7 +307,8 @@
             var usuario = await ObtenerUsuarioPorId.Ejecutar(userId.Value);
             if (usuario != null){
                 UsuarioSesion.RestaurarSesion(usuario);
-                UsuarioSesion.NotificarCambio();
+                await UsuarioSesion.NotificarCambio();
+                StateHasChanged();
             }
         }
 

@@ -1,4 +1,5 @@
 ﻿@inherits LayoutComponentBase
+@implements IDisposable
 @inject Sesion UsuarioSesion
 
 <div class="page">
@@ -23,3 +24,20 @@
         </article>
     </main>
 </div>
+
+@code
+{
+    private Func<Task>? _handler;
+
+    protected override void OnInitialized()
+    {
+        _handler = () => InvokeAsync(StateHasChanged);
+        UsuarioSesion.OnChange += _handler;
+    }
+
+    public void Dispose()
+    {
+        if (_handler != null)
+            UsuarioSesion.OnChange -= _handler;
+    }
+}

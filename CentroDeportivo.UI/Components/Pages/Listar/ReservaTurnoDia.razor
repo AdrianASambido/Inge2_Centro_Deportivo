@@ -217,6 +217,10 @@ else
     {
         if (!volviMP) return;
 
+        Console.WriteLine("Payment recibido:");
+        Console.WriteLine(PaymentId);
+        Console.WriteLine(Navegador.Uri);
+
         // cargar nombre de actividad para que la vista lo muestre
         if (ActividadId.HasValue)
         {
