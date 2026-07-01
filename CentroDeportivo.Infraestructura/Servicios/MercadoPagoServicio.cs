@@ -20,7 +20,7 @@ namespace CentroDeportivo.Infraestructura.Servicios
         public MercadoPagoServicio()
         {
 
-             MercadoPagoConfig.AccessToken = "";
+            // MercadoPagoConfig.AccessToken = "";
         }
 
         public async Task<string> CrearPreferenciaPagoAsync(
@@ -109,7 +109,7 @@ namespace CentroDeportivo.Infraestructura.Servicios
             Console.WriteLine(body);
         }
 
-        public async Task<bool> RealizarReembolsoAsync(string idTransaccion)
+       /* public async Task<bool> RealizarReembolsoAsync(string idTransaccion)
         {
             Console.WriteLine($"[Reembolso] Intentando reembolsar payment_id: {idTransaccion}");
 
@@ -128,13 +128,13 @@ namespace CentroDeportivo.Infraestructura.Servicios
             var refund = await client.RefundAsync(long.Parse(idTransaccion));
 
             return refund != null;
-        }
+        }*/
 
-        /* public async Task<bool> RealizarReembolsoAsync(string idTransaccion)
+         public async Task<bool> RealizarReembolsoAsync(string idTransaccion)
            {
                Console.WriteLine($"[Reembolso SIMULADO] payment_id: {idTransaccion}");
                await Task.CompletedTask;
                return true;
-           } */
+           } 
     }
 }

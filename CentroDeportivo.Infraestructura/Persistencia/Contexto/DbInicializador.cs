@@ -92,7 +92,20 @@ public static class DbInicializador
                     Fecha = new DateOnly(2026, 7, 1),
                     HoraInicio = new TimeOnly(22, 0),
                     HoraFin = new TimeOnly(23, 0), 
-                    PrecioTurno = 5000,
+                    PrecioTurno = 1000,
+                    CupoMaximo = 1,
+                    CupoDisponible = 1,
+                    Estado = EstadoTurno.Disponible,
+                    Actividad = futbol,
+                    Cancha = cancha1,
+                    Profesor = profeMessi
+                };
+                var turnoSuelto1 = new Turno
+                {
+                    Fecha = new DateOnly(2026, 7, 8),
+                    HoraInicio = new TimeOnly(22, 0),
+                    HoraFin = new TimeOnly(23, 0),
+                    PrecioTurno = 1000,
                     CupoMaximo = 1,
                     CupoDisponible = 1,
                     Estado = EstadoTurno.Disponible,
@@ -101,6 +114,7 @@ public static class DbInicializador
                     Profesor = profeMessi
                 };
                 turnos.Add(turnoSuelto);
+                turnos.Add(turnoSuelto1);
                 context.Turnos.AddRange(turnos);
                 context.SaveChanges();
             }

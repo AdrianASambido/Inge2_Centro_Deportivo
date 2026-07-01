@@ -53,7 +53,7 @@ namespace CentroDeportivo.Infraestructura.Servicios
             var inscriptosExpirados = todos
                 .Where(x => x.Estado == EstadoListaEspera.Notificado
                          && x.FechaNotificacion.HasValue
-                         && (ahora - x.FechaNotificacion.Value).TotalMinutes >= 10)
+                         && (ahora - x.FechaNotificacion.Value).TotalMinutes >= 5)
                 .ToList();
 
             foreach (var expirado in inscriptosExpirados)
