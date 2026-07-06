@@ -104,5 +104,19 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
 
             return !ocupado;
         }
+
+        public async Task<List<Profesor>> ObtenerDisponiblesEdicionTurnoAsync(DateOnly fecha, TimeOnly horaInicio, TimeOnly horaFin, int? excluirTurnoId = null)
+        {
+            return await contexto.Profesores
+        .Where(p => p.Existe
+            && !contexto.Turnos.Any(t =>
+                t.Id_Profesor == p.Id
+                && t.Fecha == fecha
+                && t.HoraInicio < horaFin
+                && t.HoraFin > horaInicio
+                && t.Estado != EstadoTurno.Cancelado
+                && (excluirTurnoId == null || t.Id != excluirTurnoId)))
+        .ToListAsync();
+        }
     }
 }

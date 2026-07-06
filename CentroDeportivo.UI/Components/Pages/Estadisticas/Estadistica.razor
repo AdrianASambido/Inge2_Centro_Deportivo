@@ -1,0 +1,491 @@
+﻿@page "/estadisticas"
+@rendermode InteractiveServer
+@using CentroDeportivo.Aplicacion.Casos_de_uso.EstadisticaUseCase
+@using CentroDeportivo.Aplicacion.Casos_de_uso.EstadisticaUseCase.DTOs
+@using CentroDeportivo.Aplicacion.Casos_de_uso.ActividadUseCase
+@using CentroDeportivo.Aplicacion.Entidades
+@using ApexCharts
+@inject Sesion UsuarioSesion
+@inject NavigationManager Navegador
+@inject ConsultarIngresosDelNegocioUseCase ConsultarIngresosDelNegocioUseCase
+@inject ConsultarIndicesActividadUseCase ConsultarIndicesActividadUseCase
+@inject ConsultarIngresosActividadUseCase ConsultarIngresosActividadUseCase
+@inject ListarActividadesUseCase ListarActividadesUseCase
+
+<PageTitle>Estadísticas</PageTitle>
+
+@if (!(UsuarioSesion.EstaAutenticado() && UsuarioSesion.esAdministrador()))
+{
+    <div class="container py-4">
+        <div class="alert alert-warning">
+            No tenés acceso a esta sección.
+            <NavLink href="/Login">Iniciar sesión</NavLink>
+        </div>
+    </div>
+}
+else
+{
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-3 bg-light min-vh-100 p-3 barra-lateral">
+                <h4 class="mb-4 text-center">Estadísticas</h4>
+                <div class="nav flex-column nav-pills">
+                    <button class="nav-link boton-menu @(seccionActiva == "ingresos" ? "active" : "")" @onclick='() => CambiarSeccion("ingresos")'>Ingresos Generales</button>
+                    <button class="nav-link boton-menu @(seccionActiva == "asistencia" ? "active" : "")" @onclick='() => CambiarSeccion("asistencia")'>Indices Actividad</button>
+                    <button class="nav-link boton-menu @(seccionActiva == "ingresoPorActividad" ? "active" : "")" @onclick='() => CambiarSeccion("ingresoPorActividad")'>Ingresos por actividad</button>
+                </div>
+            </div>
+
+            <div class="col-md-9 p-4">
+                @if (seccionActiva == "ingresos")
+                {
+                    <div class="card p-3 shadow-sm">
+                        <h5>Reporte de Ingresos del Negocio</h5>
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label>Desde</label>
+                                <input type="date" class="form-control" @bind="desdeDate" />
+                            </div>
+                            <div class="col-md-4">
+                                <label>Hasta</label>
+                                <input type="date" class="form-control" @bind="hastaDate" />
+                            </div>
+                            <div class="col-md-4 d-flex align-items-end">
+                                <button class="btn btn-primary" @onclick="FetchIngresosAsync" disabled="@isFetching">@((isFetching) ? "Buscando..." : "Buscar")</button>
+                            </div>
+                        </div>
+                        @if (!string.IsNullOrEmpty(errorMessageIngresos))
+                        {
+                            <div class="alert alert-danger mt-3">@errorMessageIngresos</div>
+                        }
+
+                        @if (datosIngresos != null && datosIngresos.Count > 0 && string.IsNullOrEmpty(errorMessageIngresos))
+                        {
+                            <ApexChart TItem="GraficoIngresoMesDto" Height="320" Title="Ingresos Mensuales ($)">
+                                <ApexPointSeries TItem="GraficoIngresoMesDto"
+                                                 Items="chartIngresos"
+                                                 Name="Ingresos"
+                                                 SeriesType="SeriesType.Bar"
+                                                 XValue="e => e.Mes"
+                                                 YValue="e => e.Monto" />
+                            </ApexChart>
+                        }
+                        else if (datosIngresos != null && string.IsNullOrEmpty(errorMessageIngresos))
+                        {
+                            <p class="mt-3"><em>No hay datos de ingresos para mostrar.</em></p>
+                        }
+                    </div>
+                }
+                else if (seccionActiva == "asistencia")
+                {
+                    <div class="card p-3 shadow-sm">
+                        <h5>Índices de Actividad</h5>
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label>Desde</label>
+                                <input type="date" class="form-control" @bind="desdeDate" />
+                            </div>
+                            <div class="col-md-4">
+                                <label>Hasta</label>
+                                <input type="date" class="form-control" @bind="hastaDate" />
+                            </div>
+                            <div class="col-md-4 d-flex align-items-end">
+                                <button class="btn btn-primary" @onclick="FetchAsistenciaAsync" disabled="@isFetching">Buscar</button>
+                            </div>
+                        </div>
+
+                        @if (datosAsistencia == null || datosAsistencia.Count == 0)
+                        {
+                            <p><em>No hay datos de asistencia para mostrar.</em></p>
+                        }
+                        else
+                        {
+                            <ApexChart TItem="GraficoAsistenciaDto" Height="360" Title="Asistencias, inasistencias y cancelaciones por actividad">
+                                <ApexPointSeries TItem="GraficoAsistenciaDto" Items="chartAsistencia" Name="Asistieron" SeriesType="SeriesType.Bar" XValue="e => e.Actividad" YValue="e => e.Asistencias" />
+                                <ApexPointSeries TItem="GraficoAsistenciaDto" Items="chartAsistencia" Name="Inasistieron" SeriesType="SeriesType.Bar" XValue="e => e.Actividad" YValue="e => e.Inasistencias" />
+                                <ApexPointSeries TItem="GraficoAsistenciaDto" Items="chartAsistencia" Name="Cancelaron" SeriesType="SeriesType.Bar" XValue="e => e.Actividad" YValue="e => e.Cancelaciones" />
+                            </ApexChart>
+
+                            <hr class="my-4" />
+                            <h6 class="mb-3 text-muted text-center">Resumen Porcentual de Índices</h6>
+                            @foreach (var item in chartAsistencia)
+                            {
+                                int totalReservas = item.Asistencias + item.Inasistencias + item.Cancelaciones;
+
+                                <div class="mb-4">
+                                    <strong class="d-block mb-2 text-primary">@item.Actividad (Total: @totalReservas reservas)</strong>
+                                    @if (totalReservas > 0)
+                                    {
+                                        var porcAsistencia = Math.Round((double)item.Asistencias / totalReservas * 100, 1);
+                                        var porcInasistencia = Math.Round((double)item.Inasistencias / totalReservas * 100, 1);
+                                        var porcCancelacion = Math.Round((double)item.Cancelaciones / totalReservas * 100, 1);
+
+                                        <div class="row g-2">
+                                            <div class="col-md-4">
+                                                <div class="card text-center p-2 bg-light" style="border-left: 5px solid #008FFB;">
+                                                    <span class="small text-muted font-weight-bold">Asistencia Real</span>
+                                                    <span class="h5 mb-0 text-dark">@porcAsistencia%</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="card text-center p-2 bg-light" style="border-left: 5px solid #00E396;">
+                                                    <span class="small text-muted font-weight-bold">Inasistencias</span>
+                                                    <span class="h5 mb-0 text-dark">@porcInasistencia%</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="card text-center p-2 bg-light" style="border-left: 5px solid #FEB019;">
+                                                    <span class="small text-muted font-weight-bold">Cancelaciones</span>
+                                                    <span class="h5 mb-0 text-dark">@porcCancelacion%</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <p class="small text-muted"><em>Sin reservas calculables para esta actividad en el rango seleccionado.</em></p>
+                                    }
+                                </div>
+                            }
+                        }
+                    </div>
+                }
+
+                else if (seccionActiva == "ingresoPorActividad")
+                {
+                    <div class="card p-3 shadow-sm">
+                        <h5>Ingreso por Actividad</h5>
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label>Desde</label>
+                                <input type="date" class="form-control" @bind="desdeDate" />
+                            </div>
+                            <div class="col-md-4">
+                                <label>Hasta</label>
+                                <input type="date" class="form-control" @bind="hastaDate" />
+                            </div>
+                            <div class="col-md-4 d-flex align-items-end">
+                                <button class="btn btn-primary" @onclick="FetchIngresosActividadAsync" disabled="@isFetching">Buscar</button>
+                            </div>
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(errorMessageActividades))
+                        {
+                            <div class="alert alert-danger mt-3">@errorMessageActividades</div>
+                        }
+
+                        @if (datosIngresosActividad != null && datosIngresosActividad.Count > 0 && string.IsNullOrEmpty(errorMessageActividades))
+                        {
+                            <ApexChart TItem="GraficoIngresoActividadDto" Height="360" Title="Ingresos por actividad ($)">
+                                <ApexPointSeries TItem="GraficoIngresoActividadDto"
+                                                 Items="chartIngresosActividad"
+                                                 Name="Ingresos"
+                                                 SeriesType="SeriesType.Bar"
+                                                 XValue="e => e.Actividad"
+                                                 YValue="e => e.Monto" />
+                            </ApexChart>
+                        }
+                        else if (datosIngresosActividad != null && string.IsNullOrEmpty(errorMessageActividades))
+                        {
+                            <p class="mt-3"><em>No hay datos de ingresos por actividad para mostrar.</em></p>
+                        }
+                    </div>
+                }
+
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private string seccionActiva = "ingresos";
+
+    private List<IngresoPorMesDto>? datosIngresos;
+    private List<IndiceActividadResumenDto>? datosAsistencia;
+    private List<IngresoPorActividadDto>? datosIngresosActividad;
+    private ReporteIndicesActividadResponseDTO? datosIndiceActividad;
+
+    private List<Actividad> actividades = new();
+    private int idActividadSeleccionada;
+
+    private DateTime desdeDate = DateTime.Today.AddMonths(-5);
+    private DateTime hastaDate = DateTime.Today;
+
+    private bool isFetching;
+
+    private string errorMessageIngresos = string.Empty;            //AGREGADO EL 05/07/2026 PARA INGRESOSO GENERALES
+    private string errorMessageActividades = string.Empty;         //AGREGADO PARA CONTROLAR ALERTAS DE ACTIVIDAD
+    private List<GraficoIngresoMesDto> chartIngresos = new();
+    private List<GraficoAsistenciaDto> chartAsistencia = new();
+    private List<GraficoIngresoActividadDto> chartIngresosActividad = new();
+    private List<GraficoIndiceActividadDto> chartIndiceActividad = new();
+
+    private string NombreActividadSeleccionada =>
+        actividades.FirstOrDefault(a => a.Id == idActividadSeleccionada)?.Nombre ?? "Actividad";
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            actividades = (await ListarActividadesUseCase.ejecutar()).ToList();
+            if (actividades.Count > 0)
+                idActividadSeleccionada = actividades[0].Id;
+
+            await FetchIngresosAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"ESTADISTICAS-ERROR: {ex.Message}\n{ex.StackTrace}");
+            datosIngresos = new List<IngresoPorMesDto>();
+            datosAsistencia = new List<IndiceActividadResumenDto>();
+        }
+    }
+
+    private bool PuedeConsultarUsuario() => UsuarioSesion.UsuarioActual != null;
+
+    private int ObtenerIdUsuarioAutenticado() => UsuarioSesion.UsuarioActual!.Id;
+
+    private async Task FetchIngresosAsync()
+    {
+        if (isFetching) return;
+        isFetching = true;
+        errorMessageIngresos = string.Empty;
+        try
+        {
+            if (hastaDate < desdeDate)
+            {
+                errorMessageIngresos = "Error: el periodo ingresado es incorrecto";
+                datosIngresos = new();
+                chartIngresos = new();
+                return;
+            }
+            var start = DateOnly.FromDateTime(new DateTime(desdeDate.Year, desdeDate.Month, 1));
+            var endMonth = new DateTime(hastaDate.Year, hastaDate.Month, 1);
+            int totalMeses = ((endMonth.Year - start.Year) * 12) + endMonth.Month - start.Month;
+            if (totalMeses > 24) totalMeses = 24;
+
+            var resultadosList = new List<IngresoPorMesDto>();
+
+            for (int i = 0; i <= totalMeses; i++)
+            {
+                var dt = new DateTime(start.Year, start.Month, 1).AddMonths(i);
+                var mesStart = DateOnly.FromDateTime(dt);
+                var mesEnd = mesStart.AddMonths(1).AddDays(-1);
+
+                try
+                {
+                    var total = await ConsultarIngresosDelNegocioUseCase.Ejecutar(mesStart, mesEnd);
+                    resultadosList.Add(new IngresoPorMesDto { Mes = mesStart.ToString("MMM yyyy"), MontoTotal = total });
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"ESTADISTICAS-ERROR (mes {mesStart}): {ex.Message}");
+                    resultadosList.Add(new IngresoPorMesDto { Mes = mesStart.ToString("MMM yyyy"), MontoTotal = 0m });
+                }
+            }
+
+            if (resultadosList.All(r => r.MontoTotal == 0m))
+            {
+                errorMessageIngresos = "El negocio no posee ingresos en el periodo ingresado";
+                datosIngresos = new();
+                chartIngresos = new();
+            }
+            else
+            {
+                datosIngresos = resultadosList;
+                chartIngresos = datosIngresos
+                    .Select(d => new GraficoIngresoMesDto { Mes = d.Mes, Monto = d.MontoTotal })
+                    .ToList();
+            }
+        }
+        finally
+        {
+            isFetching = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task FetchAsistenciaAsync()
+    {
+        if (isFetching) return;
+        isFetching = true;
+        try
+        {
+            if (hastaDate < desdeDate) return;
+
+            var desde = DateOnly.FromDateTime(desdeDate);
+            var hasta = DateOnly.FromDateTime(hastaDate);
+
+            if (actividades.Count == 0)
+                actividades = (await ListarActividadesUseCase.ejecutar()).ToList();
+
+            var resumen = new List<IndiceActividadResumenDto>();
+
+            foreach (var actividad in actividades)
+            {
+                var indice = await ConsultarIndicesActividadUseCase.Ejecutar(actividad.Id, desde, hasta);
+                resumen.Add(new IndiceActividadResumenDto
+                {
+                    Actividad = actividad.Nombre,
+                    CantidadAsistencias = indice.CantidadAsistencias,
+                    CantidadInasistencias = indice.CantidadInasistencias,
+                    CantidadCancelaciones = indice.CantidadCancelaciones
+                });
+            }
+
+            datosAsistencia = resumen.Where(r => r.TotalReservas > 0).ToList();
+
+            chartAsistencia = datosAsistencia
+                .Select(a => new GraficoAsistenciaDto
+                {
+                    Actividad = a.Actividad,
+                    Asistencias = a.CantidadAsistencias,
+                    Inasistencias = a.CantidadInasistencias,
+                    Cancelaciones = a.CantidadCancelaciones
+                })
+                .ToList();
+        }
+        finally
+        {
+            isFetching = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task FetchIngresosActividadAsync()
+    {
+        if (isFetching) return;
+        isFetching = true;
+        errorMessageActividades = string.Empty;
+        try
+        {
+            if (hastaDate < desdeDate)
+            {
+                errorMessageActividades = "Error: el periodo ingresado es incorrecto";
+                datosIngresosActividad = new();
+                chartIngresosActividad = new();
+                return;
+            }
+
+            var desde = DateOnly.FromDateTime(desdeDate);
+            var hasta = DateOnly.FromDateTime(hastaDate);
+
+            if (actividades.Count == 0)
+                actividades = (await ListarActividadesUseCase.ejecutar()).ToList();
+
+            var resultados = new List<IngresoPorActividadDto>();
+
+            foreach (var actividad in actividades)
+            {
+                var monto = await ConsultarIngresosActividadUseCase.Ejecutar(actividad.Id, desde, hasta);
+                resultados.Add(new IngresoPorActividadDto { Actividad = actividad.Nombre, Monto = monto });
+            }
+
+            if (resultados.All(r => r.Monto == 0m))
+            {
+                errorMessageActividades = "No se registraron ingresos para ninguna actividad en el periodo ingresado";
+                datosIngresosActividad = new();
+                chartIngresosActividad = new();
+            }
+            else
+            {
+                datosIngresosActividad = resultados.Where(r => r.Monto > 0).ToList();
+                chartIngresosActividad = datosIngresosActividad
+                    .Select(r => new GraficoIngresoActividadDto { Actividad = r.Actividad, Monto = r.Monto })
+                    .ToList();
+            }
+        }
+        finally
+        {
+            isFetching = false;
+            StateHasChanged();
+        }
+    }
+    private void CambiarSeccion(string nuevaSeccion)
+    {
+        seccionActiva = nuevaSeccion;
+        errorMessageIngresos = string.Empty;
+        errorMessageActividades = string.Empty;
+        desdeDate = DateTime.Today.AddMonths(-5);
+        hastaDate = DateTime.Today;
+    }
+
+    public class IngresoPorMesDto
+    {
+        public string Mes { get; set; } = string.Empty;
+        public decimal MontoTotal { get; set; }
+    }
+
+    public class IndiceActividadResumenDto
+    {
+        public string Actividad { get; set; } = string.Empty;
+        public int CantidadAsistencias { get; set; }
+        public int CantidadInasistencias { get; set; }
+        public int CantidadCancelaciones { get; set; }
+        public int TotalReservas => CantidadAsistencias + CantidadInasistencias + CantidadCancelaciones;
+    }
+
+    public class IngresoPorActividadDto
+    {
+        public string Actividad { get; set; } = string.Empty;
+        public decimal Monto { get; set; }
+    }
+
+    public class GraficoIngresoMesDto
+    {
+        public string Mes { get; set; } = string.Empty;
+        public decimal Monto { get; set; }
+    }
+
+    public class GraficoAsistenciaDto
+    {
+        public string Actividad { get; set; } = string.Empty;
+        public int Asistencias { get; set; }
+        public int Inasistencias { get; set; }
+        public int Cancelaciones { get; set; }
+    }
+
+    public class GraficoIngresoActividadDto
+    {
+        public string Actividad { get; set; } = string.Empty;
+        public decimal Monto { get; set; }
+    }
+
+    public class GraficoIndiceActividadDto
+    {
+        public string Etiqueta { get; set; } = string.Empty;
+        public int Cantidad { get; set; }
+    }
+}
+
+<style>
+    .boton-menu {
+        background-color: #f0f0f0;
+        color: #333 !important;
+        margin-bottom: 10px;
+        border: 1px solid #ddd;
+        text-align: left;
+        padding: 12px 15px;
+        transition: transform 0.2s ease, background-color 0.2s ease;
+    }
+
+        .boton-menu.active {
+            background-color: #0d6efd !important;
+            color: white !important;
+            border-color: #0d6efd;
+        }
+
+        .boton-menu:hover {
+            background-color: #e2e8f0;
+            transform: scale(1.04);
+            cursor: pointer;
+        }
+
+        .boton-menu.active:hover {
+            background-color: #0b5ed7 !important;
+        }
+
+    .barra-lateral {
+        border-right: 1px solid #dee2e6;
+    }
+</style>

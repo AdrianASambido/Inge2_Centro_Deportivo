@@ -146,6 +146,11 @@ builder.Services.AddScoped<RenovarReservaAdelantadaUseCase>();
 builder.Services.AddScoped<CrearReservaListaEsperaUseCase>();
 builder.Services.AddScoped<IniciarPagoListaEsperaUseCase>();
 builder.Services.AddScoped<ObtenerClasesAdelantadasDisponiblesUseCase>();
+builder.Services.AddScoped <ListarReservasClasesMensualesUseCase>();
+builder.Services.AddScoped<IniciarRenovarReservaAdelantadaUseCase>();
+builder.Services.AddScoped<ObtenerProfesoresDisponiblesUseCase>();
+builder.Services.AddScoped<ObtenerCanchasDisponiblesUseCase>();
+builder.Services.AddScoped<ObtenerDetalleRenovacionUseCase>();
 
 builder.Services.AddScoped<DescargarComprobanteUseCase>();
 

@@ -10,7 +10,8 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
 
     public class IniciarReservaAdelantadaUseCase(
         ITurnoRepositorio repoTurno,
-        IPagoServicio pagoServicio
+        IPagoServicio pagoServicio,
+        IUsuarioRepositorio repoUsuario
     )
     {
         public async Task<string> Ejecutar(int idUsuario, List<Turno> clasesDisponibles)
@@ -21,9 +22,13 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
             if (clasesDisponibles.Any(t => t.CupoDisponible <= 0))
                 throw new Exception("Una o más clases del mes ya no cuentan con cupo disponible. Operación cancelada.");
 
-            decimal precioBaseTurno = clasesDisponibles.First().PrecioTurno;
-            decimal precioConDescuento = precioBaseTurno * 0.80m;
-            decimal montoTotalAPagar = precioConDescuento * clasesDisponibles.Count;
+            var usuario = await repoUsuario.ObtenerPorIdAsync(idUsuario)
+            ?? throw new Exception("Usuario no encontrado.");
+
+            decimal precioBase = clasesDisponibles.First().PrecioTurno;
+            decimal factor = usuario.TieneSancionDescuento ? 1.0m : 0.80m;
+            decimal precioConDescuento = precioBase * factor;
+            decimal montoTotal = precioConDescuento * clasesDisponibles.Count;
 
             string stringIdsTurnos = string.Join(",", clasesDisponibles.Select(t => t.Id));
 
@@ -36,7 +41,7 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
 
             string urlMercadoPago = await pagoServicio.CrearPreferenciaPagoAsync(
                 idUsuario,
-                montoTotalAPagar,
+                montoTotal,
                 nombreProducto,
                 urlExito,
                 urlFallo

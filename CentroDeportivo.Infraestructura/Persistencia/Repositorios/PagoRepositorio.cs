@@ -20,21 +20,57 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
 
         public async Task<decimal> ObtenerIngresosGeneralesAsync(DateOnly desde, DateOnly hasta)
         {
-
             DateTime fechaDesde = desde.ToDateTime(TimeOnly.MinValue);
             DateTime fechaHasta = hasta.ToDateTime(TimeOnly.MaxValue);
 
-            return await contexto.Pagos
+  
+            var montos = await contexto.Pagos
                 .Where(p => p.Fecha >= fechaDesde && p.Fecha <= fechaHasta)
-                .SumAsync(p => p.Monto);
+                .Select(p => p.Monto)
+                .ToListAsync();
+
+            
+            return montos.Sum();
         }
 
         public async Task<decimal> ObtenerIngresosPorActividadAsync(int idActividad, DateOnly desde, DateOnly hasta)
         {
-            return await contexto.Pagos
-                        .Include(p => p.Turno)
-                        .Where(p => p.Turno!.Id_Actividad == idActividad && p.Turno.Fecha >= desde && p.Turno.Fecha <= hasta)
-                        .SumAsync(P => P.Monto);
+            // 1. Pagos de reservas ocasionales (tienen Id_Turno)
+            var montosDirectos = await contexto.Pagos
+                .Where(p => p.Id_Turno != null
+                         && p.Turno!.Id_Actividad == idActividad
+                         && p.Turno.Fecha >= desde
+                         && p.Turno.Fecha <= hasta)
+                .Select(p => p.Monto)
+                .ToListAsync();
+
+            decimal totalDirectos = montosDirectos.Sum();
+
+            // 2. Pagos de reservas adelantadas (tienen CodigoPaqueteAdelantado)
+            // Obtenemos los códigos de paquetes que corresponden a la actividad y rango
+            var codigosPaquetes = await contexto.Reservas
+                .Where(r => r.CodigoPaqueteAdelantado != null
+                         && r.Turno!.Id_Actividad == idActividad
+                         && r.Turno.Fecha >= desde
+                         && r.Turno.Fecha <= hasta)
+                .Select(r => r.CodigoPaqueteAdelantado)
+                .Distinct()
+                .ToListAsync();
+
+            // Luego buscamos los pagos que tienen esos códigos
+            decimal totalAdelantados = 0;
+            if (codigosPaquetes.Any())
+            {
+                var montosAdelantados = await contexto.Pagos
+                    .Where(p => p.CodigoPaqueteAdelantado != null
+                             && codigosPaquetes.Contains(p.CodigoPaqueteAdelantado))
+                    .Select(p => p.Monto)
+                    .ToListAsync();
+
+                totalAdelantados = montosAdelantados.Sum();
+            }
+
+            return totalDirectos + totalAdelantados;
         }
 
         public async Task<Pago?> ObtenerPorIdAsync(int idPago)

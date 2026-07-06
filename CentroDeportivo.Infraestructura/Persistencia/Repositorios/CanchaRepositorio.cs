@@ -102,5 +102,19 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
 
             return !ocupado;
         }
+
+        public async Task<List<Cancha>> ObtenerDisponiblesEdicionTurnoAsync(DateOnly fecha, TimeOnly horaInicio, TimeOnly horaFin, int? excluirTurnoId = null)
+        {
+            return await contexto.Canchas
+        .Where(c => c.Existe
+            && !contexto.Turnos.Any(t =>
+                t.Id_Cancha == c.Id
+                && t.Fecha == fecha
+                && t.HoraInicio < horaFin
+                && t.HoraFin > horaInicio
+                && t.Estado != EstadoTurno.Cancelado
+                && (excluirTurnoId == null || t.Id != excluirTurnoId)))
+        .ToListAsync();
+        }
     }
 }

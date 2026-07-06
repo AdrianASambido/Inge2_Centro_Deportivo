@@ -20,5 +20,6 @@ namespace CentroDeportivo.Aplicacion.Interfaces
         Task<bool> YaExisteNumeroParaEditar(int numeroCancha, int idCancha);
         Task<bool> TieneTurnosAsignadosAsync(int idCancha);
         Task<bool> EstaDisponibleAsync(int idCancha, DateOnly fecha, TimeOnly horarioInicio);
+        Task<List<Cancha>> ObtenerDisponiblesEdicionTurnoAsync(DateOnly fecha, TimeOnly horaInicio, TimeOnly horaFin, int? excluirTurnoId = null);
     }
 }

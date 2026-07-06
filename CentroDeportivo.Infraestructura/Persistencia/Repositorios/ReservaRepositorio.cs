@@ -37,15 +37,14 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
             return await contexto.Reservas
                 .Where(r => r.Id_Usuario == idUsuario
                          && r.Estado == EstadoReserva.Cancelado
-                         && r.FechaReserva.Year == anio
-                         && r.FechaReserva.Month == mes)
+                         && r.TipoReserva == TipoReserva.Adelantado
+                         && r.FechaCancelacion.HasValue
+                         && r.FechaCancelacion.Value.Year == anio
+                         && r.FechaCancelacion.Value.Month == mes)
                 .CountAsync();
         }
 
-        public async Task<bool> ExisteReservaActivaAsync(int usuarioId, int turnoId)
-        {
-            throw new NotImplementedException();
-        }
+
 
         public async Task GuardarMuchasReservasAsync(List<Reserva> reservas)
         {
@@ -54,6 +53,29 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
             await contexto.Reservas.AddRangeAsync(reservas);
 
             await contexto.SaveChangesAsync();
+        }
+
+        public async Task<List<Reserva>> ObtenerPorCodigoPaqueteAsync(Guid codigoPaquete)
+        {
+            return await contexto.Reservas
+                .Include(r => r.Turno)
+                    .ThenInclude(t => t.Actividad)
+                .Include(r => r.Turno)
+                    .ThenInclude(t => t.Profesor)
+                .Include(r => r.Turno)
+                    .ThenInclude(t => t.Cancha)
+                .Where(r => r.CodigoPaqueteAdelantado == codigoPaquete
+                         && r.Estado != EstadoReserva.Cancelado)
+                .ToListAsync();
+        }
+
+        public async Task<bool> ExisteReservaActivaEnFechaYHoraAsync(int idUsuario, DateOnly fecha, TimeOnly horaInicio)
+        {
+            return await contexto.Reservas
+                .AnyAsync(r => r.Id_Usuario == idUsuario
+                            && r.Estado != EstadoReserva.Cancelado
+                            && r.Turno.Fecha == fecha
+                            && r.Turno.HoraInicio == horaInicio);
         }
 
         public async Task<Reserva?> ObtenerPorIdAsync(int id)
@@ -200,6 +222,22 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
                             .Where(r => r.Id_Usuario == idUsuario && r.Estado == EstadoReserva.Cancelado && r.FechaReserva >= fechaLimite).CountAsync();
 
             return cantidad >= 3;
+        }
+
+        public async Task<List<Reserva>> ObtenerPaquetesAdelantatadosPorUsuarioAsync(int idUsuario)
+        {
+            
+            var paquetes = await contexto.Reservas
+                .Include(r => r.Turno)
+                    .ThenInclude(t => t.Actividad)
+                .Include(r => r.Turno)
+                    .ThenInclude(t => t.Profesor)
+                .Where(r => r.Id_Usuario == idUsuario
+                         && r.TipoReserva == TipoReserva.Adelantado
+                         && r.CodigoPaqueteAdelantado.HasValue)
+                .ToListAsync();
+
+            return paquetes;
         }
     }
     }

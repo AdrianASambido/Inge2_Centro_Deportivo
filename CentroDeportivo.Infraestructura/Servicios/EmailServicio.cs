@@ -47,7 +47,7 @@ namespace CentroDeportivo.Infraestructura.Servicios
                 HtmlBody = $@"
             <h3>Clase Cancelada</h3>
             <p>Lamentamos informarle que la clase de <b>{turno.Actividad?.Nombre}</b> del día <b>{turno.Fecha}</b> a las <b>{turno.HoraInicio} hs</b> ha sido cancelada por el establecimiento.</p>
-            <p>Si habías realizado la reserva por adelantado, se genero un credito a tu favor. De lo contrario se te devolvera el dinero</p>"
+            <p>Si habías realizado la reserva con un credito o por adelantado, se genero un credito a tu favor. De lo contrario se te devolvera el dinero</p>"
             };
             mensaje.Body = bodyBuilder.ToMessageBody();
 

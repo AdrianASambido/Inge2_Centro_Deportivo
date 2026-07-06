@@ -4,9 +4,10 @@
 @inject EditarTurnoUseCase EditarTurnoUseCase
 @inject Sesion UsuarioSesion
 @inject ITurnoRepositorio RepositorioTurno
+@inject ObtenerProfesoresDisponiblesUseCase ObtenerProfesoresDisponiblesUseCase
+@inject ObtenerCanchasDisponiblesUseCase ObtenerCanchasDisponiblesUseCase
 
 <PageTitle>Editar Turno</PageTitle>
-
 <h3>Editar turno</h3>
 
 @if (turno == null)
@@ -16,37 +17,118 @@
 else
 {
     <div class="card shadow-sm border-0 rounded-4 p-4" style="max-width: 700px;">
-        <input placeholder="Cupo" @bind="cupo" type="number" class="form-control mb-2" />
-        <input placeholder="Fecha" @bind="fecha" type="date" class="form-control mb-2" />
-        <input placeholder="Hora de inicio" @bind="horaInicio" type="number" class="form-control mb-2" />
-        <input placeholder="Precio" @bind="precio" class="form-control mb-3" type="number" step="0.01" />
+
+        <div class="mb-2">
+            <label class="form-label">Fecha</label>
+            <input value="@fecha.ToString("yyyy-MM-dd")"
+                   @onchange="OnFechaChanged"
+                   type="date"
+                   min="@DateTime.Today.ToString("yyyy-MM-dd")"
+                   class="form-control" />
+        </div>
+
+        <div class="mb-2">
+            <label class="form-label">Hora de inicio</label>
+            <input value="@horaInicio.ToString("HH:mm")"
+                   @onchange="OnHoraInicioChanged"
+                   type="time"
+                   class="form-control" />
+        </div>
+
+        <div class="mb-2">
+            <label class="form-label">Precio</label>
+            <input @bind="precio"
+                   type="number"
+                   step="0.01"
+                   min="1"
+                   class="form-control" />
+        </div>
+
+        <div class="mb-2">
+            <label class="form-label">Profesor</label>
+            <select @bind="idProfesor" class="form-select">
+                <option value="0">-- Seleccione un profesor --</option>
+                @foreach (var p in profesoresDisponibles)
+                {
+                    <option value="@p.Id">@p.Nombre @p.Apellido</option>
+                }
+            </select>
+        </div>
+
+        <div class="mb-2">
+            <label class="form-label">Cancha</label>
+            <select @bind="idCancha" class="form-select">
+                <option value="0">-- Seleccione una cancha --</option>
+                @foreach (var c in canchasDisponibles)
+                {
+                    <option value="@c.Id">Cancha @c.Numero</option>
+                }
+            </select>
+        </div>
+
+        @if (idCancha > 0)
+        {
+            var canchaElegida = canchasDisponibles.FirstOrDefault(c => c.Id == idCancha);
+            if (canchaElegida != null)
+            {
+                <div class="mb-2">
+                    <label class="form-label">
+                        Cupo máximo
+                        <span class="text-muted small">(máx. @canchaElegida.Capacidad)</span>
+                    </label>
+                    <select @bind="cupo" class="form-select">
+                        @for (int i = 1; i <= canchaElegida.Capacidad; i++)
+                        {
+                            <option value="@i">@i</option>
+                        }
+                    </select>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="mb-2">
+                <label class="form-label">Cupo máximo</label>
+                <input type="number" class="form-control" disabled
+                       placeholder="Seleccioná una cancha primero" />
+            </div>
+        }
 
         <div class="d-flex gap-2 mt-3 justify-content-end">
-
-            <button class="btn btn-success" @onclick="GuardarDatos">Guardar cambios</button>
+            <div title="@(!FormularioValido() ? "Completá todos los campos para guardar" : "")">
+                <button class="btn btn-success"
+                        @onclick="GuardarDatos"
+                        disabled="@(!FormularioValido())">
+                    Guardar cambios
+                </button>
+            </div>
             <button class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
-
         </div>
+
         @if (!string.IsNullOrEmpty(mensaje))
         {
-            <div class="alert alert-danger mt-3">@mensaje</div>
+            <div class="alert @(esExito ? "alert-success" : "alert-danger") mt-3">
+                @mensaje
+            </div>
         }
     </div>
-
 }
-
 
 @code {
     [Parameter] public int Id { get; set; }
 
-    public Turno? turno;
-    public int cupo;
-    public DateOnly fecha = DateOnly.FromDateTime(DateTime.Now);
-    public TimeOnly horaInicio;
-    public decimal precio;
-
-
-    public string mensaje = "";
+    private Turno? turno;
+    private int cupo;
+    private DateOnly fecha = DateOnly.FromDateTime(DateTime.Today);
+    private TimeOnly horaInicio;
+    private TimeOnly horaFin;
+    private decimal precio;
+    private int idProfesor;
+    private int idCancha;
+    private string mensaje = "";
+    private bool esExito;
+    private List<Profesor> profesoresDisponibles = new();
+    private List<Cancha> canchasDisponibles = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -56,26 +138,83 @@ else
             cupo = turno.CupoMaximo;
             fecha = turno.Fecha;
             horaInicio = turno.HoraInicio;
+            horaFin = turno.HoraFin;
             precio = turno.PrecioTurno;
+            idProfesor = turno.Id_Profesor;
+            idCancha = turno.Id_Cancha;
+
+            await ActualizarDisponibles();
         }
     }
 
-    async Task GuardarDatos()
+    private async Task ActualizarDisponibles()
+    {
+        profesoresDisponibles = await ObtenerProfesoresDisponiblesUseCase.Ejecutar(
+            fecha, horaInicio, horaFin, excluirTurnoId: Id);
+
+        canchasDisponibles = await ObtenerCanchasDisponiblesUseCase.Ejecutar(
+            fecha, horaInicio, horaFin, excluirTurnoId: Id);
+
+        if (!profesoresDisponibles.Any(p => p.Id == idProfesor))
+            idProfesor = 0;
+
+        if (!canchasDisponibles.Any(c => c.Id == idCancha))
+            idCancha = 0;
+
+        StateHasChanged();
+    }
+
+    private async Task OnFechaChanged(ChangeEventArgs e)
+    {
+        if (DateOnly.TryParse(e.Value?.ToString(), out var nuevaFecha))
+        {
+            fecha = nuevaFecha;
+            horaFin = horaInicio.AddHours(1);
+            await ActualizarDisponibles();
+        }
+    }
+
+    private async Task OnHoraInicioChanged(ChangeEventArgs e)
+    {
+        if (TimeOnly.TryParse(e.Value?.ToString(), out var nuevaHora))
+        {
+            horaInicio = nuevaHora;
+            horaFin = nuevaHora.AddHours(1);
+            await ActualizarDisponibles();
+        }
+    }
+
+    private async Task GuardarDatos()
     {
         if (turno == null) return;
         mensaje = "";
+
         try
         {
-            var tur = new Turno();
-            await EditarTurnoUseCase.Ejecutar(Id,fecha,horaInicio,precio,cupo);
-            mensaje = "Cambios guardados con exito.";
-            StateHasChanged();
+            await EditarTurnoUseCase.Ejecutar(
+                Id, fecha, horaInicio, horaFin, precio, cupo, idProfesor, idCancha);
+            mensaje = "Cambios guardados con éxito.";
+            esExito = true;
         }
         catch (Exception ex)
         {
             mensaje = ex.Message;
+            esExito = false;
         }
     }
 
-    void Cancelar() => Navegador.NavigateTo("/listar-turnos-creados");
+    private bool FormularioValido()
+    {
+        if (idProfesor <= 0) return false;
+        if (idCancha <= 0) return false;
+        if (precio <= 0) return false;
+        if (cupo <= 0) return false;
+
+        var canchaElegida = canchasDisponibles.FirstOrDefault(c => c.Id == idCancha);
+        if (canchaElegida != null && cupo > canchaElegida.Capacidad) return false;
+
+        return true;
+    }
+
+    private void Cancelar() => Navegador.NavigateTo("/listar-turnos-creados");
 }

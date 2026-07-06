@@ -19,5 +19,8 @@ namespace CentroDeportivo.Aplicacion.Interfaces
         Task<List<Turno>> ObtenerTurnosDisponiblesRangoAsync(int idActividad, DayOfWeek diaSemana,int idUsuario, DateOnly desde, DateOnly hasta);
         Task<bool> TieneInscriptosAsync(int turnoId);
         Task ActualizarMuchosAsync(List<Turno> turnos);
+        Task<List<Turno>> ObtenerTurnosSiguienteMesPorClaseAsync(
+    int idActividad, DayOfWeek diaSemana, TimeOnly horaInicio,
+    int idProfesor, int idCancha, int anio, int mes);
     }
 }

@@ -21,7 +21,7 @@
 
 <PageTitle>Listado de Turnos</PageTitle>
 
-@* Cambiamos la lógica: Si no cumple con los roles autorizados, mostramos la advertencia y cortamos la ejecución *@
+
 @if (!UsuarioSesion.EstaAutenticado() || (!UsuarioSesion.esAdministrador() && !UsuarioSesion.esEmpleado()))
 {
     <div class="alert alert-warning m-3">¡No tenés acceso a esta sección!</div>
@@ -29,7 +29,7 @@
 else
 {
     <div class="container-fluid p-0">
-        <h2 class="mb-1">Turnos creados</h2>
+        <h1 class="mb-1">Turnos</h1>
         <p class="text-muted mb-4">Bienvenido, @UsuarioSesion.UsuarioActual?.Nombre</p>
 
         <div class="d-flex gap-2 mb-4">
@@ -41,13 +41,20 @@ else
             </button>
         </div>
 
+
+        @if (!string.IsNullOrEmpty(mensajeTurno))
+        {
+            <div class="alert alert-success mt-3 shadow-sm alert-dismissible fade show" role="alert">
+                <h5 class="alert-heading"><i class="bi bi-check-circle-fill me-2"></i> ¡Turno cancelado exitosamente!</h5>
+                <hr>
+                <p class="mb-0" style="white-space: pre-line;">@mensajeTurno</p>
+                <button type="button" class="btn-close" @onclick="() => mensajeTurno = string.Empty" aria-label="Close"></button>
+            </div>
+        }
+
+
         @if (quiereAgregar)
         {
-            @if (!string.IsNullOrEmpty(mensajeTurno))
-            {
-                <div class="alert alert-info mt-3 shadow-sm">@mensajeTurno</div>
-            }
-
             <div class="card shadow-sm mb-4 border-primary" style="max-width: 600px;">
                 <div class="card-body">
                     <h4 class="card-title mb-3">Datos sobre el turno</h4>
@@ -123,7 +130,7 @@ else
                 </div>
             </div>
         }
-        @*
+
         <div class="card shadow-sm mb-4">
             <div class="card-body">
                 <div class="row g-3 align-items-end">
@@ -168,19 +175,17 @@ else
                 </div>
             </div>
         </div>
-        *@
+
         <div class="table-responsive shadow-sm" style="background: white; border-radius: 8px;">
             <table class="table table-hover mb-0">
                 <thead class="table-light">
                     <tr>
-                        <th>ID</th>
                         <th>Actividad</th>
                         <th>Profesor</th>
                         <th>Fecha</th>
                         <th>Hora inicio</th>
                         <th>Hora fin</th>
                         <th>Cancha</th>
-                        <th class="text-center">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -189,7 +194,6 @@ else
                         @foreach (var tu in turnosFiltrados)
                         {
                             <tr>
-                                <td class="fw-bold">@tu.Id</td>
                                 <td>@tu.Actividad.Nombre</td>
                                 <td>@tu.Profesor.Nombre</td>
                                 <td>@tu.Fecha.ToString("dd/MM/yyyy")</td>
@@ -198,13 +202,15 @@ else
                                 <td><span class="badge bg-info text-dark">N° @tu.Cancha.Numero</span></td>
                                 <td class="text-center">
                                     <button class="btn btn-sm btn-outline-primary" @onclick="() => MostrarInscriptos(tu.Id)">
-                                        Ver Inscriptos
+                                        Inscriptos
                                     </button>
-                                    <button class="btn btn-sm btn-outline-warning" @onclick="() => EditarTurno(tu.Id)">
-                                        Editar Turno
+                                    <button class="btn btn-sm btn-outline-warning"
+                                            disabled="@tu.TieneInscriptos"
+                                            @onclick="() => EditarTurno(tu.Id)">
+                                        Editar
                                     </button>
                                     <button class="btn btn-sm btn-outline-danger" @onclick="() => ConfirmarCancelacion(tu.Id)">
-                                        Cancelar Turno
+                                        Cancelar
                                     </button>
                                 </td>
                             </tr>
@@ -263,7 +269,6 @@ else
                                     <th>Estado</th>
                                     <th>Asistencia</th>
                                     <th>Tipo</th>
-                                    <th class="text-center">Acciones</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -290,7 +295,11 @@ else
                         </table>
                         @if (!string.IsNullOrEmpty(mensajeTabla))
                         {
-                            <div class="alert alert-info mt-3 shadow-sm">@mensajeTabla</div>
+                            <div class="alert @(mensajeTabla.StartsWith("Error") ? "alert-danger" : "alert-success") alert-dismissible fade show shadow-sm my-3" role="alert">
+                                <i class="bi @(mensajeTabla.StartsWith("Error") ? "bi-exclamation-triangle-fill" : "bi-check-circle-fill") me-2"></i>
+                                @mensajeTabla
+                                <button type="button" class="btn-close" @onclick="() => mensajeTabla = string.Empty" aria-label="Close"></button>
+                            </div>
                         }
 
                         @if (mostrarDialog)
@@ -709,11 +718,26 @@ else
         {
             mensajeTabla = "";
 
-            await EliminarInscriptoUseCase.Ejecutar(idAEliminar);
+            var resumen = await EliminarInscriptoUseCase.Ejecutar(idAEliminar);
 
             await RecargarReservas();
 
-            mensajeTabla = "El inscripto ha sido eliminado correctamente.";
+            if (resumen.TipoReserva == TipoReserva.Adelantado)
+            {
+                mensajeTabla = "El inscripto ha sido eliminado correctamente. Se le reintegró 1 crédito por su reserva anticipada.";
+            }
+            else if (resumen.TipoReserva == TipoReserva.Ocasional && resumen.ConCredito)
+            {
+                mensajeTabla = "El inscripto ha sido eliminado correctamente. Se le devolvió el crédito utilizado para la clase ocasional.";
+            }
+            else if (resumen.TipoReserva == TipoReserva.Ocasional && resumen.MontoDineroDevuelto > 0)
+            {
+                mensajeTabla = $"El inscripto ha sido eliminado correctamente. Se emitió el reembolso de ${resumen.MontoDineroDevuelto:N2} mediante Mercado Pago.";
+            }
+            else
+            {
+                mensajeTabla = "El inscripto ha sido eliminado correctamente.";
+            }
         }
         catch (Exception ex)
         {
@@ -730,16 +754,46 @@ else
 
     private async Task CancelarTurno()
     {
-        mensajeTurno ="";
-        mostrarDialogCancelar = false;
-        try {
-            await CancelarTurnoUseCase.Ejecutar(idAEliminar);
-            mensajeTurno = "El turno se ha cancelado exitosamente.";
+        mensajeTurno = "";
+        mostrarDialogCancelar = false; // Asumiendo que usás un modal de confirmación
+
+        try
+        {
+            // Ejecutamos el caso de uso y recuperamos el resumen del backend
+            ResumenCancelacionDto resumen = await CancelarTurnoUseCase.Ejecutar(idAEliminar);
+
+            // Evaluamos el resultado para construir el mensaje ideal
+            if (resumen.TotalInscriptosAfectados > 0)
+            {
+                var sb = new System.Text.StringBuilder();
+                sb.AppendLine($"El turno fue cancelado. Se procesó el impacto sobre {resumen.TotalInscriptosAfectados} reserva(s) activa(s):");
+
+                if (resumen.CreditosDevueltos > 0)
+                {
+                    sb.AppendLine($"• Se reintegraron {resumen.CreditosDevueltos} crédito(s) de la actividad a las cuentas de los usuarios correspondientes (Reservas por Adelantado / Ocasionales con crédito).");
+                }
+
+                if (resumen.MontoTotalDineroDevuelto > 0)
+                {
+                    sb.AppendLine($"• Se emitió la orden de reembolso por un total de ${resumen.MontoTotalDineroDevuelto:N2} a través de Mercado Pago para las reservas ocasionales abonadas con dinero.");
+                }
+
+                mensajeTurno = sb.ToString();
+            }
+            else
+            {
+                mensajeTurno = "Turno cancelado con éxito. No había usuarios inscriptos, por lo que no se requirieron devoluciones.";
+            }
+
+            // Refrescar la lista de turnos de tu grilla/tabla
             turnos = (await ListarTurnosUseCase.Ejecutar(null, null, null, null, null)).ToList();
+            AplicarFiltros();
             StateHasChanged();
         }
-        catch (Exception ex){
-            mensajeTurno = ex.Message;   
+        catch (Exception ex)
+        {
+            // En caso de error (por ejemplo, si falló Mercado Pago y no lo emulaste), se muestra el error
+            mensajeTurno = $"Error al intentar cancelar el turno: {ex.Message}";
         }
     }
 

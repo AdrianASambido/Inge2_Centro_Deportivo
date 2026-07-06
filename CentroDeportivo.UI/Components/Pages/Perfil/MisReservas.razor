@@ -11,7 +11,11 @@
 @inject CrearReservaListaEsperaUseCase CrearReservaListaEsperaUseCase
 @inject AbandonarListaEsperaUseCase AbandonarListaEsperaUseCase
 @inject ConsultarListaEsperaUseCase ConsultarListaEsperaUseCase
+@inject ListarReservasClasesMensualesUseCase ListarReservasClasesMensualesUseCase
 @inject ConfirmarPagoRestanteReservaOcasionalUseCase ConfirmarPagoRestanteReservaOcasionalUseCase
+@inject IniciarRenovarReservaAdelantadaUseCase IniciarRenovarReservaAdelantadaUseCase
+@inject RenovarReservaAdelantadaUseCase RenovarReservaAdelantadaUseCase
+@inject ObtenerDetalleRenovacionUseCase ObtenerDetalleRenovacionUseCase
 @inject ObtenerUsuarioPorId ObtenerUsuarioPorId
 @inject NavigationManager Navigation
 
@@ -54,7 +58,7 @@
                                 <th>Actividad</th>
                                 <th>Fecha</th>
                                 <th>Horario</th>
-                                <th>Cancha</th>
+                                <th>Profesor</th>
                                 <th>Precio Abonado</th>
                                 <th>Estado</th>
                                 <th>Acciones</th>
@@ -69,7 +73,7 @@
                                         <td>@r.Turno?.Actividad?.Nombre</td>
                                         <td>@r.Turno?.Fecha.ToShortDateString()</td>
                                         <td>@r.Turno?.HoraInicio hs</td>
-                                        <td>Cancha @r.Turno?.Cancha?.Numero</td>
+                                        <td>@r.Turno?.Profesor.Nombre @r.Turno?.Profesor.Apellido</td>
                                         <td><span class="badge bg-success-subtle text-success">$ @r.PrecioPagado</span></td>
                                         <td>
                                             <span class="badge @(r.Estado == EstadoReserva.Confirmado ? "bg-success" : "bg-warning text-dark")">
@@ -143,8 +147,9 @@
                                             @(paqueteIdDesplegado == paquete.CodigoPaquete ? "Ocultar turnos" : "Ver turnos")
                                         </button>
 
-                                        <button class="btn btn-warning btn-sm fw-bold text-dark" @onclick="() => RenovarPaquete(paquete.CodigoPaquete)">
-                                            <i class="bi bi-arrow-repeat me-1"></i> Renovar reserva
+                                        <button class="btn btn-warning btn-sm fw-bold text-dark"
+                                                @onclick="() => VerDetalleRenovacion(paquete.CodigoPaquete)">
+                                            <i class="bi bi-arrow-repeat me-1"></i> Renovar
                                         </button>
                                     </div>
                                 </div>
@@ -158,8 +163,8 @@
                                                     <tr>
                                                         <th class="ps-3">Día / Fecha</th>
                                                         <th>Horario</th>
-                                                        <th>Cancha</th>
-                                                        <th>Precio Unitario</th>
+                                                        <th>Profesor</th>
+                                                        <th>Precio</th>
                                                         <th>Estado</th>
                                                         <th class="text-end pe-3">Acciones</th>
                                                     </tr>
@@ -170,7 +175,7 @@
                                                         <tr>
                                                             <td class="ps-3 fw-bold text-primary">@r.Turno?.Fecha.ToString("dddd dd/MM/yyyy")</td>
                                                             <td>@r.Turno?.HoraInicio hs</td>
-                                                            <td>Cancha @r.Turno?.Cancha?.Numero</td>
+                                                            <td>@r.Turno?.Profesor.Nombre @r.Turno?.Profesor.Apellido</td>
                                                             <td>$ @r.PrecioPagado</td>
                                                             <td>
                                                                 <span class="badge @(r.Estado == EstadoReserva.Confirmado ? "bg-success" : "bg-secondary")">
@@ -240,7 +245,7 @@
                                         <td>@inscripcion.Turno?.Actividad?.Nombre</td>
                                         <td>@inscripcion.Turno?.Fecha.ToShortDateString()</td>
                                         <td>@inscripcion.Turno?.HoraInicio hs</td>
-                                        <td>Cancha @inscripcion.Turno?.Profesor?.Nombre</td>
+                                        <td>@inscripcion.Turno?.Profesor?.Nombre @inscripcion.Turno?.Profesor.Apellido</td>
                                         <td>
                                             <span class="badge @(inscripcion.Estado == EstadoListaEspera.Notificado ? "bg-success" : "bg-warning text-dark")">
                                                 @(inscripcion.Estado == EstadoListaEspera.Notificado ? "Lugar disponible" : "En espera")
@@ -281,6 +286,57 @@
     <div class="alert alert-info mt-3 shadow-sm">@error</div>
 }
 
+@if (mostrarModalRenovacion && detalleRenovacion != null)
+{
+    <div class="modal show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Detalle de renovación</h5>
+                </div>
+                <div class="modal-body">
+                    @if (!detalleRenovacion.TurnosDisponibles)
+                    {
+                        <div class="alert alert-warning">
+                            No hay turnos cargados para @detalleRenovacion.NombreMes todavía.
+                        </div>
+                    }
+                    else
+                    {
+                        <p>Mes: <strong>@detalleRenovacion.NombreMes</strong></p>
+                        <p>Cantidad de clases: <strong>@detalleRenovacion.CantidadClases</strong></p>
+                        <p>Precio por clase: <strong>$@detalleRenovacion.PrecioUnitario</strong></p>
+
+                        @if (detalleRenovacion.AplicaDescuento)
+                        {
+                            <p class="text-decoration-line-through text-muted">
+                                Total sin descuento: $@detalleRenovacion.PrecioTotal
+                            </p>
+                            <p class="text-success fw-bold">
+                                Total con 20% de descuento: $@detalleRenovacion.PrecioConDescuento
+                            </p>
+                        }
+                        else
+                        {
+                            <p>Total: <strong>$@detalleRenovacion.PrecioTotal</strong></p>
+                        }
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" @onclick="CerrarModalRenovacion">Cancelar</button>
+                    @if (detalleRenovacion.TurnosDisponibles)
+                    {
+                        <button class="btn btn-warning fw-bold text-dark"
+                                @onclick="ConfirmarRenovacion">
+                            <i class="bi bi-arrow-repeat me-1"></i> Confirmar y pagar
+                        </button>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
 @code {
     private Guid? paqueteIdDesplegado = null;
     [SupplyParameterFromQuery] public bool pagoExitoso { get; set; }
@@ -290,12 +346,17 @@
     [SupplyParameterFromQuery] public int? userId { get; set; }
     private List<InscripcionListaEspera>? listaEspera;
     [SupplyParameterFromQuery] public int? turnoId { get; set; }
+    [SupplyParameterFromQuery] public string? turnosId { get; set; }
+    private bool mostrarModalRenovacion = false;
+    private DetalleRenovacionDTO? detalleRenovacion;
+    private Guid codigoPaqueteARenovar;
 
     public class PaqueteAgrupadoDTO
     {
         public Guid CodigoPaquete { get; set; }
         public string NombreActividad { get; set; } = string.Empty;
         public List<Reserva> ReservasAsociadas { get; set; } = new();
+        public decimal PrecioUnitario { get; set; }
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -305,7 +366,8 @@
         if (UsuarioSesion.UsuarioActual == null && userId.HasValue)
         {
             var usuario = await ObtenerUsuarioPorId.Ejecutar(userId.Value);
-            if (usuario != null){
+            if (usuario != null)
+            {
                 UsuarioSesion.RestaurarSesion(usuario);
                 await UsuarioSesion.NotificarCambio();
                 StateHasChanged();
@@ -319,6 +381,10 @@
         else if (turnoId.HasValue && tipo == "listaEspera")
         {
             await ProcesarVueltaMPListaEspera();
+        }
+        else if (tipo == "renovacion")
+        {
+            await ProcesarVueltaMPRenovacion();
         }
     }
 
@@ -345,18 +411,47 @@
         StateHasChanged();
     }
 
+    private async Task VerDetalleRenovacion(Guid codigoPaquete)
+    {
+        try
+        {
+            error = "";
+            codigoPaqueteARenovar = codigoPaquete;
+            detalleRenovacion = await ObtenerDetalleRenovacionUseCase.Ejecutar(
+                UsuarioSesion.UsuarioActual!.Id, codigoPaquete);
+            mostrarModalRenovacion = true;
+        }
+        catch (Exception ex)
+        {
+            error = ex.Message;
+        }
+    }
+
+    private void CerrarModalRenovacion()
+    {
+        mostrarModalRenovacion = false;
+        detalleRenovacion = null;
+    }
+
+    private async Task ConfirmarRenovacion()
+    {
+        mostrarModalRenovacion = false;
+        await RenovarPaquete(codigoPaqueteARenovar);
+    }
+
     private IEnumerable<PaqueteAgrupadoDTO> ObtenerPaquetesAdelantados()
     {
-        if (reservasActivas == null) return Enumerable.Empty<PaqueteAgrupadoDTO>();
+        if (todasLasReservasAdelantadas == null) return Enumerable.Empty<PaqueteAgrupadoDTO>();
 
-        return reservasActivas
-            .Where(r => r.TipoReserva == TipoReserva.Adelantado && r.CodigoPaqueteAdelantado.HasValue)
+        return todasLasReservasAdelantadas
+            .Where(r => r.CodigoPaqueteAdelantado.HasValue)
             .GroupBy(r => r.CodigoPaqueteAdelantado!.Value)
             .Select(g => new PaqueteAgrupadoDTO
             {
                 CodigoPaquete = g.Key,
                 NombreActividad = g.First().Turno?.Actividad?.Nombre ?? "Clase Adelantada",
-                ReservasAsociadas = g.ToList()
+                
+                ReservasAsociadas = g.Where(r => r.Estado != EstadoReserva.Cancelado).ToList()
             });
     }
 
@@ -368,9 +463,46 @@
             paqueteIdDesplegado = codigoPaquete;
     }
 
-    private void RenovarPaquete(Guid codigoPaquete)
+    private async Task RenovarPaquete(Guid codigoPaquete)
     {
-        Navigation.NavigateTo($"/renovar-reserva/{codigoPaquete}");
+        try
+        {
+            error = "";
+            string urlRedireccion = await IniciarRenovarReservaAdelantadaUseCase.Ejecutar(
+                UsuarioSesion.UsuarioActual!.Id, codigoPaquete);
+            Navigation.NavigateTo(urlRedireccion, true);
+        }
+        catch (Exception ex)
+        {
+            error = ex.Message;
+        }
+    }
+
+    private async Task ProcesarVueltaMPRenovacion()
+    {
+        if (pagoExitoso && !string.IsNullOrEmpty(PaymentId) && !string.IsNullOrEmpty(turnosId))
+        {
+            try
+            {
+                var ids = turnosId.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                                  .Select(int.Parse)
+                                  .ToList();
+                await RenovarReservaAdelantadaUseCase.Ejecutar(
+                    UsuarioSesion.UsuarioActual!.Id, ids, PaymentId);
+                error = "¡Renovación realizada con éxito!";
+            }
+            catch (Exception ex)
+            {
+                error = $"Error al confirmar la renovación: {ex.Message}";
+            }
+        }
+        else
+        {
+            error = "El pago fue cancelado o no pudo procesarse.";
+        }
+
+        await CargarReservas();
+        StateHasChanged();
     }
 
     List<Reserva>? reservasActivas;
@@ -378,6 +510,7 @@
     private int? reservaSeleccionadaId;
     private byte[] qrCode = Array.Empty<byte>();
     private string error = "";
+    private List<Reserva>? todasLasReservasAdelantadas;
 
     protected override async Task OnInitializedAsync()
     {
@@ -393,6 +526,11 @@
             {
                 var resultado = await listarReservasUseCase.Ejecutar(UsuarioSesion.UsuarioActual.Id);
                 reservasActivas = resultado.Where(r => r.Estado != EstadoReserva.Cancelado).ToList();
+
+                
+                 todasLasReservasAdelantadas = await ListarReservasClasesMensualesUseCase.Ejecutar(
+                    UsuarioSesion.UsuarioActual.Id);
+
                 listaEspera = await ConsultarListaEsperaUseCase.Ejecutar(UsuarioSesion.UsuarioActual.Id);
             }
         }
@@ -402,7 +540,7 @@
         }
     }
 
-    // 3. Método para invocar el caso de uso y despachar a Mercado Pago
+
     private async Task PagarSaldoRestante(int idReserva)
     {
         try

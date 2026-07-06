@@ -41,6 +41,7 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
                 .Include(t => t.Actividad)
                 .Include(t => t.Profesor)
                 .Include(t => t.Cancha)
+                .Include(t => t.Reservas)
                 .AsQueryable(); // encadena filtros
 
             if (fecha.HasValue)
@@ -81,7 +82,9 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
         public async Task<bool> TieneInscriptosAsync(int turnoId)
         {
             return await contexto.Turnos
-                .AnyAsync(t => t.Id == turnoId && t.Reservas.Any());
+                .AnyAsync(t => t.Id == turnoId
+                            && t.Reservas.Any(r => r.Estado == EstadoReserva.Confirmado
+                                               || r.Estado == EstadoReserva.Reservado));
         }
 
 
@@ -182,6 +185,29 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
             contexto.Turnos.UpdateRange(turnos);
 
             await contexto.SaveChangesAsync();
+        }
+
+        public async Task<List<Turno>> ObtenerTurnosSiguienteMesPorClaseAsync(
+    int idActividad, DayOfWeek diaSemana, TimeOnly horaInicio,
+    int idProfesor, int idCancha, int anio, int mes)
+        {
+            DateOnly inicio = new DateOnly(anio, mes, 1);
+            DateOnly fin = new DateOnly(anio, mes, DateTime.DaysInMonth(anio, mes));
+
+            return await contexto.Turnos
+                .Include(t => t.Actividad)
+                .Include(t => t.Profesor)
+                .Include(t => t.Cancha)
+                .Where(t => t.Id_Actividad == idActividad
+                         && t.Id_Profesor == idProfesor
+                         && t.Id_Cancha == idCancha
+                         && t.HoraInicio == horaInicio
+                         && t.Fecha >= inicio
+                         && t.Fecha <= fin
+                         && t.Fecha.DayOfWeek == diaSemana
+                         && t.Estado == EstadoTurno.Disponible)
+                .OrderBy(t => t.Fecha)
+                .ToListAsync();
         }
     }
 }

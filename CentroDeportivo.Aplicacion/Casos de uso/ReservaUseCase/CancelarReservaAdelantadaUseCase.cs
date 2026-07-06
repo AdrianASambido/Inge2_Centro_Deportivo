@@ -39,6 +39,7 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
             bool aplicarSancion = totalCancelaciones >= 3;
 
             reserva.Estado = EstadoReserva.Cancelado;
+            reserva.FechaCancelacion = DateOnly.FromDateTime(DateTime.Now);
 
             var primeroEnEspera = await listaRepo.ObtenerPrimeroEnFilaAsync(turno.Id);
             if (primeroEnEspera != null)
@@ -62,7 +63,7 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
                 usuario.TieneSancionDescuento = true;
             }
 
-            bool otorgaCredito = cumpleAnticipacion && !usuario.TieneSancionDescuento;
+            bool otorgaCredito = cumpleAnticipacion;
             if (otorgaCredito)
             {
                 Credito credito = new Credito(idUsuario, turno.Id_Actividad);
@@ -77,22 +78,14 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
             if (aplicarSancion)
             {
                 mensaje = otorgaCredito
-                    ? "Clase cancelada a tiempo. Se reintegró el crédito, pero alcanzaste las 3 cancelaciones mensuales y fuiste sancionado."
-                    : "Clase cancelada fuera de término. No se otorgó crédito y, además, alcanzaste las 3 cancelaciones mensuales: fuiste sancionado.";
+                    ? "Clase cancelada con éxito. Recibiste un crédito a favor. Por haber cancelado 3 clases este mes, no se aplicará el 20% de descuento en tu próxima reserva adelantada."
+                    : "Clase cancelada fuera de término (menos de 48hs de anticipación). No se otorgó crédito. Por haber cancelado 3 clases este mes, no se aplicará el 20% de descuento en tu próxima reserva adelantada.";
             }
             else
             {
-                if (otorgaCredito)
-                {
-                    mensaje = "Clase cancelada con éxito. El crédito correspondiente fue acreditado en tu cuenta.";
-                }
-                else
-                {
-
-                    mensaje = !cumpleAnticipacion
-                        ? "Clase cancelada fuera de término (menos de 48hs de anticipación). No se te otorga un credito."
-                        : "Clase cancelada a tiempo, pero no se otorgó crédito por poseer una sanción vigente.";
-                }
+                mensaje = otorgaCredito
+                    ? "Clase cancelada con éxito. El crédito correspondiente fue acreditado en tu cuenta."
+                    : "Clase cancelada fuera de término (menos de 48hs de anticipación). No se otorgó crédito.";
             }
 
             return (otorgaCredito, mensaje);

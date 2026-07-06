@@ -52,7 +52,7 @@ else
         <div class="row">
             <div class="col-12 mb-4">
                 <div class="card shadow-sm">
-                    <div class="card-header bg-primary text-white fw-bold">Turnos Disponibles</div>
+                    <div class="card-header bg-primary text-white fw-bold">Clases Disponibles</div>
                     <ul class="list-group list-group-flush">
                         @if (clasesDisponibles.Any())
                         {
@@ -66,8 +66,23 @@ else
                                             @t.HoraInicio.ToString("HH:mm") – @t.HoraFin.ToString("HH:mm")
                                         </span>
                                         <div class="small text-muted">Profesor: @t.Profesor.Nombre</div>
-                                        <div class="small text-muted">Cupo mínimo disponible: @clase.CupoMinimoDisponible</div>
                                         <div class="small text-muted">Cantidad de clases: @clase.TurnosDelMes.Count</div>
+
+                                        @if (clase.AplicaDescuento)
+                                        {
+                                            <div class="small text-muted text-decoration-line-through">
+                                                Precio sin descuento: $@clase.PrecioTotal
+                                            </div>
+                                            <div class="small text-success fw-bold">
+                                                Precio con 20% de descuento: $@clase.PrecioTotalConDescuento
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div class="small text-muted">
+                                                Precio total: $@clase.PrecioTotal
+                                            </div>
+                                        }
                                     </div>
                                     <button class="btn btn-success"
                                             disabled="@procesando"
@@ -80,7 +95,7 @@ else
                         else
                         {
                             <li class="list-group-item text-center py-4 text-muted">
-                                No hay turnos disponibles para reservar en este mes.
+                                No hay clases disponibles para reservar en este mes.
                             </li>
                         }
                     </ul>

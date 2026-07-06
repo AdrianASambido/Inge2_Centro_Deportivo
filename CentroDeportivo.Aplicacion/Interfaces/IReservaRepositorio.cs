@@ -14,7 +14,7 @@ namespace CentroDeportivo.Aplicacion.Interfaces
         Task<Reserva?> ObtenerPorQrTokenAsync(string qrToken);
         Task<IEnumerable<Reserva>> ObtenerPorUsuarioAsync(int usuarioId, int? actividadId, EstadoReserva? estado, bool incluirPasadas);
         Task<IEnumerable<Reserva>> ObtenerPorTurnoAsync(int turnoId, string? dni);
-        Task<bool> ExisteReservaActivaAsync(int usuarioId, int turnoId);
+        Task<bool> ExisteReservaActivaEnFechaYHoraAsync(int idUsuario, DateOnly fecha, TimeOnly horaInicio);
         Task<bool> TieneConflictoHorarioAsync(int usuarioId, DateOnly fecha, TimeOnly horarioInicio);
         Task AgregarAsync(Reserva reserva);
         Task<int> ContarCancelacionesUsuarioMesAsync(int idUsuario, int anio, int mes);
@@ -23,6 +23,9 @@ namespace CentroDeportivo.Aplicacion.Interfaces
         Task ActualizarAsync(Reserva reserva);
         Task<bool> TieneExcesoCancelacionesAsync(int idUsuario, DateOnly fechaLimite);
         Task<ReporteIndicesActividadDTO> ObtenerTotalesPorActividadAsync(int idActividad, DateOnly desde, DateOnly hasta);
+        // obtener reservas por código de paquete (para extraer datos de la clase)
+        Task<List<Reserva>> ObtenerPorCodigoPaqueteAsync(Guid codigoPaquete);
+        Task<List<Reserva>> ObtenerPaquetesAdelantatadosPorUsuarioAsync(int idUsuario);
         Task<IEnumerable<HistorialUsuarioActividadDTO>> ObtenerTotalesPorUsuarioAsync(int idUsuario, DateOnly? desde=null, DateOnly? hasta=null);
     }
 }

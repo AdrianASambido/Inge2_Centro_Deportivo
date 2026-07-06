@@ -28,5 +28,9 @@ namespace CentroDeportivo.Aplicacion.Entidades
 
         public Turno() { }
 
+  
+        public bool TieneInscriptos => Reservas.Any(r => r.Estado == EstadoReserva.Confirmado
+                                                      || r.Estado == EstadoReserva.Reservado);
+
     }
 }

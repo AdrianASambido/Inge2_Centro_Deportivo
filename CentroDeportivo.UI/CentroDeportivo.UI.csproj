@@ -8,6 +8,7 @@
 
 
   <ItemGroup>
+    <PackageReference Include="Blazor-ApexCharts" Version="6.1.0" />
     <PackageReference Include="MailKit" Version="4.16.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.26">
       <PrivateAssets>all</PrivateAssets>
