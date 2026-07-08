@@ -27,11 +27,6 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
             var usuario = await repoUsuario.ObtenerPorIdAsync(idUsuario)
                 ?? throw new Exception("Usuario no encontrado.");
 
-            if (usuario.TieneSancionDescuento)
-            {
-                usuario.TieneSancionDescuento = false;
-                await repoUsuario.ActualizarAsync(usuario);
-            }
 
             await crearReservaUseCase.Ejecutar(idUsuario, turnos, paymentId);
         }

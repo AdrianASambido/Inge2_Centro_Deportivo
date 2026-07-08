@@ -62,7 +62,7 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
             return await contexto.Creditos
                          .Include(c => c.Usuario)
                          .Include(c => c.Actividad)
-                         .Where(c => c.Id_Usuario == idUsuario)
+                         .Where(c => c.Id_Usuario == idUsuario && c.Estado == EstadoCredito.Disponible)
                          .AsNoTracking().ToListAsync();
         }
     }

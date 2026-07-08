@@ -2,6 +2,7 @@
 @rendermode InteractiveServer
 
 @using CentroDeportivo.Aplicacion.Casos_de_uso.EstadisticaUseCase.DTOs
+@using CentroDeportivo.Aplicacion.Entidades
 @inject Sesion UsuarioSesion
 @inject NavigationManager Navegador
 @inject ConsultarHistorialUsuarioUseCase ConsultarHistorialUsuarioCase
@@ -18,7 +19,7 @@
 
             <div class="text-center mb-4">
                 <h1 class="fw-bold text-primary">Mi Perfil</h1>
-                <p class="text-muted">Gestiona la información y el historial de tu cuenta</p>
+                <p class="text-muted">Gestiona la información de tu cuenta</p>
             </div>
 
             @if (UsuarioSesion.UsuarioActual == null)
@@ -42,21 +43,20 @@
                             @onclick="() => pestanaActiva = 1">
                         <span class="fw-bold small">Mi Perfil</span>
                     </button>
-                    <button class="btn py-2 px-3 text-center @(pestanaActiva == 2 ? "btn-primary text-white shadow" : "btn-light text-dark")"
-                            style="min-width: 130px; border-radius: 12px;"
-                            @onclick="() => pestanaActiva = 2">
-                        <span class="fw-bold small">Historial</span>
-                    </button>
-                    <button class="btn py-2 px-3 text-center @(pestanaActiva == 3 ? "btn-primary text-white shadow" : "btn-light text-dark")"
-                            style="min-width: 130px; border-radius: 12px;"
-                            @onclick="() => pestanaActiva = 3">
-                        <span class="fw-bold small">Comprobantes</span>
-                    </button>
-                    <button class="btn py-2 px-3 text-center @(pestanaActiva == 4 ? "btn-primary text-white shadow" : "btn-light text-dark")"
-                            style="min-width: 130px; border-radius: 12px;"
-                            @onclick="() => pestanaActiva = 4">
-                        <span class="fw-bold small">Mis Créditos</span>
-                    </button>
+
+                    @if (UsuarioSesion.UsuarioActual.Rol == Rol.Cliente)
+                    {
+                        <button class="btn py-2 px-3 text-center @(pestanaActiva == 3 ? "btn-primary text-white shadow" : "btn-light text-dark")"
+                                style="min-width: 130px; border-radius: 12px;"
+                                @onclick="() => pestanaActiva = 3">
+                            <span class="fw-bold small">Mis Pagos</span>
+                        </button>
+                        <button class="btn py-2 px-3 text-center @(pestanaActiva == 4 ? "btn-primary text-white shadow" : "btn-light text-dark")"
+                                style="min-width: 130px; border-radius: 12px;"
+                                @onclick="() => pestanaActiva = 4">
+                            <span class="fw-bold small">Mis Créditos</span>
+                        </button>
+                    }
                 </div>
 
                 <div class="card border-0 shadow-sm bg-white overflow-hidden" style="border-radius: 16px;">
@@ -64,6 +64,23 @@
                     @if (pestanaActiva == 1)
                     {
                         <div class="card-body p-4 p-md-5">
+
+                            @if (UsuarioSesion.UsuarioActual.Rol == Rol.Cliente && UsuarioSesion.UsuarioActual.TieneSancionVigente())
+                            {
+                                <div class="alert alert-danger border-0 shadow-sm mb-4 d-flex align-items-center gap-3" style="border-radius: 12px; border-left: 6px solid #dc3545 !important;">
+                                    <div class="bg-danger text-white rounded-circle d-flex align-items-center justify-content-center" style="min-width: 40px; height: 40px;">
+                                        <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="fw-bold mb-1 text-danger">Beneficio de Descuento Suspendido</h6>
+                                        <p class="small mb-0 text-muted">
+                                            Debido al límite de cancelaciones mensuales alcanzado, el descuento del 20% en reservas adelantadas se encuentra inactivo.
+                                            <strong>Vence el: @UsuarioSesion.UsuarioActual.FechaInicioSancion!.Value.AddDays(30).ToString("dd/MM/yyyy HH:mm") hs.</strong>
+                                        </p>
+                                    </div>
+                                </div>
+                            }
+
                             <h4 class="card-title fw-bold text-dark mb-4 text-center text-md-start">
                                 <i class="bi bi-person-lines-fill me-2 text-primary"></i>Datos Personales
                             </h4>
@@ -103,156 +120,131 @@
                             </div>
                         </div>
                     }
-                    else if (pestanaActiva == 2)
-                    {
-                        <div class="card-body p-4 p-md-5">
-                            <h4 class="card-title fw-bold text-dark mb-4 text-center text-md-start">
-                                <i class="bi bi-clock-history me-2 text-primary"></i>Historial de Actividad
-                            </h4>
-                            @if (historial != null && historial.Any())
-                            {
-                                <div class="table-responsive border rounded-3 bg-white">
-                                    <table class="table table-hover align-middle m-0 text-center">
-                                        <thead class="table-light">
-                                            <tr class="text-muted small text-uppercase">
-                                                <th class="text-start ps-3">Actividad</th>
-                                                <th>Asistencias</th>
-                                                <th>Inasistencias</th>
-                                                <th>Cancelaciones</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach (var h in historial)
-                                            {
-                                                <tr>
-                                                    <td class="fw-bold text-start ps-3 text-primary">@h.NombreActividad</td>
-                                                    <td><span class="badge bg-success-subtle text-success fs-6 px-3">@h.TotalAsistencias</span></td>
-                                                    <td><span class="badge bg-danger-subtle text-danger fs-6 px-3">@h.TotalInasistencias</span></td>
-                                                    <td><span class="badge bg-secondary-subtle text-secondary fs-6 px-3">@h.TotalCancelaciones</span></td>
-                                                </tr>
-                                            }
-                                        </tbody>
-                                    </table>
-                                </div>
-                            }
-                            else
-                            {
-                                <div class="text-center py-4 text-muted">
-                                    <i class="bi bi-calendar-x fs-3 d-block mb-2"></i>
-                                    No registra actividad deportiva en el sistema.
-                                </div>
-                            }
-                        </div>
-                    }
                     else if (pestanaActiva == 3)
                     {
-                        <!-- Forzamos a que el contenido use el ancho completo en tablas -->
-                        <div class="card-body p-3 p-md-4">
-                            <h4 class="card-title fw-bold text-dark mb-4 text-center text-md-start">
-                                <i class="bi bi-receipt me-2 text-primary"></i>Comprobantes de Pago
-                            </h4>
+                        @if (UsuarioSesion.UsuarioActual.Rol == Rol.Cliente)
+                        {
+                            <div class="card-body p-3 p-md-4">
+                                <h4 class="card-title fw-bold text-dark mb-4 text-center text-md-start">
+                                    <i class="bi bi-receipt me-2 text-primary"></i>Comprobantes de Pago
+                                </h4>
 
-                            @if (!string.IsNullOrEmpty(mensajePago))
-                            {
-                                <div class="alert alert-danger">@mensajePago</div>
-                            }
+                                @if (!string.IsNullOrEmpty(mensajePago))
+                                {
+                                    <div class="alert alert-danger">@mensajePago</div>
+                                }
 
-                            @if (pagos != null && pagos.Any())
-                            {
-                                <!-- 'text-nowrap' evita que las fechas o botones se partan en dos renglones desprolijamente -->
-                                <div class="table-responsive border rounded-3 bg-white text-nowrap">
-                                    <table class="table table-hover align-middle m-0">
-                                        <thead class="table-light">
-                                            <tr class="text-muted small text-uppercase">
-                                                <th class="ps-3">Fecha</th>
-                                                <th>Actividad</th>
-                                                <th>Monto</th>
-                                                <th class="text-end pe-3">Comprobante</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach (var p in pagos)
-                                            {
-                                                <tr>
-                                                    <td class="ps-3">@p.Fecha.ToString("dd/MM/yyyy")</td>
-                                                    <td>
-                                                        @(p.Reserva?.Turno?.Actividad?.Nombre
-                                                          ?? p.Turno?.Actividad?.Nombre
-                                                          ?? "Pago")
-                                                    </td>
-                                                    <td>
-                                                        <span class="badge bg-success-subtle text-success fs-6 px-3">
-                                                            $ @p.Monto
-                                                        </span>
-                                                    </td>
-                                                    <td class="text-end pe-3">
-                                                        <button class="btn btn-outline-primary btn-sm"
-                                                                @onclick="() => DescargarComprobante(p.Id)">
-                                                            <i class="bi bi-download me-1"></i> Descargar
-                                                        </button>
-                                                    </td>
+                                @if (pagos != null && pagos.Any())
+                                {
+                                    <div class="table-responsive border rounded-3 bg-white text-nowrap">
+                                        <table class="table table-hover align-middle m-0">
+                                            <thead class="table-light">
+                                                <tr class="text-muted small text-uppercase">
+                                                    <th class="ps-3">Fecha</th>
+                                                    <th>Actividad</th>
+                                                    <th>Monto</th>
+                                                    <th class="text-end pe-3">Comprobante</th>
                                                 </tr>
-                                            }
-                                        </tbody>
-                                    </table>
-                                </div>
-                            }
-                            else
-                            {
-                                <div class="text-center py-4 text-muted">
-                                    <i class="bi bi-credit-card-2-back fs-3 d-block mb-2"></i>
-                                    No registra comprobantes de pago.
-                                </div>
-                            }
-                        </div>
+                                            </thead>
+                                            <tbody>
+                                                @foreach (var p in pagos)
+                                                {
+                                                    <tr>
+                                                        <td class="ps-3">@p.Fecha.ToString("dd/MM/yyyy")</td>
+                                                        <td>
+                                                            @(p.Reserva?.Turno?.Actividad?.Nombre
+                                                                ?? p.Turno?.Actividad?.Nombre
+                                                                ?? "Pago")
+                                                        </td>
+                                                        <td>
+                                                            <span class="badge bg-success-subtle text-success fs-6 px-3">
+                                                                $ @p.Monto
+                                                            </span>
+                                                        </td>
+                                                        <td class="text-end pe-3">
+                                                            <button class="btn btn-outline-primary btn-sm"
+                                                                    @onclick="() => DescargarComprobante(p.Id)">
+                                                                <i class="bi bi-download me-1"></i> Descargar
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="text-center py-4 text-muted">
+                                        <i class="bi bi-credit-card-2-back fs-3 d-block mb-2"></i>
+                                        No registra comprobantes de pago.
+                                    </div>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="card-body p-4 text-center text-muted">
+                                <em>Sección exclusiva para clientes.</em>
+                            </div>
+                        }
                     }
                     else if (pestanaActiva == 4)
                     {
-                        <div class="card-body p-3 p-md-4">
-                            <h4 class="card-title fw-bold text-dark mb-4 text-md-start">
-                                <i class="bi bi-wallet2 me-2 text-primary"></i>Créditos disponibles
-                            </h4>
+                        @if (UsuarioSesion.UsuarioActual.Rol == Rol.Cliente)
+                        {
+                            <div class="card-body p-3 p-md-4">
+                                <h4 class="card-title fw-bold text-dark mb-4 text-md-start">
+                                    <i class="bi bi-wallet2 me-2 text-primary"></i>Créditos disponibles
+                                </h4>
 
-                            @if (creditos != null && creditos.Any())
-                            {
-                                <div class="table-responsive border rounded-3 bg-white text-nowrap">
-                                    <table class="table table-hover align-middle m-0">
-                                        <thead class="table-light">
-                                            <tr class="text-muted small text-uppercase">
-                                                <th class="ps-3">Actividad</th>
-                                                <th>Generado</th>
-                                                <th>Vence</th>
-                                                <th>Estado</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach (var c in creditos)
-                                            {
-                                                <tr>
-                                                    <td class="ps-3 fw-bold text-primary">
-                                                        @(c.Actividad?.Nombre ?? "-")
-                                                    </td>
-                                                    <td>@c.FechaGeneracion.ToString("dd/MM/yyyy")</td>
-                                                    <td>@c.FechaVencimiento.ToString("dd/MM/yyyy")</td>
-                                                    <td>
-                                                        <span class="badge @(c.Estado == EstadoCredito.Disponible ? "bg-success" : "bg-secondary")">
-                                                            @c.Estado
-                                                        </span>
-                                                    </td>
+                                @if (creditos != null && creditos.Any())
+                                {
+                                    <div class="table-responsive border rounded-3 bg-white text-nowrap">
+                                        <table class="table table-hover align-middle m-0">
+                                            <thead class="table-light">
+                                                <tr class="text-muted small text-uppercase">
+                                                    <th class="ps-3">Actividad</th>
+                                                    <th>Generado</th>
+                                                    <th>Vence</th>
+                                                    <th>Estado</th>
                                                 </tr>
-                                            }
-                                        </tbody>
-                                    </table>
-                                </div>
-                            }
-                            else
-                            {
-                                <div class="text-center py-4 text-muted">
-                                    <i class="bi bi-wallet2 fs-3 d-block mb-2"></i>
-                                    No registra créditos disponibles.
-                                </div>
-                            }
-                        </div>
+                                            </thead>
+                                            <tbody>
+                                                @foreach (var c in creditos)
+                                                {
+                                                    <tr>
+                                                        <td class="ps-3 fw-bold text-primary">
+                                                            @(c.Actividad?.Nombre ?? "-")
+                                                        </td>
+                                                        <td>@c.FechaGeneracion.ToString("dd/MM/yyyy")</td>
+                                                        <td>@c.FechaVencimiento.ToString("dd/MM/yyyy")</td>
+                                                        <td>
+                                                            <span class="badge @(c.Estado == EstadoCredito.Disponible ? "bg-success" : "bg-secondary")">
+                                                                @c.Estado
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="text-center py-4 text-muted">
+                                        <i class="bi bi-wallet2 fs-3 d-block mb-2"></i>
+                                        No registra créditos disponibles.
+                                    </div>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="card-body p-4 text-center text-muted">
+                                <em>Sección exclusiva para clientes.</em>
+                            </div>
+                        }
                     }
                 </div>
             }
@@ -262,7 +254,6 @@
 
 @code {
     private int pestanaActiva = 1;
-    private List<HistorialUsuarioActividadDTO>? historial;
     private List<Credito>? creditos;
     private List<Pago>? pagos;
     private string mensaje = "";
@@ -279,9 +270,6 @@
             }
 
             var idUsuario = UsuarioSesion.UsuarioActual.Id;
-
-            var resultadoHistorial = await ConsultarHistorialUsuarioCase.Ejecutar(idUsuario);
-            historial = resultadoHistorial?.ToList() ?? new();
 
             var resultadoCreditos = await ConsultarCreditosUseCase.Ejecutar(idUsuario);
             creditos = resultadoCreditos?.ToList() ?? new();

@@ -80,9 +80,10 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
 
         public async Task<Reserva?> ObtenerPorIdAsync(int id)
         {
-            return await contexto.Reservas
-                .Include(r => r.Turno)   // Traigo los datos del horario, fecha
+            return await contexto.Reservas      
                 .Include(r => r.Usuario) // Taigo los datos del cliente 
+                .Include(r => r.Turno)   // Traigo los datos del horario, fecha
+                    .ThenInclude(t => t!.Actividad)
                 .FirstOrDefaultAsync(r => r.Id == id);
         }
 

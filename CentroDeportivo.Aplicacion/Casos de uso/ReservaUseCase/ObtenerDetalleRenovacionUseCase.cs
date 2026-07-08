@@ -32,7 +32,7 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
                 mesSiguiente);
 
             var usuario = await repoUsuario.ObtenerPorIdAsync(idUsuario)!;
-            bool aplicaDescuento = !usuario!.TieneSancionDescuento;
+            bool aplicaDescuento = !usuario!.TieneSancionVigente();
 
             decimal precioUnitario = turnosSiguienteMes.Any()
                 ? turnosSiguienteMes.First().PrecioTurno

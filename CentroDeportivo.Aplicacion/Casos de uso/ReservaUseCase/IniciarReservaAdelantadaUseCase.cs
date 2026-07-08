@@ -26,7 +26,7 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
             ?? throw new Exception("Usuario no encontrado.");
 
             decimal precioBase = clasesDisponibles.First().PrecioTurno;
-            decimal factor = usuario.TieneSancionDescuento ? 1.0m : 0.80m;
+            decimal factor = usuario.TieneSancionVigente() ? 1.0m : 0.80m;
             decimal precioConDescuento = precioBase * factor;
             decimal montoTotal = precioConDescuento * clasesDisponibles.Count;
 

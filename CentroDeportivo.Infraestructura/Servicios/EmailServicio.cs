@@ -185,5 +185,43 @@ namespace CentroDeportivo.Infraestructura.Servicios
         {
             throw new NotImplementedException();
         }
+
+        public async Task EnviarAvisoEliminacionInscriptoAsync(string emailDestino, Turno turno)
+        {
+            var mensaje = new MimeMessage();
+            mensaje.From.Add(new MailboxAddress("Centro Deportivo", _username));
+            mensaje.To.Add(new MailboxAddress("", emailDestino));
+            mensaje.Subject = $"Aviso: Fuiste eliminado de una clase - {turno.Actividad?.Nombre}";
+
+            var bodyBuilder = new BodyBuilder
+            {
+                HtmlBody = $@"
+            <h3>Eliminación de clase</h3>
+            <p>Te informamos que fuiste eliminado de la clase de 
+            <b>{turno.Actividad?.Nombre}</b> del día 
+            <b>{turno.Fecha}</b> a las 
+            <b>{turno.HoraInicio}hs</b>.</p>
+            <p>Si habías realizado la reserva con un pago, se procesará 
+            la devolución correspondiente a través de Mercado Pago. 
+            Si la reserva fue realizada con crédito o por adelantado, 
+            se generó un nuevo crédito a tu favor.</p>
+            <p>Disculpá los inconvenientes.</p>"
+            };
+            mensaje.Body = bodyBuilder.ToMessageBody();
+
+            using var client = new SmtpClient();
+            try
+            {
+                await client.ConnectAsync(_host, _port, SecureSocketOptions.StartTls);
+                await client.AuthenticateAsync(_username, _password);
+                await client.SendAsync(mensaje);
+                await client.DisconnectAsync(true);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error al enviar aviso de eliminación: {ex.Message}");
+                throw;
+            }
+        }
     }
 }

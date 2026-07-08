@@ -14,7 +14,7 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
      IUsuarioRepositorio repoUsuario
  )
     {
-        public async Task Ejecutar(int idUsuario, List<Turno> clasesDisponibles, string idPayment)
+        public async Task<String> Ejecutar(int idUsuario, List<Turno> clasesDisponibles, string idPayment)
         {
             DateOnly hoy = DateOnly.FromDateTime(DateTime.Now);
             Guid codigoPaquete = Guid.NewGuid();
@@ -23,16 +23,11 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
                 ?? throw new Exception("Usuario no encontrado.");
 
             decimal precioBase = clasesDisponibles.First().PrecioTurno;
-            decimal factor = usuario.TieneSancionDescuento ? 1.0m : 0.80m;
+            decimal factor = usuario.TieneSancionVigente() ? 1.0m : 0.80m;
             decimal precioConDescuento = precioBase * factor;
             decimal montoTotal = precioConDescuento * clasesDisponibles.Count;
+            string mensaje = "Reserva realizada con exito.";
 
-            // si tenía sanción se levanta al reservar por adelantado
-            if (usuario.TieneSancionDescuento)
-            {
-                usuario.TieneSancionDescuento = false;
-                await repoUsuario.ActualizarAsync(usuario);
-            }
 
             List<Reserva> nuevasReservas = new();
             foreach (var turnoClase in clasesDisponibles)
@@ -63,6 +58,7 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
             await repoReserva.GuardarMuchasReservasAsync(nuevasReservas);
             await repoTurno.ActualizarMuchosAsync(clasesDisponibles);
             await repoPago.AgregarAsync(nuevoPago);
+            return mensaje;
         }
     }
 }

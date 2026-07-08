@@ -14,5 +14,6 @@ namespace CentroDeportivo.Aplicacion.Interfaces
         Task EnviarLinkRecuperacionAsync(string email, string link);
         Task EnviarAvisoCancelacionMasivo(IEnumerable<string> emails, Turno turno);
         Task EnviarAvisoVacanteListaEsperaAsync(string email, Turno turno);
+        Task EnviarAvisoEliminacionInscriptoAsync(string email, Turno turno);
     }
 }

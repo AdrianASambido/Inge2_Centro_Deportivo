@@ -14,7 +14,9 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.TurnoUseCase
       IPagoRepositorio repoPago,
       ICreditoRepositorio repoCredito,
       ITurnoRepositorio repoTurno,
-      IPagoServicio pagoServicio)
+      IPagoServicio pagoServicio,
+      IEmailServicio emailRepo,
+      IListaDeEsperaRepositorio repoLista)
     {
         public async Task<ResumenEliminarInscripto> Ejecutar(int idReserva)
         {
@@ -50,15 +52,34 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.TurnoUseCase
             }
 
             reserva.Estado = EstadoReserva.Cancelado;
-            reserva.FechaCancelacion = DateOnly.FromDateTime(DateTime.Today); 
+            reserva.FechaCancelacion = DateTime.Now; // con hora exacta
             await repoReserva.ActualizarAsync(reserva);
 
             var turno = reserva.Turno;
-            turno.CupoDisponible++;
-            if (turno.Estado == EstadoTurno.Lleno)
-                turno.Estado = EstadoTurno.Disponible;
+            var primeroEnEspera = await repoLista.ObtenerPrimeroEnFilaAsync(turno.Id);
 
-            await repoTurno.ActualizarAsync(turno);
+            if (primeroEnEspera != null)
+            {
+
+                primeroEnEspera.Estado = EstadoListaEspera.Notificado;
+                primeroEnEspera.FechaNotificacion = DateTime.Now;
+
+                await emailRepo.EnviarAvisoVacanteListaEsperaAsync(primeroEnEspera.Usuario.Email, turno);
+                await repoLista.ActualizarAsync(primeroEnEspera);
+            }
+            else
+            {
+                // Solo si NO hay nadie esperando, liberamos el cupo
+                turno.CupoDisponible++;
+                if (turno.Estado == EstadoTurno.Lleno)
+                    turno.Estado = EstadoTurno.Disponible;
+
+                await repoTurno.ActualizarAsync(turno);
+            }
+
+            // 4. Aviso al inscripto eliminado
+            await emailRepo.EnviarAvisoEliminacionInscriptoAsync(reserva.Usuario!.Email, reserva.Turno!);
+
 
             return new ResumenEliminarInscripto
             {

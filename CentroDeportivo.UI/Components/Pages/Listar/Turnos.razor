@@ -96,9 +96,9 @@
                 <div class="col-12 col-md-5">
 
                     <div class="mb-3">
-                        <label class="form-label">Actividad</label>
+                        <label class="form-label fw-semibold">Actividad</label>
                         <select class="form-select" @bind="SeleccionActividad" @bind:after="AlActividadCambiada">
-                            <option value="">— Seleccione una actividad —</option>
+                            <option value="" selected>— Seleccione una actividad —</option>
                             @foreach (var a in actividades)
                             {
                                 <option value="@a.Id">@a.Nombre</option>
@@ -107,31 +107,34 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Día de la semana</label>
-                        <select class="form-select" @bind="diaSemana">
+                        <label class="form-label fw-semibold">Día de la semana</label>
+                        <select class="form-select" @bind="diaSemanaString">
+                            <option value="" selected>— Seleccione un día —</option>
                             @foreach (var d in Enum.GetValues<DayOfWeek>().Where(d => d != DayOfWeek.Saturday && d != DayOfWeek.Sunday))
                             {
-                                <option value="@d">@NombreDia(d)</option>
+                                <option value="@d.ToString()">@NombreDia(d)</option>
                             }
                         </select>
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Mes</label>
-                        <select class="form-select" @bind="mesSeleccionado">
-                            <option value="@MesActual()">@NombreMes(DateTime.Now.Year, DateTime.Now.Month)</option>
-                            <option value="@MesProximo()">@NombreMes(AnioProximo(), NumeroMesProximo())</option>
+                        <label class="form-label fw-semibold">Mes</label>
+                        <select class="form-select" @bind="mesSeleccionadoString">
+                            <option value="" selected>— Seleccione un mes —</option>
+                            @foreach (var mes in ObtenerMesesRestantesDelAnio())
+                            {
+                                <option value="@mes.Valor">@mes.NombreAnio</option>
+                            }
                         </select>
                     </div>
 
-                    @if (int.TryParse(SeleccionActividad, out var aid2) && aid2 > 0)
-                    {
-                        <div class="mt-4 text-center">
-                            <button class="btn btn-primary w-100" @onclick="() => IrAActividad(aid2, diaSemana)">
-                                Continuar
-                            </button>
-                        </div>
-                    }
+                    <div class="mt-4 text-center">
+                        <button class="btn btn-primary w-100"
+                                disabled="@(string.IsNullOrEmpty(SeleccionActividad) || string.IsNullOrEmpty(diaSemanaString) || string.IsNullOrEmpty(mesSeleccionadoString))"
+                                @onclick="ManejarContinuar">
+                            Continuar
+                        </button>
+                    </div>
                 </div>
             </div>
         }
@@ -148,18 +151,40 @@
     private static readonly string[] NombresActividades = ["Pádel", "Fútbol", "Vóley", "Básquet"];
     private static readonly string[] DiasSemanaCortos = ["Lu", "Ma", "Mi", "Ju", "Vi", "Sa", "Do"];
 
-    private DayOfWeek diaSemana = new DayOfWeek();
+    // Modificados a string para poder manejar el valor por defecto "" (vacío)
+    private string diaSemanaString = "";
+    private string mesSeleccionadoString = "";
+
     private List<Actividad> actividades = [];
     private string SeleccionActividad = "";
     private bool mostrarCalendarioMini;
     private bool mostrarCalendarioCompleto;
 
-    private string mesSeleccionado = $"{DateTime.Now.Year}-{DateTime.Now.Month:D2}";
+    // Estructura auxiliar para renderizar el lazo de meses dinámicos
+    public class MesItem
+    {
+        public string Valor { get; set; } = "";     // Ejemplo: "07-2026"
+        public string NombreAnio { get; set; } = ""; // Ejemplo: "Julio 2026"
+    }
 
-    private string MesActual() => $"{DateTime.Now.Year}-{DateTime.Now.Month:D2}";
-    private string MesProximo() => $"{AnioProximo()}-{NumeroMesProximo():D2}";
-    private int NumeroMesProximo() => DateTime.Now.Month == 12 ? 1 : DateTime.Now.Month + 1;
-    private int AnioProximo() => DateTime.Now.Month == 12 ? DateTime.Now.Year + 1 : DateTime.Now.Year;
+    private List<MesItem> ObtenerMesesRestantesDelAnio()
+    {
+        var lista = new List<MesItem>();
+        var fechaActual = DateTime.Now;
+        var añoActual = fechaActual.Year;
+
+        // Itera desde el mes en curso hasta diciembre del corriente año
+        for (int m = fechaActual.Month; m <= 12; m++)
+        {
+            lista.Add(new MesItem
+            {
+                Valor = $"{m:D2}-{añoActual}",
+                NombreAnio = $"{NombreMes(añoActual, m)}"
+            });
+        }
+        return lista;
+    }
+
     private string NombreMes(int anio, int mes)
     {
         var nombre = new DateTime(anio, mes, 1).ToString("MMMM yyyy", new CultureInfo("es-AR"));
@@ -259,11 +284,22 @@
         Navegador.NavigateTo($"/Turnos/dia?actividadId={actividadId}&fecha={f}");
     }
 
+    private void ManejarContinuar()
+    {
+        if (int.TryParse(SeleccionActividad, out var aid2) &&
+            Enum.TryParse<DayOfWeek>(diaSemanaString, out var diaElegido) &&
+            !string.IsNullOrEmpty(mesSeleccionadoString))
+        {
+            IrAActividad(aid2, diaElegido);
+        }
+    }
+
     private void IrAActividad(int actividadId, DayOfWeek diaSemana)
     {
-        var partes = mesSeleccionado.Split('-');
-        var anio = partes[0];
-        var mes = partes[1];
+        // Dividimos la cadena del formato "MM-yyyy" (ej: "08-2026")
+        var partes = mesSeleccionadoString.Split('-');
+        var mes = partes[0];
+        var anio = partes[1];
 
         Navegador.NavigateTo($"/Turno/adelantada?actividadId={actividadId}&diaSemana={(int)diaSemana}&anio={anio}&mes={mes}");
     }
@@ -321,5 +357,6 @@
 
         __builder.CloseElement();
     };
-
 }
+
+

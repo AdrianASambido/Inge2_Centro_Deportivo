@@ -63,6 +63,7 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
 
 
             reserva.Estado = EstadoReserva.Cancelado;
+            reserva.FechaCancelacion = DateTime.Now; // con hora exacta
             await repoReserva.ActualizarAsync(reserva);
 
             var turno = await repoTurno.ObtenerPorIdAsync(reserva.Id_Turno);

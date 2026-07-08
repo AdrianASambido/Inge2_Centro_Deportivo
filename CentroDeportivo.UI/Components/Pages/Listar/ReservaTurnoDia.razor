@@ -121,7 +121,7 @@ else
                     <h5 class="modal-title">Reserva con créditos</h5>
                 </div>
                 <div class="modal-body">
-                    <p>¿Desea utilizar un credito disponible para esta reserva?</p>
+                    <p>¿Desea utilizar un crédito disponible para la actividad <strong>@actividadNombre</strong> en esta reserva?</p>
                 </div>
                 <div class="modal-footer">
                     <button class="btn btn-secondary" @onclick="() => Reservar(idTurnoAReservar)">No</button>
@@ -187,7 +187,10 @@ else
         if (UsuarioSesion.UsuarioActual is null) return;
         if (volviMP) return; // lo maneja OnAfterRenderAsync
 
-        creditosUsuario = (await ConsultarCreditosUseCase.Ejecutar(UsuarioSesion.UsuarioActual!.Id)).ToList();
+        var todosLosCreditos = await ConsultarCreditosUseCase.Ejecutar(UsuarioSesion.UsuarioActual!.Id);
+        creditosUsuario = todosLosCreditos
+            .Where(c => c.Id_Actividad == ActividadId) 
+            .ToList();
         procesando = true;
         mensajeError = mensajeExito = null;
 

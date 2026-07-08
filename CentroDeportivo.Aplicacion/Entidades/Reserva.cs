@@ -13,7 +13,7 @@ namespace CentroDeportivo.Aplicacion.Entidades
         public EstadoReserva Estado { get; set; }
         public Asistencia Asistencia { get; set; }
         public DateOnly FechaReserva { get; set; }
-        public DateOnly? FechaCancelacion { get; set; }
+        public DateTime? FechaCancelacion { get; set; }
         public DateOnly FechaAsistencia { get; set; }
         public TipoReserva TipoReserva { get; set; } ///Tipo Ocasional, Adelantada
         public bool ConCredito { get; set; } ///Si hizo la reserva ocasional pagando con credito es TRUE

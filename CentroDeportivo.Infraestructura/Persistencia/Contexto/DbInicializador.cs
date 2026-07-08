@@ -13,10 +13,10 @@ public static class DbInicializador
         {
             var usuarios = new List<Usuario>
             {
-                new Usuario("Carlos", "Tevez", "Calle 123", "112345534", BCrypt.Net.BCrypt.HashPassword("Admin1234"), "admin@gmail.com", false, Rol.Administrador),
-                new Usuario("Joaquin", "P", "Calle 456", "30111222", BCrypt.Net.BCrypt.HashPassword("Boca1999"), "joa64919@gmail.com", false, Rol.Cliente),
+                new Usuario("Mario", "Tevez", "Calle 123", "112345534", BCrypt.Net.BCrypt.HashPassword("Admin1234"), "admin@gmail.com", false, Rol.Administrador),
+                new Usuario("Joaquin", "Pinanelli", "Calle 456", "30111222", BCrypt.Net.BCrypt.HashPassword("Boca1999"), "joa64919@gmail.com", false, Rol.Cliente),
                 new Usuario("Maria", "Gomez", "Calle 789", "32444555", BCrypt.Net.BCrypt.HashPassword("Boca1999"), "maria@gmail.com", false, Rol.Cliente),
-                new Usuario("nel joaquin", "pin", "Calle10", "123456", BCrypt.Net.BCrypt.HashPassword("Boca1999"), "nelsonjp1999@gmail.com", false, Rol.Cliente)
+                new Usuario("nel", "pinanelli", "Calle10", "123456", BCrypt.Net.BCrypt.HashPassword("Boca1999"), "nelsonjp1999@gmail.com", false, Rol.Cliente)
             };
             context.Usuarios.AddRange(usuarios);
             context.SaveChanges();
@@ -39,7 +39,7 @@ public static class DbInicializador
             var profesores = new List<Profesor>
             {
                 new Profesor("Lionel", "Messi", "25000111"),
-                new Profesor("Alberto", "Tevez", "26000222"),
+                new Profesor("Carlos", "Tevez", "26000222"),
                 new Profesor("Juan", "Riquelme", "27000333")
             };
             context.Profesores.AddRange(profesores);
@@ -50,8 +50,10 @@ public static class DbInicializador
         {
             var actividades = new List<Actividad>
             {
-                new Actividad("Futbol", "Actividad recreativa de futbol 5", 50),
-                new Actividad("Voley", "Entrenamiento de voley", 30)
+                new Actividad("Futbol", "Actividad recreativa de futbol 5", 500),
+                new Actividad("Voley", "Entrenamiento de voley", 300),
+                new Actividad("Paddle", "Clase grupal de Paddle", 200),
+                new Actividad("Basquet", "Clase grupal de Basquet", 100)
             };
             context.Actividades.AddRange(actividades);
             context.SaveChanges();
@@ -191,7 +193,8 @@ public static class DbInicializador
                     Profesor = profeMessi
                 };
 
-                var turnoSuelto2 = new Turno
+
+                var turnoSuelto2 = new Turno   
                 {
                     Fecha = new DateOnly(2026, 7, 17),
                     HoraInicio = new TimeOnly(20, 0),
@@ -207,6 +210,7 @@ public static class DbInicializador
 
                 context.Turnos.AddRange(turnoSuelto1);
                 context.Turnos.AddRange(turnoSuelto2);
+                context.Turnos.AddRange(turnos);
                 context.Turnos.AddRange(turnosMiercolesJulio);
                 context.Turnos.AddRange(turnosMiercolesAgosto);
                 context.Turnos.AddRange(turnosJuevesJulio);
@@ -341,7 +345,7 @@ public static class DbInicializador
                 Estado = EstadoReserva.Cancelado,   // <--- CANCELACIÓN (Avisó previo)
                 Asistencia = Asistencia.Ausente,
                 FechaReserva = new DateOnly(2026, 6, 20),
-                FechaCancelacion = new DateOnly(2026, 6, 22),
+              //  FechaCancelacion = new DateOnly(2026, 6, 22),
                 FechaAsistencia = turnoPasadoFutbol2.Fecha,
                 TipoReserva = TipoReserva.Ocasional
             },

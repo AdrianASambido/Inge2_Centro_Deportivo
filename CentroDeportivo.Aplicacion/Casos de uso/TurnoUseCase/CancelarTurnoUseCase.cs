@@ -40,7 +40,7 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.TurnoUseCase
                     emailsDestinatarios.Add(reserva.Usuario.Email);
 
                 reserva.Estado = EstadoReserva.Cancelado;
-                reserva.FechaCancelacion = DateOnly.FromDateTime(DateTime.Today); 
+                reserva.FechaCancelacion = DateTime.Now; // con hora exacta
 
                 if (reserva.TipoReserva == TipoReserva.Ocasional)
                 {

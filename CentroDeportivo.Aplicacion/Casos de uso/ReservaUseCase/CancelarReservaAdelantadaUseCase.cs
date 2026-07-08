@@ -36,10 +36,9 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
             int cancelacionesMes = await repoReserva.ContarCancelacionesUsuarioMesAsync(idUsuario, ahora.Year, ahora.Month);
 
             int totalCancelaciones = cancelacionesMes + 1;
-            bool aplicarSancion = totalCancelaciones >= 3;
 
             reserva.Estado = EstadoReserva.Cancelado;
-            reserva.FechaCancelacion = DateOnly.FromDateTime(DateTime.Now);
+            reserva.FechaCancelacion = DateTime.Now; 
 
             var primeroEnEspera = await listaRepo.ObtenerPrimeroEnFilaAsync(turno.Id);
             if (primeroEnEspera != null)
@@ -58,9 +57,10 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
                 }
             }
 
+            bool aplicarSancion = totalCancelaciones >= 3 && !usuario.TieneSancionVigente();
             if (aplicarSancion)
             {
-                usuario.TieneSancionDescuento = true;
+                usuario.FechaInicioSancion = ahora;
             }
 
             bool otorgaCredito = cumpleAnticipacion;
@@ -78,8 +78,8 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
             if (aplicarSancion)
             {
                 mensaje = otorgaCredito
-                    ? "Clase cancelada con éxito. Recibiste un crédito a favor. Por haber cancelado 3 clases este mes, no se aplicará el 20% de descuento en tu próxima reserva adelantada."
-                    : "Clase cancelada fuera de término (menos de 48hs de anticipación). No se otorgó crédito. Por haber cancelado 3 clases este mes, no se aplicará el 20% de descuento en tu próxima reserva adelantada.";
+                    ? "Clase cancelada con éxito. Recibiste un crédito a favor. Por haber cancelado 3 clases este mes, el descuento del 20% quedará suspendido durante 30 días."
+                    : "Clase cancelada fuera de término (menos de 48hs de anticipación). No se otorgó crédito. Por haber cancelado 3 clases este mes, el descuento del 20% quedará suspendido durante 30 días.";
             }
             else
             {

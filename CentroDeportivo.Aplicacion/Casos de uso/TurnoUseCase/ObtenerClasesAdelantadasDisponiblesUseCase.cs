@@ -28,7 +28,7 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.TurnoUseCase
                 idActividad, diaSemana, idUsuario, desde, finDeMes);
 
             var usuario = await repoUsuario.ObtenerPorIdAsync(idUsuario);
-            bool aplicaDescuento = usuario != null && !usuario.TieneSancionDescuento;
+            bool aplicaDescuento = usuario != null && !usuario.TieneSancionVigente();
 
             var clasesAgrupadas = turnosFisicos
                 .GroupBy(t => new { t.Id_Profesor, t.HoraInicio, t.Id_Cancha })

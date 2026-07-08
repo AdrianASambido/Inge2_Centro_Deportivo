@@ -235,12 +235,11 @@ else
                     turnos.Add(turno);
             }
 
-            await CrearReservaAdelantadaUseCase.Ejecutar(
+            mensajeExito = await CrearReservaAdelantadaUseCase.Ejecutar(
                 UsuarioSesion.UsuarioActual!.Id,
                 turnos,
                 PaymentId!);
 
-            mensajeExito = "Pago y reserva realizados con éxito.";
             await CargarTurnos();
         }
         else

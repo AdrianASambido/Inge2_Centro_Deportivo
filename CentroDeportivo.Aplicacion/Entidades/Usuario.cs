@@ -15,10 +15,10 @@ namespace CentroDeportivo.Aplicacion.Entidades
         public string Dni { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
-        public bool TieneSancionDescuento { get; set; } = false;
         public string? TokenRecuperacion {  get; set; } = string.Empty;
         public DateTime? TokenRecuperacionVencimiento {  get; set; } 
         public bool DebeCambiarPassword { get; set; } = false;
+        public DateTime? FechaInicioSancion { get; set; }
         public Rol Rol { get; set; }
 
         public Usuario(string nombre, string apellido, string domicilio, string dni, string password, string email, bool debeCambiarPassword, Rol rol)
@@ -34,5 +34,11 @@ namespace CentroDeportivo.Aplicacion.Entidades
         }
 
         public Usuario() { }
+
+        public bool TieneSancionVigente()
+        {
+            if (FechaInicioSancion == null) return false;
+            return DateTime.Now <= FechaInicioSancion.Value.AddDays(30);
+        }
     }
 }
