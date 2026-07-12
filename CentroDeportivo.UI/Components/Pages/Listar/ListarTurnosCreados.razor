@@ -44,8 +44,14 @@ else
 
         @if (!string.IsNullOrEmpty(mensajeTurno))
         {
+            bool esCancelacion = mensajeTurno.Contains("cancelado", StringComparison.OrdinalIgnoreCase) ||
+                                 mensajeTurno.Contains("eliminado", StringComparison.OrdinalIgnoreCase);
+
             <div class="alert alert-success mt-3 shadow-sm alert-dismissible fade show" role="alert">
-                <h5 class="alert-heading"><i class="bi bi-check-circle-fill me-2"></i> ¡Turno cancelado exitosamente!</h5>
+                <h5 class="alert-heading">
+                    <i class="bi bi-check-circle-fill me-2"></i>
+                    @(esCancelacion ? "¡Turno cancelado exitosamente!" : "¡Operación exitosa!")
+                </h5>
                 <hr>
                 <p class="mb-0" style="white-space: pre-line;">@mensajeTurno</p>
                 <button type="button" class="btn-close" @onclick="() => mensajeTurno = string.Empty" aria-label="Close"></button>

@@ -15,5 +15,7 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.TurnoUseCase.DTOsTurno
         public decimal PrecioTotal { get; set; }
         public decimal PrecioTotalConDescuento { get; set; }
         public bool AplicaDescuento { get; set; }
+
+
     }
 }

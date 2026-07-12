@@ -42,12 +42,21 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
             decimal precioTotal = precioUnitario * cantidadClases;
             decimal precioConDescuento = aplicaDescuento ? precioTotal * 0.80m : precioTotal;
 
+            bool yaRenovo = await repoReserva.YaRenovoParaSiguienteMesAsync(
+    idUsuario,
+    turnoReferencia.Id_Actividad,
+    turnoReferencia.Fecha.DayOfWeek,
+    turnoReferencia.HoraInicio,
+    anioSiguiente,
+    mesSiguiente);
+
             return new DetalleRenovacionDTO
             {
                 CantidadClases = cantidadClases,
                 PrecioUnitario = precioUnitario,
                 PrecioTotal = precioTotal,
                 PrecioConDescuento = precioConDescuento,
+                YaRenovo = yaRenovo,
                 AplicaDescuento = aplicaDescuento,
                 TurnosDisponibles = turnosSiguienteMes.Any(),
                 NombreMes = new DateTime(anioSiguiente, mesSiguiente, 1)
@@ -65,5 +74,6 @@ namespace CentroDeportivo.Aplicacion.Casos_de_uso.ReservaUseCase
         public bool AplicaDescuento { get; set; }
         public bool TurnosDisponibles { get; set; }
         public string NombreMes { get; set; } = "";
+        public bool YaRenovo { get; set; }
     }
 }

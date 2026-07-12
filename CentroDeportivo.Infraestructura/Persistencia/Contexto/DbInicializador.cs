@@ -70,6 +70,8 @@ public static class DbInicializador
             var cancha2 = context.Canchas.FirstOrDefault(c => c.Numero == 2);
             var profeJuan = context.Profesores.FirstOrDefault(p => p.Nombre == "Juan");
 
+            var basquet = context.Actividades.FirstOrDefault(a => a.Nombre == "Basquet");
+
             var fechasMartesJulio = new List<DateOnly>
             {
                 new DateOnly(2026, 7, 7),
@@ -126,8 +128,8 @@ public static class DbInicializador
                 var turnosMiercolesJulio = fechasMiercolesJulio.Select(fecha => new Turno
                 {
                     Fecha = fecha,
-                    HoraInicio = new TimeOnly(18, 0),
-                    HoraFin = new TimeOnly(19, 0),
+                    HoraInicio = new TimeOnly(20, 0),
+                    HoraFin = new TimeOnly(21, 0),
                     PrecioTurno = 5000,
                     CupoMaximo = 10,
                     CupoDisponible = 10,
@@ -140,8 +142,8 @@ public static class DbInicializador
                 var turnosMiercolesAgosto = fechasMiercolesAgosto.Select(fecha => new Turno
                 {
                     Fecha = fecha,
-                    HoraInicio = new TimeOnly(18, 0),
-                    HoraFin = new TimeOnly(19, 0),
+                    HoraInicio = new TimeOnly(20, 0),
+                    HoraFin = new TimeOnly(21, 0),
                     PrecioTurno = 5000,
                     CupoMaximo = 10,
                     CupoDisponible = 10,
@@ -197,8 +199,8 @@ public static class DbInicializador
                 var turnoSuelto2 = new Turno   
                 {
                     Fecha = new DateOnly(2026, 7, 17),
-                    HoraInicio = new TimeOnly(20, 0),
-                    HoraFin = new TimeOnly(21, 0),
+                    HoraInicio = new TimeOnly(19, 0),
+                    HoraFin = new TimeOnly(20, 0),
                     PrecioTurno = 1000,
                     CupoMaximo = 5,
                     CupoDisponible = 5,
@@ -208,9 +210,23 @@ public static class DbInicializador
                     Profesor = profeJuan
                 };
 
+                var turnoSuelto3 = new Turno
+                {
+                    Fecha = new DateOnly(2026, 8, 12),
+                    HoraInicio = new TimeOnly(20, 30),
+                    HoraFin = new TimeOnly(21, 30),
+                    PrecioTurno = 1000,
+                    CupoMaximo = 10,
+                    CupoDisponible = 10,
+                    Estado = EstadoTurno.Disponible,
+                    Actividad = basquet,
+                    Cancha = cancha1,
+                    Profesor = profeMessi
+                };
+
                 context.Turnos.AddRange(turnoSuelto1);
                 context.Turnos.AddRange(turnoSuelto2);
-                context.Turnos.AddRange(turnos);
+                context.Turnos.AddRange(turnoSuelto3);
                 context.Turnos.AddRange(turnosMiercolesJulio);
                 context.Turnos.AddRange(turnosMiercolesAgosto);
                 context.Turnos.AddRange(turnosJuevesJulio);

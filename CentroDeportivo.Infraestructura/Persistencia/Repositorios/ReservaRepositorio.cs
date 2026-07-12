@@ -69,20 +69,23 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
                 .ToListAsync();
         }
 
-        public async Task<bool> ExisteReservaActivaEnFechaYHoraAsync(int idUsuario, DateOnly fecha, TimeOnly horaInicio)
+        public async Task<bool> ExisteReservaActivaEnFechaYHoraAsync(
+      int idUsuario, DateOnly fecha, TimeOnly horaInicio)
         {
+            var horaFin = horaInicio.AddHours(1);
+
             return await contexto.Reservas
                 .AnyAsync(r => r.Id_Usuario == idUsuario
                             && r.Estado != EstadoReserva.Cancelado
-                            && r.Turno.Fecha == fecha
-                            && r.Turno.HoraInicio == horaInicio);
+                            && r.Turno!.Fecha == fecha
+                            && r.Turno.HoraInicio < horaFin
+                            && r.Turno.HoraFin > horaInicio);
         }
-
         public async Task<Reserva?> ObtenerPorIdAsync(int id)
         {
             return await contexto.Reservas      
-                .Include(r => r.Usuario) // Taigo los datos del cliente 
-                .Include(r => r.Turno)   // Traigo los datos del horario, fecha
+                .Include(r => r.Usuario) 
+                .Include(r => r.Turno)   
                     .ThenInclude(t => t!.Actividad)
                 .FirstOrDefaultAsync(r => r.Id == id);
         }
@@ -239,6 +242,26 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
                 .ToListAsync();
 
             return paquetes;
+        }
+
+        public async Task<bool> YaRenovoParaSiguienteMesAsync(
+    int idUsuario,
+    int idActividad,
+    DayOfWeek diaSemana,
+    TimeOnly horaInicio,
+    int anioSiguiente,
+    int mesSiguiente)
+        {
+            return await contexto.Reservas
+                .Where(r => r.Id_Usuario == idUsuario
+                         && r.TipoReserva == TipoReserva.Adelantado
+                         && r.Estado != EstadoReserva.Cancelado
+                         && r.Turno!.Id_Actividad == idActividad
+                         && r.Turno.HoraInicio == horaInicio
+                         && r.Turno.Fecha.Year == anioSiguiente
+                         && r.Turno.Fecha.Month == mesSiguiente
+                         && r.Turno.Fecha.DayOfWeek == diaSemana)
+                .AnyAsync();
         }
     }
     }

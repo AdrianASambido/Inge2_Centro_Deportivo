@@ -1,11 +1,11 @@
 ﻿@page "/MisReservas"
 @rendermode InteractiveServer
 @inject GenerarQrUseCase GenerarQRUseCase
-@inject IReservaRepositorio ReservaRepositorio
+@inject IReservaRepositorio repoReserva
 @inject Sesion UsuarioSesion
 @inject ListarReservasUseCase listarReservasUseCase
 @inject CancelarReservaUseCase cancelarReservasUseCase
-@inject CompletarPagoReservaOcasionalUseCase CompletarPagoReservaCase 
+@inject CompletarPagoReservaOcasionalUseCase CompletarPagoReservaCase
 @inject CancelarReservaAdelantadaUseCase CancelarReservaAdelantadaUseCase
 @inject IniciarPagoListaEsperaUseCase IniciarPagoListaEsperaUseCase
 @inject CrearReservaListaEsperaUseCase CrearReservaListaEsperaUseCase
@@ -22,46 +22,61 @@
 <PageTitle>Mis Reservas</PageTitle>
 
 <div class="container-fluid p-0">
-    <div class="p-5 mb-4 bg-light rounded-3 shadow-sm">
-        <h2 class="mb-3">Mis reservas</h2>
+    <div class="p-4 p-md-5 mb-4 bg-light rounded-3 shadow-sm">
+        <h2 class="mb-3 fw-bold text-dark">Mis reservas</h2>
 
         @if (!UsuarioSesion.EstaAutenticado())
         {
-            <div class="alert alert-warning">
-                <p>No estás logueado.</p>
-                <NavLink href="/login" class="btn btn-primary">Iniciar sesión</NavLink>
+            <div class="alert alert-warning border-0 shadow-sm d-flex align-items-center justify-content-between p-4" style="border-radius: 12px;">
+                <div>
+                    <h5 class="fw-bold text-warning-emphasis mb-1">Sesión no iniciada</h5>
+                    <p class="mb-0 text-muted">Debes ingresar al sistema con tu cuenta para visualizar e interactuar con tus turnos.</p>
+                </div>
+                <NavLink href="/login" class="btn btn-warning fw-bold px-4 shadow-sm text-dark">Iniciar sesión</NavLink>
             </div>
         }
         else
         {
+            @if (!string.IsNullOrEmpty(error))
+            {
+                bool esExito = error.Contains("éxito", StringComparison.OrdinalIgnoreCase) ||
+                               error.Contains("exitosamente", StringComparison.OrdinalIgnoreCase) ||
+                               error.Contains("confirmada", StringComparison.OrdinalIgnoreCase);
+
+                <div class="alert @(esExito ? "alert-success" : "alert-danger") border-0 shadow-sm mb-4" style="border-radius: 12px;">
+                    <i class="bi @(esExito ? "bi-check-circle-fill" : "bi-exclamation-triangle-fill") me-2"></i>
+                    @error
+                </div>
+            }
+
             <div class="d-flex gap-2 mb-4">
-                <button class="btn @(tipoFiltroActivo == 1 ? "btn-primary" : "btn-outline-primary")"
-                        @onclick="() => tipoFiltroActivo = 1">
+                <button class="btn py-2 px-3 fw-bold @(tipoFiltroActivo == 1 ? "btn-primary shadow" : "btn-outline-primary")"
+                        style="border-radius: 10px;" @onclick="() => tipoFiltroActivo = 1">
                     <i class="bi bi-calendar-event me-2"></i>Reservas Ocasionales
                 </button>
-                <button class="btn @(tipoFiltroActivo == 2 ? "btn-primary" : "btn-outline-primary")"
-                        @onclick="() => tipoFiltroActivo = 2">
+                <button class="btn py-2 px-3 fw-bold @(tipoFiltroActivo == 2 ? "btn-primary shadow" : "btn-outline-primary")"
+                        style="border-radius: 10px;" @onclick="() => tipoFiltroActivo = 2">
                     <i class="bi bi-box-seam me-2"></i>Reservas Mensuales
                 </button>
-                <button class="btn @(tipoFiltroActivo == 3 ? "btn-primary" : "btn-outline-primary")"
-                        @onclick="() => tipoFiltroActivo = 3">
+                <button class="btn py-2 px-3 fw-bold @(tipoFiltroActivo == 3 ? "btn-primary shadow" : "btn-outline-primary")"
+                        style="border-radius: 10px;" @onclick="() => tipoFiltroActivo = 3">
                     <i class="bi bi-hourglass-split me-2"></i>Lista de Espera
                 </button>
             </div>
 
             @if (tipoFiltroActivo == 1)
             {
-                <div class="table-responsive shadow-sm" style="background: white; border-radius: 8px;">
+                <div class="table-responsive shadow-sm border" style="background: white; border-radius: 12px;">
                     <table class="table table-hover align-middle m-0">
-                        <thead>
-                            <tr>
-                                <th>Actividad</th>
+                        <thead class="table-light">
+                            <tr class="text-uppercase small text-muted">
+                                <th class="ps-3">Actividad</th>
                                 <th>Fecha</th>
                                 <th>Horario</th>
                                 <th>Profesor</th>
                                 <th>Precio Abonado</th>
                                 <th>Estado</th>
-                                <th>Acciones</th>
+                                <th class="text-end pe-3">Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -70,26 +85,26 @@
                                 @foreach (var r in ObtenerReservasFiltradas())
                                 {
                                     <tr>
-                                        <td>@r.Turno?.Actividad?.Nombre</td>
+                                        <td class="ps-3 fw-bold text-dark">@r.Turno?.Actividad?.Nombre</td>
                                         <td>@r.Turno?.Fecha.ToShortDateString()</td>
-                                        <td>@r.Turno?.HoraInicio hs</td>
-                                        <td>@r.Turno?.Profesor.Nombre @r.Turno?.Profesor.Apellido</td>
-                                        <td><span class="badge bg-success-subtle text-success">$ @r.PrecioPagado</span></td>
+                                        <td>@r.Turno?.HoraInicio.ToString("HH:mm") hs</td>
+                                        <td>@r.Turno?.Profesor?.Nombre @r.Turno?.Profesor?.Apellido</td>
+                                        <td><span class="badge bg-success-subtle text-success fs-6 px-2">$ @r.PrecioPagado</span></td>
                                         <td>
                                             <span class="badge @(r.Estado == EstadoReserva.Confirmado ? "bg-success" : "bg-warning text-dark")">
                                                 @r.Estado
                                             </span>
                                         </td>
-                                        <td>
+                                        <td class="text-end pe-3">
                                             @if (r.Estado == EstadoReserva.Reservado)
                                             {
-                                                <button class="btn btn-success btn-sm me-1"
+                                                <button class="btn btn-success btn-sm me-1 fw-bold"
                                                         @onclick="() => PagarSaldoRestante(r.Id)">
                                                     <i class="bi bi-credit-card me-1"></i> Pagar Saldo (50%)
                                                 </button>
                                             }
 
-                                            <button class="btn btn-primary btn-sm me-1"
+                                            <button class="btn btn-outline-primary btn-sm me-1"
                                                     @onclick="() => GenerarQr(r.Id)"
                                                     disabled="@(!PuedeGenerarQr(r))">
                                                 <i class="bi bi-qr-code"></i> Generar QR
@@ -97,12 +112,12 @@
 
                                             @if (reservaSeleccionadaId == r.Id && qrCode != null && qrCode.Length > 0)
                                             {
-                                                <div class="card shadow-sm my-4 border-primary" style="max-width: 300px; position: absolute; z-index: 100;">
-                                                    <div class="card-header bg-primary text-white text-center">Tu código de acceso</div>
-                                                    <div class="card-body text-center bg-white">
-                                                        <img src="data:image/png;base64,@Convert.ToBase64String(qrCode)" alt="QR Reserva" style="width: 200px;" />
-                                                        <p class="small text-muted mt-2">Presentá este código al ingresar</p>
-                                                        <button class="btn btn-outline-secondary btn-sm" @onclick="CerrarQr">Cerrar</button>
+                                                <div class="card shadow border-primary my-2 text-center" style="max-width: 260px; position: absolute; right: 40px; z-index: 100; border-radius: 12px;">
+                                                    <div class="card-header bg-primary text-white fw-bold small">Código de acceso</div>
+                                                    <div class="card-body bg-white p-3">
+                                                        <img src="data:image/png;base64,@Convert.ToBase64String(qrCode)" alt="QR Reserva" class="img-fluid mb-2" style="width: 160px;" />
+                                                        <p class="small text-muted mb-2">Presentalo en mesa de entrada</p>
+                                                        <button class="btn btn-outline-secondary btn-sm w-100" @onclick="CerrarQr">Cerrar</button>
                                                     </div>
                                                 </div>
                                             }
@@ -119,7 +134,10 @@
                             else
                             {
                                 <tr>
-                                    <td colspan="7" class="text-center py-4 text-muted">No registra reservas ocasionales activas.</td>
+                                    <td colspan="7" class="text-center py-5 text-muted">
+                                        <i class="bi bi-calendar-x fs-2 d-block mb-2"></i>
+                                        No registra reservas ocasionales activas.
+                                    </td>
                                 </tr>
                             }
                         </tbody>
@@ -133,7 +151,7 @@
                     {
                         @foreach (var paquete in ObtenerPaquetesAdelantados())
                         {
-                            <div class="card mb-3 border-primary shadow-sm" style="border-radius: 8px; overflow: hidden;">
+                            <div class="card mb-3 border-primary shadow-sm" style="border-radius: 12px; overflow: hidden;">
                                 <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center py-3">
                                     <div>
                                         <h5 class="mb-0 fw-bold">
@@ -142,14 +160,16 @@
                                         <small class="opacity-75">Código de compra: @paquete.CodigoPaquete.ToString().Substring(0, 8)...</small>
                                     </div>
                                     <div class="d-flex gap-2">
-                                        <button class="btn btn-light btn-sm text-primary fw-bold" @onclick="() => AlternarDetallePaquete(paquete.CodigoPaquete)">
+                                        <button class="btn btn-light btn-sm text-primary fw-bold" style="border-radius: 6px;" @onclick="() => AlternarDetallePaquete(paquete.CodigoPaquete)">
                                             <i class="bi @(paqueteIdDesplegado == paquete.CodigoPaquete ? "bi-eye-slash-fill" : "bi-eye-fill") me-1"></i>
                                             @(paqueteIdDesplegado == paquete.CodigoPaquete ? "Ocultar turnos" : "Ver turnos")
                                         </button>
 
-                                        <button class="btn btn-warning btn-sm fw-bold text-dark"
+                                        <button class="btn btn-warning btn-sm fw-bold text-dark" style="border-radius: 6px;"
+                                                disabled="@paquete.YaRenovo"
                                                 @onclick="() => VerDetalleRenovacion(paquete.CodigoPaquete)">
-                                            <i class="bi bi-arrow-repeat me-1"></i> Renovar
+                                            <i class="bi @(paquete.YaRenovo ? "bi-check-circle-fill" : "bi-arrow-repeat") me-1"></i>
+                                            @(paquete.YaRenovo ? "Ya Renovado" : "Renovar")
                                         </button>
                                     </div>
                                 </div>
@@ -160,7 +180,7 @@
                                         <div class="table-responsive">
                                             <table class="table table-sm table-hover m-0 bg-white align-middle">
                                                 <thead class="table-secondary">
-                                                    <tr>
+                                                    <tr class="small text-muted">
                                                         <th class="ps-3">Día / Fecha</th>
                                                         <th>Horario</th>
                                                         <th>Profesor</th>
@@ -174,8 +194,8 @@
                                                     {
                                                         <tr>
                                                             <td class="ps-3 fw-bold text-primary">@r.Turno?.Fecha.ToString("dddd dd/MM/yyyy")</td>
-                                                            <td>@r.Turno?.HoraInicio hs</td>
-                                                            <td>@r.Turno?.Profesor.Nombre @r.Turno?.Profesor.Apellido</td>
+                                                            <td>@r.Turno?.HoraInicio.ToString("HH:mm") hs</td>
+                                                            <td>@r.Turno?.Profesor?.Nombre @r.Turno?.Profesor?.Apellido</td>
                                                             <td>$ @r.PrecioPagado</td>
                                                             <td>
                                                                 <span class="badge @(r.Estado == EstadoReserva.Confirmado ? "bg-success" : "bg-secondary")">
@@ -183,7 +203,7 @@
                                                                 </span>
                                                             </td>
                                                             <td class="text-end pe-3 position-relative">
-                                                                <button class="btn btn-primary btn-sm me-1"
+                                                                <button class="btn btn-outline-primary btn-sm me-1"
                                                                         @onclick="() => GenerarQr(r.Id)"
                                                                         disabled="@(!PuedeGenerarQr(r))">
                                                                     <i class="bi bi-qr-code"></i> QR
@@ -191,9 +211,9 @@
 
                                                                 @if (reservaSeleccionadaId == r.Id && qrCode != null && qrCode.Length > 0)
                                                                 {
-                                                                    <div class="card shadow border-primary text-center p-2" style="position: absolute; right: 20px; top: 35px; z-index: 110; max-width: 220px;">
-                                                                        <img src="data:image/png;base64,@Convert.ToBase64String(qrCode)" alt="QR" class="img-fluid mx-auto" style="width: 130px;" />
-                                                                        <button class="btn btn-outline-secondary btn-xs mt-1 w-100" @onclick="CerrarQr">Cerrar</button>
+                                                                    <div class="card shadow border-primary text-center p-2" style="position: absolute; right: 80px; top: -10px; z-index: 110; min-width: 180px; border-radius: 10px;">
+                                                                        <img src="data:image/png;base64,@Convert.ToBase64String(qrCode)" alt="QR" class="img-fluid mx-auto mb-1" style="width: 120px;" />
+                                                                        <button class="btn btn-outline-secondary btn-xs w-100" @onclick="CerrarQr">Cerrar</button>
                                                                     </div>
                                                                 }
 
@@ -215,51 +235,51 @@
                     }
                     else
                     {
-                        <div class="card p-4 text-center text-muted bg-white shadow-sm" style="border-radius: 8px;">
-                            No registra reservas mensuales activas.
+                        <div class="card p-5 text-center text-muted bg-white shadow-sm border-0" style="border-radius: 12px;">
+                            <i class="bi bi-box-seam fs-2 d-block mb-2"></i>
+                            No registra pases mensuales o reservas adelantadas activas.
                         </div>
                     }
                 </div>
-
             }
             else if (tipoFiltroActivo == 3)
             {
-                <div class="table-responsive shadow-sm" style="background: white; border-radius: 8px;">
+                <div class="table-responsive shadow-sm border" style="background: white; border-radius: 12px;">
                     @if (listaEspera != null && listaEspera.Any())
                     {
                         <table class="table table-hover align-middle m-0">
-                            <thead>
-                                <tr>
-                                    <th>Actividad</th>
+                            <thead class="table-light">
+                                <tr class="text-uppercase small text-muted">
+                                    <th class="ps-3">Actividad</th>
                                     <th>Fecha</th>
                                     <th>Horario</th>
                                     <th>Profesor</th>
                                     <th>Estado</th>
-                                    <th>Acciones</th>
+                                    <th class="text-end pe-3">Acciones</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach (var inscripcion in listaEspera)
                                 {
                                     <tr>
-                                        <td>@inscripcion.Turno?.Actividad?.Nombre</td>
+                                        <td class="ps-3 fw-bold text-dark">@inscripcion.Turno?.Actividad?.Nombre</td>
                                         <td>@inscripcion.Turno?.Fecha.ToShortDateString()</td>
-                                        <td>@inscripcion.Turno?.HoraInicio hs</td>
-                                        <td>@inscripcion.Turno?.Profesor?.Nombre @inscripcion.Turno?.Profesor.Apellido</td>
+                                        <td>@inscripcion.Turno?.HoraInicio.ToString("HH:mm") hs</td>
+                                        <td>@inscripcion.Turno?.Profesor?.Nombre @inscripcion.Turno?.Profesor?.Apellido</td>
                                         <td>
-                                            <span class="badge @(inscripcion.Estado == EstadoListaEspera.Notificado ? "bg-success" : "bg-warning text-dark")">
+                                            <span class="badge @(inscripcion.Estado == EstadoListaEspera.Notificado ? "bg-success px-3 py-2" : "bg-warning text-dark")">
                                                 @(inscripcion.Estado == EstadoListaEspera.Notificado ? "Lugar disponible" : "En espera")
                                             </span>
                                         </td>
-                                        <td>
+                                        <td class="text-end pe-3">
                                             @if (inscripcion.Estado == EstadoListaEspera.Notificado)
                                             {
-                                                <button class="btn btn-success btn-sm me-1"
+                                                <button class="btn btn-success btn-sm me-1 fw-bold"
                                                         @onclick="() => ReservarLugarLiberado(inscripcion.Id_Turno)">
-                                                    <i class="bi bi-credit-card me-1"></i> Reservar
+                                                    <i class="bi bi-check-circle me-1"></i> Reservar Lugar
                                                 </button>
                                             }
-                                            <button class="btn btn-danger btn-sm"
+                                            <button class="btn btn-outline-danger btn-sm"
                                                     @onclick="() => AbandonarLista(inscripcion.Id_Turno)">
                                                 <i class="bi bi-x-circle me-1"></i> Abandonar lista
                                             </button>
@@ -271,8 +291,9 @@
                     }
                     else
                     {
-                        <div class="text-center py-4 text-muted">
-                            No registra turnos en lista de espera.
+                        <div class="text-center py-5 text-muted">
+                            <i class="bi bi-hourglass-x fs-2 d-block mb-2"></i>
+                            No registras turnos vigentes en lista de espera.
                         </div>
                     }
                 </div>
@@ -281,54 +302,78 @@
     </div>
 </div>
 
-@if (!string.IsNullOrEmpty(error))
-{
-    <div class="alert alert-info mt-3 shadow-sm">@error</div>
-}
-
 @if (mostrarModalRenovacion && detalleRenovacion != null)
 {
-    <div class="modal show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5);">
+    <div class="modal show d-block animate-fade-in" tabindex="-1" style="background: rgba(0,0,0,0.55);">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Detalle de renovación</h5>
+            <div class="modal-content border-0 shadow" style="border-radius: 14px;">
+                <div class="modal-header bg-light border-0 py-3">
+                    <h5 class="modal-title fw-bold text-dark"><i class="bi bi-arrow-repeat text-warning me-2"></i>Detalle de renovación</h5>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body p-4">
                     @if (!detalleRenovacion.TurnosDisponibles)
                     {
-                        <div class="alert alert-warning">
-                            No hay turnos cargados para @detalleRenovacion.NombreMes todavía.
+                        <div class="alert alert-warning border-0 shadow-sm mb-0">
+                            No hay turnos cargados para <strong>@detalleRenovacion.NombreMes</strong> todavía.
                         </div>
                     }
                     else
                     {
-                        <p>Mes: <strong>@detalleRenovacion.NombreMes</strong></p>
-                        <p>Cantidad de clases: <strong>@detalleRenovacion.CantidadClases</strong></p>
-                        <p>Precio por clase: <strong>$@detalleRenovacion.PrecioUnitario</strong></p>
+                        @if (detalleRenovacion.YaRenovo)
+                        {
+                            <div class="alert alert-info shadow-sm d-flex align-items-center mb-3 border-0">
+                                <i class="bi bi-info-circle-fill me-2 fs-5 text-info"></i>
+                                <div>
+                                    Usted ya renovó este paquete de clases para el mes de <strong>@detalleRenovacion.NombreMes</strong>.
+                                </div>
+                            </div>
+                        }
 
-                        @if (detalleRenovacion.AplicaDescuento)
-                        {
-                            <p class="text-decoration-line-through text-muted">
-                                Total sin descuento: $@detalleRenovacion.PrecioTotal
-                            </p>
-                            <p class="text-success fw-bold">
-                                Total con 20% de descuento: $@detalleRenovacion.PrecioConDescuento
-                            </p>
-                        }
-                        else
-                        {
-                            <p>Total: <strong>$@detalleRenovacion.PrecioTotal</strong></p>
-                        }
+                        <div class="list-group list-group-flush mb-2">
+                            <div class="list-group-item px-0 d-flex justify-content-between">
+                                <span class="text-muted">Período:</span>
+                                <span class="fw-bold">@detalleRenovacion.NombreMes</span>
+                            </div>
+                            <div class="list-group-item px-0 d-flex justify-content-between">
+                                <span class="text-muted">Cantidad de clases estimadas:</span>
+                                <span class="fw-bold">@detalleRenovacion.CantidadClases</span>
+                            </div>
+                            <div class="list-group-item px-0 d-flex justify-content-between">
+                                <span class="text-muted">Precio base unitario:</span>
+                                <span class="fw-bold">$@detalleRenovacion.PrecioUnitario</span>
+                            </div>
+                        </div>
+
+                        <div class="p-3 bg-light rounded-3 mt-3">
+                            @if (detalleRenovacion.AplicaDescuento)
+                            {
+                                <p class="text-decoration-line-through text-muted small mb-1">
+                                    Total sin beneficio: $@detalleRenovacion.PrecioTotal
+                                </p>
+                                <h5 class="text-success fw-bold mb-0 d-flex justify-content-between">
+                                    <span>Total (20% OFF):</span>
+                                    <span>$@detalleRenovacion.PrecioConDescuento</span>
+                                </h5>
+                            }
+                            else
+                            {
+                                <h5 class="text-dark fw-bold mb-0 d-flex justify-content-between">
+                                    <span>Total Final:</span>
+                                    <span>$@detalleRenovacion.PrecioTotal</span>
+                                </h5>
+                            }
+                        </div>
                     }
                 </div>
-                <div class="modal-footer">
-                    <button class="btn btn-secondary" @onclick="CerrarModalRenovacion">Cancelar</button>
+                <div class="modal-footer bg-light border-0">
+                    <button class="btn btn-secondary px-4" style="border-radius: 8px;" @onclick="CerrarModalRenovacion">Cancelar</button>
                     @if (detalleRenovacion.TurnosDisponibles)
                     {
-                        <button class="btn btn-warning fw-bold text-dark"
+                        <button class="btn btn-warning fw-bold text-dark px-4" style="border-radius: 8px;"
+                                disabled="@detalleRenovacion.YaRenovo"
                                 @onclick="ConfirmarRenovacion">
-                            <i class="bi bi-arrow-repeat me-1"></i> Confirmar y pagar
+                            <i class="bi bi-credit-card-2-back-fill me-1"></i>
+                            @(detalleRenovacion.YaRenovo ? "Ya Abonado" : "Confirmar y pagar")
                         </button>
                     }
                 </div>
@@ -351,12 +396,15 @@
     private DetalleRenovacionDTO? detalleRenovacion;
     private Guid codigoPaqueteARenovar;
 
+    private Dictionary<Guid, bool> estadosRenovacionPaquetes = new();
+
     public class PaqueteAgrupadoDTO
     {
         public Guid CodigoPaquete { get; set; }
         public string NombreActividad { get; set; } = string.Empty;
         public List<Reserva> ReservasAsociadas { get; set; } = new();
         public decimal PrecioUnitario { get; set; }
+        public bool YaRenovo { get; set; }
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -450,8 +498,8 @@
             {
                 CodigoPaquete = g.Key,
                 NombreActividad = g.First().Turno?.Actividad?.Nombre ?? "Clase Adelantada",
-                
-                ReservasAsociadas = g.Where(r => r.Estado != EstadoReserva.Cancelado).ToList()
+                ReservasAsociadas = g.Where(r => r.Estado != EstadoReserva.Cancelado).ToList(),
+                YaRenovo = estadosRenovacionPaquetes.ContainsKey(g.Key) && estadosRenovacionPaquetes[g.Key]
             });
     }
 
@@ -498,7 +546,7 @@
         }
         else
         {
-            error = "El pago no se pudo realizar. Intente nuevamente..";
+            error = "El pago no se pudo realizar. Intente nuevamente.";
         }
 
         await CargarReservas();
@@ -524,14 +572,42 @@
         {
             if (UsuarioSesion.UsuarioActual != null)
             {
-                var resultado = await listarReservasUseCase.Ejecutar(UsuarioSesion.UsuarioActual.Id);
+                var idUsuario = UsuarioSesion.UsuarioActual.Id;
+
+                var resultado = await listarReservasUseCase.Ejecutar(idUsuario);
                 reservasActivas = resultado.Where(r => r.Estado != EstadoReserva.Cancelado).ToList();
 
-                
-                 todasLasReservasAdelantadas = await ListarReservasClasesMensualesUseCase.Ejecutar(
-                    UsuarioSesion.UsuarioActual.Id);
+                todasLasReservasAdelantadas = await ListarReservasClasesMensualesUseCase.Ejecutar(idUsuario);
+                listaEspera = await ConsultarListaEsperaUseCase.Ejecutar(idUsuario);
 
-                listaEspera = await ConsultarListaEsperaUseCase.Ejecutar(UsuarioSesion.UsuarioActual.Id);
+                // PROCESAMIENTO ASÍNCRONO DEL MAPEO DEL CONTROL DE RENOVACIÓN
+                if (todasLasReservasAdelantadas != null)
+                {
+                    var grupos = todasLasReservasAdelantadas
+                        .Where(r => r.CodigoPaqueteAdelantado.HasValue)
+                        .GroupBy(r => r.CodigoPaqueteAdelantado!.Value);
+
+                    foreach (var g in grupos)
+                    {
+                        var primerTurno = g.First().Turno;
+                        if (primerTurno != null)
+                        {
+                            int anioSiguiente = primerTurno.Fecha.Month == 12 ? primerTurno.Fecha.Year + 1 : primerTurno.Fecha.Year;
+                            int mesSiguiente = primerTurno.Fecha.Month == 12 ? 1 : primerTurno.Fecha.Month + 1;
+
+                            bool yaRenovo = await repoReserva.YaRenovoParaSiguienteMesAsync(
+                                idUsuario,
+                                primerTurno.Id_Actividad,
+                                primerTurno.Fecha.DayOfWeek,
+                                primerTurno.HoraInicio,
+                                anioSiguiente,
+                                mesSiguiente
+                            );
+
+                            estadosRenovacionPaquetes[g.Key] = yaRenovo;
+                        }
+                    }
+                }
             }
         }
         catch (Exception ex)
@@ -539,7 +615,6 @@
             error = ex.Message;
         }
     }
-
 
     private async Task PagarSaldoRestante(int idReserva)
     {
@@ -550,7 +625,6 @@
 
             if (!string.IsNullOrEmpty(urlRedireccion))
             {
-                // Navegación forzada (true) hacia el checkout pro externo de Mercado Pago
                 Navigation.NavigateTo(urlRedireccion, true);
             }
             else
@@ -661,6 +735,22 @@
         }
     }
 
+    private async Task AbandonarLista(int idTurno)
+    {
+        try
+        {
+            error = "";
+            await AbandonarListaEsperaUseCase.Ejecutar(UsuarioSesion.UsuarioActual!.Id, idTurno);
+            error = "Has abandonado la lista de espera correctamente.";
+            await CargarReservas();
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            error = ex.Message;
+        }
+    }
+
     private bool PuedeGenerarQr(Reserva r)
     {
         if (r.Estado != EstadoReserva.Confirmado && r.Estado != EstadoReserva.Reservado)
@@ -696,24 +786,7 @@
             if (!string.IsNullOrEmpty(urlRedireccion))
                 Navigation.NavigateTo(urlRedireccion, true);
             else
-                error = "No se pudo generar la pasarela de pago en este momento.";
-        }
-        catch (Exception ex)
-        {
-            error = ex.Message;
-        }
-    }
-
-    private async Task AbandonarLista(int idTurno)
-    {
-        try
-        {
-            error = "";
-            await AbandonarListaEsperaUseCase.Ejecutar(UsuarioSesion.UsuarioActual!.Id, idTurno);
-            error = "Abandonaste la lista de espera exitosamente.";
-            var inscripciones = await ConsultarListaEsperaUseCase.Ejecutar(UsuarioSesion.UsuarioActual.Id);
-            listaEspera = inscripciones;
-            StateHasChanged();
+                error = "Ocurrió un error al intentar conectarse con la pasarela de pagos.";
         }
         catch (Exception ex)
         {
