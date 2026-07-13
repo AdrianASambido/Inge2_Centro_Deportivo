@@ -13,6 +13,7 @@ public static class DbInicializador
         {
             var usuarios = new List<Usuario>
             {
+                new Usuario("Pablo", "Nicolas", "Calle 123", "2322534", BCrypt.Net.BCrypt.HashPassword("Boca1999"), "nicolas@gmail.com", false, Rol.Cliente),
                 new Usuario("Mario", "Tevez", "Calle 123", "112345534", BCrypt.Net.BCrypt.HashPassword("Admin1234"), "admin@gmail.com", false, Rol.Administrador),
                 new Usuario("Joaquin", "Pinanelli", "Calle 456", "30111222", BCrypt.Net.BCrypt.HashPassword("Boca1999"), "joa64919@gmail.com", false, Rol.Cliente),
                 new Usuario("Maria", "Gomez", "Calle 789", "32444555", BCrypt.Net.BCrypt.HashPassword("Boca1999"), "maria@gmail.com", false, Rol.Cliente),
@@ -139,6 +140,20 @@ public static class DbInicializador
                     Profesor = profeMessi
                 }).ToList();
 
+                var turnosMiercolesJulio2 = fechasMiercolesJulio.Select(fecha => new Turno
+                {
+                    Fecha = fecha,
+                    HoraInicio = new TimeOnly(20, 30),
+                    HoraFin = new TimeOnly(21, 30),
+                    PrecioTurno = 4000,
+                    CupoMaximo = 10,
+                    CupoDisponible = 10,
+                    Estado = EstadoTurno.Disponible,
+                    Actividad = futbol,
+                    Cancha = cancha2,
+                    Profesor = profeJuan
+                }).ToList();
+
                 var turnosMiercolesAgosto = fechasMiercolesAgosto.Select(fecha => new Turno
                 {
                     Fecha = fecha,
@@ -228,6 +243,7 @@ public static class DbInicializador
                 context.Turnos.AddRange(turnoSuelto2);
                 context.Turnos.AddRange(turnoSuelto3);
                 context.Turnos.AddRange(turnosMiercolesJulio);
+                context.Turnos.AddRange(turnosMiercolesJulio2);
                 context.Turnos.AddRange(turnosMiercolesAgosto);
                 context.Turnos.AddRange(turnosJuevesJulio);
                 context.Turnos.AddRange(turnosJuevesAgosto);
@@ -391,7 +407,146 @@ public static class DbInicializador
             }
         };
 
+
                 context.Reservas.AddRange(reservasHistoricas);
+                context.SaveChanges();
+            }
+        }
+        // -------------------------------------------------------------------------
+        // SECCIÓN: PAGOS HISTÓRICOS (MAYO Y JUNIO) REPARTIDOS POR ACTIVIDAD
+        // -------------------------------------------------------------------------
+        if (!context.Pagos.Any())
+        {
+            var clienteJoaco = context.Usuarios.FirstOrDefault(u => u.Email == "joa64919@gmail.com");
+            var clienteMaria = context.Usuarios.FirstOrDefault(u => u.Email == "maria@gmail.com");
+            var clienteNelson = context.Usuarios.FirstOrDefault(u => u.Email == "nelsonjp1999@gmail.com");
+            var clienteNicolas = context.Usuarios.FirstOrDefault(u => u.Email == "nicolas@gmail.com");
+
+            // Actividades
+            var futbol = context.Actividades.FirstOrDefault(a => a.Nombre == "Futbol");
+            var voley = context.Actividades.FirstOrDefault(a => a.Nombre == "Voley");
+            var paddle = context.Actividades.FirstOrDefault(a => a.Nombre == "Paddle");
+            var basquet = context.Actividades.FirstOrDefault(a => a.Nombre == "Basquet");
+
+            // Canchas y Profesores
+            var cancha1 = context.Canchas.FirstOrDefault(c => c.Numero == 1);
+            var cancha2 = context.Canchas.FirstOrDefault(c => c.Numero == 2);
+            var profeMessi = context.Profesores.FirstOrDefault(p => p.Nombre == "Lionel");
+            var profeJuan = context.Profesores.FirstOrDefault(p => p.Nombre == "Juan");
+
+            // Recuperamos turnos de junio ya existentes
+            var turnoJunioFutbol = context.Turnos.FirstOrDefault(t => t.Fecha == new DateOnly(2026, 6, 16)); // Futbol
+            var turnoJunioVoley = context.Turnos.FirstOrDefault(t => t.Fecha == new DateOnly(2026, 6, 18));  // Voley
+
+            if (clienteJoaco != null && clienteMaria != null && clienteNelson != null &&
+                futbol != null && voley != null && paddle != null && basquet != null &&
+                cancha1 != null && cancha2 != null && profeMessi != null && profeJuan != null)
+            {
+                // 1. CREAMOS TURNOS PASADOS EN MAYO PARA LAS NUEVAS ACTIVIDADES (PADDLE Y BÁSQUET)
+                var turnoMayoPaddle = new Turno
+                {
+                    Fecha = new DateOnly(2026, 5, 10),
+                    HoraInicio = new TimeOnly(18, 0),
+                    HoraFin = new TimeOnly(19, 0),
+                    PrecioTurno = 4000,
+                    CupoMaximo = 4,
+                    CupoDisponible = 2,
+                    Estado = EstadoTurno.Finalizado,
+                    Actividad = paddle,
+                    Cancha = cancha2,
+                    Profesor = profeJuan
+                };
+
+                var turnoMayoBasquet = new Turno
+                {
+                    Fecha = new DateOnly(2026, 5, 15),
+                    HoraInicio = new TimeOnly(20, 0),
+                    HoraFin = new TimeOnly(21, 0),
+                    PrecioTurno = 3000,
+                    CupoMaximo = 15,
+                    CupoDisponible = 5,
+                    Estado = EstadoTurno.Finalizado,
+                    Actividad = basquet,
+                    Cancha = cancha1,
+                    Profesor = profeMessi
+                };
+
+                // También un turno de Fútbol en Mayo para tener variedad ese mes
+                var turnoMayoFutbol = new Turno
+                {
+                    Fecha = new DateOnly(2026, 5, 20),
+                    HoraInicio = new TimeOnly(19, 0),
+                    HoraFin = new TimeOnly(20, 0),
+                    PrecioTurno = 5000,
+                    CupoMaximo = 10,
+                    CupoDisponible = 5,
+                    Estado = EstadoTurno.Finalizado,
+                    Actividad = futbol,
+                    Cancha = cancha1,
+                    Profesor = profeMessi
+                };
+
+                context.Turnos.AddRange(turnoMayoPaddle, turnoMayoBasquet, turnoMayoFutbol);
+                context.SaveChanges(); // Guardamos para generar IDs de Mayo
+
+
+                // 2. CREAMOS UN TURNO PASADO DE PADDLE EN JUNIO
+                var turnoJunioPaddle = new Turno
+                {
+                    Fecha = new DateOnly(2026, 6, 12),
+                    HoraInicio = new TimeOnly(17, 0),
+                    HoraFin = new TimeOnly(18, 0),
+                    PrecioTurno = 4500,
+                    CupoMaximo = 4,
+                    CupoDisponible = 0,
+                    Estado = EstadoTurno.Finalizado,
+                    Actividad = paddle,
+                    Cancha = cancha2,
+                    Profesor = profeJuan
+                };
+
+                context.Turnos.Add(turnoJunioPaddle);
+                context.SaveChanges(); // Guardamos para tener su ID
+
+
+                // 3. CREAMOS LOS PAGOS ASOCIADOS (SOBREESCRIBIENDO LA FECHA)
+
+                // --- PAGOS DE MAYO ---
+                var pagoMayoPaddle1 = new Pago(clienteNicolas.Id, 4000, idTurno: turnoMayoPaddle.Id)
+                {
+                    Fecha = new DateTime(2026, 5, 10, 17, 30, 0) // Paddle
+                };
+
+                var pagoMayoBasquet1 = new Pago(clienteNicolas.Id, 3000, idTurno: turnoMayoBasquet.Id)
+                {
+                    Fecha = new DateTime(2026, 5, 15, 19, 45, 0) // Básquet
+                };
+
+                var pagoMayoFutbol1 = new Pago(clienteNicolas.Id, 5000, idTurno: turnoMayoFutbol.Id)
+                {
+                    Fecha = new DateTime(2026, 5, 20, 18, 50, 0) // Fútbol
+                };
+
+
+                // --- PAGOS DE JUNIO ---
+                var pagoJunioFutbol1 = new Pago(clienteNicolas.Id, 5000, idTurno: turnoJunioFutbol?.Id)
+                {
+                    Fecha = new DateTime(2026, 6, 15, 20, 00, 0) // Fútbol
+                };
+
+                var pagoJunioVoley1 = new Pago(clienteNicolas.Id, 2000, idTurno: turnoJunioVoley?.Id)
+                {
+                    Fecha = new DateTime(2026, 6, 17, 18, 30, 0) // Voley
+                };
+
+                var pagoJunioPaddle1 = new Pago(clienteNicolas.Id, 4500, idTurno: turnoJunioPaddle.Id)
+                {
+                    Fecha = new DateTime(2026, 6, 11, 16, 15, 0) // Paddle
+                };
+
+
+                // Guardamos todos los pagos
+                context.Pagos.AddRange(pagoMayoPaddle1, pagoMayoBasquet1, pagoMayoFutbol1, pagoJunioFutbol1, pagoJunioVoley1, pagoJunioPaddle1);
                 context.SaveChanges();
             }
         }
