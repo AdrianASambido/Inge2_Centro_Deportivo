@@ -238,6 +238,70 @@ public static class DbInicializador
         context.SaveChanges();
 
         // -------------------------------------------------------------------------
+        // SECCIÓN: DATOS HISTÓRICOS PARA ESTADÍSTICAS (PAGOS)
+        // -------------------------------------------------------------------------
+        if (!context.Pagos.Any())
+        {
+            var clienteJoaco = context.Usuarios.FirstOrDefault(u => u.Email == "joa64919@gmail.com");
+            var clienteMaria = context.Usuarios.FirstOrDefault(u => u.Email == "maria@gmail.com");
+            var clienteNelson = context.Usuarios.FirstOrDefault(u => u.Email == "nelsonjp1999@gmail.com");
+
+            if (clienteJoaco != null && clienteMaria != null && clienteNelson != null)
+            {
+                var pagos = new List<Pago>
+                {
+                    // Febrero
+                    new Pago
+                    {
+                        Id_Usuario = clienteJoaco.Id,
+                        Monto = 1000,
+                        Id_Turno = clienteJoaco.Id,
+                        Fecha = new DateTime(2026, 2, 10)
+                    },
+                    new Pago
+                    {
+                        Id_Usuario = clienteMaria.Id,
+                        Monto = 1500,
+                        Id_Turno = clienteMaria.Id,
+                        Fecha = new DateTime(2026, 2, 20)
+                    },
+                    // Marzo
+                    new Pago
+                    {
+                        Id_Usuario = clienteNelson.Id,
+                        Monto = 2000,
+                        Id_Turno = clienteNelson.Id,
+                        Fecha = new DateTime(2026, 3, 5)
+                    },
+                    new Pago
+                    {
+                        Id_Usuario = clienteJoaco.Id,
+                        Monto = 1200,
+                        Id_Turno = clienteJoaco.Id,
+                        Fecha = new DateTime(2026, 3, 15)
+                    },
+                    // Abril
+                    new Pago
+                    {
+                        Id_Usuario = clienteMaria.Id,
+                        Monto = 1800,
+                        Id_Turno = clienteMaria.Id,
+                        Fecha = new DateTime(2026, 4, 10)
+                    },
+                    new Pago
+                    {
+                        Id_Usuario = clienteNelson.Id,
+                        Monto = 2500,
+                        Id_Turno = clienteNelson.Id,
+                        Fecha = new DateTime(2026, 4, 25)
+                    }
+                };
+                context.Pagos.AddRange(pagos);
+                context.SaveChanges();
+            }
+        }
+
+        // -------------------------------------------------------------------------
         // SECCIÓN: DATOS HISTÓRICOS PARA ESTADÍSTICAS (TURNOS FINALIZADOS Y RESERVAS)
         // -------------------------------------------------------------------------
         if (!context.Reservas.Any())
