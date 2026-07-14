@@ -20,7 +20,7 @@ namespace CentroDeportivo.Infraestructura.Servicios
         public MercadoPagoServicio()
         {
 
-             // MercadoPagoConfig.AccessToken = "";
+             MercadoPagoConfig.AccessToken = "";
         }
 
         public async Task<string> CrearPreferenciaPagoAsync(
@@ -66,8 +66,8 @@ namespace CentroDeportivo.Infraestructura.Servicios
                 Console.WriteLine(preference.SandboxInitPoint);
 
                 // Usamos InitPoint porque el Access Token ya pertenece a un entorno de pruebas cerrado
-               // return preference.SandboxInitPoint;
-                return preference.InitPoint;
+                return preference.SandboxInitPoint;
+               //return preference.InitPoint;
 
             }
             catch (Exception ex)

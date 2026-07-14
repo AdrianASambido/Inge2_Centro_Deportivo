@@ -154,13 +154,12 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
         }
 
         public async Task<List<Turno>> ObtenerTurnosDisponiblesRangoAsync(
-                int idActividad,
-                DayOfWeek diaSemana,
-                int idUsuario,
-                DateOnly desde,
-                DateOnly hasta)
+      int idActividad,
+      DayOfWeek diaSemana,
+      int idUsuario,
+      DateOnly desde,
+      DateOnly hasta)
         {
-
             return await contexto.Turnos
                 .Include(t => t.Profesor)
                 .Include(t => t.Cancha)
@@ -168,12 +167,12 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
                          && t.Estado == EstadoTurno.Disponible
                          && t.Fecha >= desde
                          && t.Fecha <= hasta
-                         && t.Fecha.DayOfWeek == diaSemana 
-
+                         && t.Fecha.DayOfWeek == diaSemana
                          && !contexto.Reservas.Any(r => r.Id_Usuario == idUsuario
                                                      && r.Estado != EstadoReserva.Cancelado
-                                                     && r.Turno.Fecha == t.Fecha       
-                                                     && r.Turno.HoraInicio == t.HoraInicio)) 
+                                                     && r.Turno.Fecha == t.Fecha
+                                                     && r.Turno.HoraInicio < t.HoraFin
+                                                     && r.Turno.HoraFin > t.HoraInicio))
                 .OrderBy(t => t.Fecha)
                 .ToListAsync();
         }
