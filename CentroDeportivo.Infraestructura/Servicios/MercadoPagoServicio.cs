@@ -20,7 +20,7 @@ namespace CentroDeportivo.Infraestructura.Servicios
         public MercadoPagoServicio()
         {
 
-             MercadoPagoConfig.AccessToken = "";
+             // MercadoPagoConfig.AccessToken = "";
         }
 
         public async Task<string> CrearPreferenciaPagoAsync(
