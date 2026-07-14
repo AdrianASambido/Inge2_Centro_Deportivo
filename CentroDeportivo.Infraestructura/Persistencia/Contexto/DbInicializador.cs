@@ -254,64 +254,61 @@ public static class DbInicializador
         context.SaveChanges();
 
         // -------------------------------------------------------------------------
-        // SECCIÓN: DATOS HISTÓRICOS PARA ESTADÍSTICAS (PAGOS)
+        // SECCIÓN: DATOS HISTÓRICOS PARA ESTADÍSTICAS (TURNOS + PAGOS FEB-MAR-APR)
+        // Añadimos estos pagos solo si no existen pagos para Feb/Mar/Abril 2026
         // -------------------------------------------------------------------------
-        if (!context.Pagos.Any())
+        if (!context.Pagos.Any(p => p.Fecha.Year == 2026 && (p.Fecha.Month == 2 || p.Fecha.Month == 3 || p.Fecha.Month == 4)))
         {
             var clienteJoaco = context.Usuarios.FirstOrDefault(u => u.Email == "joa64919@gmail.com");
             var clienteMaria = context.Usuarios.FirstOrDefault(u => u.Email == "maria@gmail.com");
             var clienteNelson = context.Usuarios.FirstOrDefault(u => u.Email == "nelsonjp1999@gmail.com");
 
-            if (clienteJoaco != null && clienteMaria != null && clienteNelson != null)
+            var futbol = context.Actividades.FirstOrDefault(a => a.Nombre == "Futbol");
+            var voley = context.Actividades.FirstOrDefault(a => a.Nombre == "Voley");
+            var paddle = context.Actividades.FirstOrDefault(a => a.Nombre == "Paddle");
+            var basquet = context.Actividades.FirstOrDefault(a => a.Nombre == "Basquet");
+
+            var cancha1 = context.Canchas.FirstOrDefault();
+            var cancha2 = context.Canchas.Skip(1).FirstOrDefault() ?? cancha1;
+            var profe1 = context.Profesores.FirstOrDefault();
+
+            if (clienteJoaco != null && clienteMaria != null && clienteNelson != null && futbol != null && voley != null && paddle != null)
             {
+                // Crear algunos turnos específicos para Febrero / Marzo / Abril 2026
+                var turnosHistoricos = new List<Turno>
+                {
+                    // FEBRERO - Futbol
+                    new Turno { Fecha = new DateOnly(2026,2,5), HoraInicio = new TimeOnly(18,0), HoraFin = new TimeOnly(19,0), PrecioTurno = 5000, CupoMaximo = 10, CupoDisponible = 0, Estado = EstadoTurno.Finalizado, Actividad = futbol, Cancha = cancha1!, Profesor = profe1! },
+                    new Turno { Fecha = new DateOnly(2026,2,19), HoraInicio = new TimeOnly(18,0), HoraFin = new TimeOnly(19,0), PrecioTurno = 5000, CupoMaximo = 10, CupoDisponible = 0, Estado = EstadoTurno.Finalizado, Actividad = futbol, Cancha = cancha1!, Profesor = profe1! },
+
+                    // MARZO - Voley
+                    new Turno { Fecha = new DateOnly(2026,3,3), HoraInicio = new TimeOnly(19,0), HoraFin = new TimeOnly(20,0), PrecioTurno = 2000, CupoMaximo = 10, CupoDisponible = 0, Estado = EstadoTurno.Finalizado, Actividad = voley, Cancha = cancha2!, Profesor = profe1! },
+                    new Turno { Fecha = new DateOnly(2026,3,17), HoraInicio = new TimeOnly(19,0), HoraFin = new TimeOnly(20,0), PrecioTurno = 2000, CupoMaximo = 10, CupoDisponible = 0, Estado = EstadoTurno.Finalizado, Actividad = voley, Cancha = cancha2!, Profesor = profe1! },
+
+                    // ABRIL - Paddle y Basquet
+                    new Turno { Fecha = new DateOnly(2026,4,7), HoraInicio = new TimeOnly(20,0), HoraFin = new TimeOnly(21,0), PrecioTurno = 2000, CupoMaximo = 10, CupoDisponible = 0, Estado = EstadoTurno.Finalizado, Actividad = paddle, Cancha = cancha2!, Profesor = profe1! },
+                    new Turno { Fecha = new DateOnly(2026,4,21), HoraInicio = new TimeOnly(20,0), HoraFin = new TimeOnly(21,0), PrecioTurno = 1000, CupoMaximo = 10, CupoDisponible = 0, Estado = EstadoTurno.Finalizado, Actividad = basquet, Cancha = cancha1!, Profesor = profe1! }
+                };
+
+                context.Turnos.AddRange(turnosHistoricos);
+                context.SaveChanges(); // necesitamos los Ids de los turnos para los pagos
+
+                // Crear pagos asociados a esos turnos (varios usuarios, diferentes montos)
                 var pagos = new List<Pago>
                 {
-                    // Febrero
-                    new Pago
-                    {
-                        Id_Usuario = clienteJoaco.Id,
-                        Monto = 1000,
-                        Id_Turno = clienteJoaco.Id,
-                        Fecha = new DateTime(2026, 2, 10)
-                    },
-                    new Pago
-                    {
-                        Id_Usuario = clienteMaria.Id,
-                        Monto = 1500,
-                        Id_Turno = clienteMaria.Id,
-                        Fecha = new DateTime(2026, 2, 20)
-                    },
-                    // Marzo
-                    new Pago
-                    {
-                        Id_Usuario = clienteNelson.Id,
-                        Monto = 2000,
-                        Id_Turno = clienteNelson.Id,
-                        Fecha = new DateTime(2026, 3, 5)
-                    },
-                    new Pago
-                    {
-                        Id_Usuario = clienteJoaco.Id,
-                        Monto = 1200,
-                        Id_Turno = clienteJoaco.Id,
-                        Fecha = new DateTime(2026, 3, 15)
-                    },
-                    // Abril
-                    new Pago
-                    {
-                        Id_Usuario = clienteMaria.Id,
-                        Monto = 1800,
-                        Id_Turno = clienteMaria.Id,
-                        Fecha = new DateTime(2026, 4, 10)
-                    },
-                    new Pago
-                    {
-                        Id_Usuario = clienteNelson.Id,
-                        Monto = 2500,
-                        Id_Turno = clienteNelson.Id,
-                        Fecha = new DateTime(2026, 4, 25)
-                    }
+                    // Febrero - Futbol
+                    new Pago(clienteJoaco.Id, 5000m, null, turnosHistoricos[0].Id) { Fecha = new DateTime(2026,2,5) },
+                    new Pago(clienteMaria.Id, 5000m, null, turnosHistoricos[1].Id) { Fecha = new DateTime(2026,2,19) },
+
+                    // Marzo - Voley
+                    new Pago(clienteNelson.Id, 2000m, null, turnosHistoricos[2].Id) { Fecha = new DateTime(2026,3,3) },
+                    new Pago(clienteJoaco.Id, 2000m, null, turnosHistoricos[3].Id) { Fecha = new DateTime(2026,3,17) },
+
+                    // Abril - Paddle / Basquet
+                    new Pago(clienteMaria.Id, 2000m, null, turnosHistoricos[4].Id) { Fecha = new DateTime(2026,4,7) },
+                    new Pago(clienteNelson.Id, 1000m, null, turnosHistoricos[5].Id) { Fecha = new DateTime(2026,4,21) }
                 };
+
                 context.Pagos.AddRange(pagos);
                 context.SaveChanges();
             }
@@ -478,8 +475,9 @@ public static class DbInicializador
         }
         // -------------------------------------------------------------------------
         // SECCIÓN: PAGOS HISTÓRICOS (MAYO Y JUNIO) REPARTIDOS POR ACTIVIDAD
+        // Añadimos estos pagos solo si no existen pagos para Mayo/Junio 2026
         // -------------------------------------------------------------------------
-        if (!context.Pagos.Any())
+        if (!context.Pagos.Any(p => p.Fecha.Year == 2026 && (p.Fecha.Month == 5 || p.Fecha.Month == 6)))
         {
             var clienteJoaco = context.Usuarios.FirstOrDefault(u => u.Email == "joa64919@gmail.com");
             var clienteMaria = context.Usuarios.FirstOrDefault(u => u.Email == "maria@gmail.com");

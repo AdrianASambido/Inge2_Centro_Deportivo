@@ -44,11 +44,11 @@ else
                         <div class="row mb-3">
                             <div class="col-md-4">
                                 <label>Desde</label>
-                                <input type="date" class="form-control" @bind="desdeDate" />
+                                <input type="date" class="form-control" @bind="desdeDate" @bind:event="oninput" />
                             </div>
                             <div class="col-md-4">
                                 <label>Hasta</label>
-                                <input type="date" class="form-control" @bind="hastaDate" />
+                                <input type="date" class="form-control" @bind="hastaDate" @bind:event="oninput" />
                             </div>
                             <div class="col-md-4 d-flex align-items-end">
                                 <button class="btn btn-primary" @onclick="FetchIngresosAsync" disabled="@isFetching">@((isFetching) ? "Buscando..." : "Buscar")</button>
@@ -61,14 +61,16 @@ else
 
                         @if (datosIngresos != null && datosIngresos.Count > 0 && string.IsNullOrEmpty(errorMessageIngresos))
                         {
-                            <ApexChart TItem="GraficoIngresoMesDto" Height="320" Title="Ingresos Mensuales ($)">
-                                <ApexPointSeries TItem="GraficoIngresoMesDto"
-                                                 Items="chartIngresos"
-                                                 Name="Ingresos"
-                                                 SeriesType="SeriesType.Bar"
-                                                 XValue="e => e.Mes"
-                                                 YValue="e => e.Monto" />
-                            </ApexChart>
+                            <div @key="chartKeyIngresos">
+                                <ApexChart TItem="GraficoIngresoMesDto" Height="320" Title="Ingresos Mensuales ($)">
+                                    <ApexPointSeries TItem="GraficoIngresoMesDto"
+                                                     Items="chartIngresos"
+                                                     Name="Ingresos"
+                                                     SeriesType="SeriesType.Bar"
+                                                     XValue="e => e.Mes"
+                                                     YValue="e => e.Monto" />
+                                </ApexChart>
+                            </div>
                         }
                         else if (datosIngresos != null && string.IsNullOrEmpty(errorMessageIngresos))
                         {
@@ -100,11 +102,13 @@ else
                         }
                         else
                         {
-                            <ApexChart TItem="GraficoAsistenciaDto" Height="360" Title="Asistencias, inasistencias y cancelaciones por actividad">
-                                <ApexPointSeries TItem="GraficoAsistenciaDto" Items="chartAsistencia" Name="Asistieron" SeriesType="SeriesType.Bar" XValue="e => e.Actividad" YValue="e => e.Asistencias" />
-                                <ApexPointSeries TItem="GraficoAsistenciaDto" Items="chartAsistencia" Name="Inasistieron" SeriesType="SeriesType.Bar" XValue="e => e.Actividad" YValue="e => e.Inasistencias" />
-                                <ApexPointSeries TItem="GraficoAsistenciaDto" Items="chartAsistencia" Name="Cancelaron" SeriesType="SeriesType.Bar" XValue="e => e.Actividad" YValue="e => e.Cancelaciones" />
-                            </ApexChart>
+                            <div @key="chartKeyAsistencia">
+                                <ApexChart TItem="GraficoAsistenciaDto" Height="360" Title="Asistencias, inasistencias y cancelaciones por actividad">
+                                    <ApexPointSeries TItem="GraficoAsistenciaDto" Items="chartAsistencia" Name="Asistieron" SeriesType="SeriesType.Bar" XValue="e => e.Actividad" YValue="e => e.Asistencias" />
+                                    <ApexPointSeries TItem="GraficoAsistenciaDto" Items="chartAsistencia" Name="Inasistieron" SeriesType="SeriesType.Bar" XValue="e => e.Actividad" YValue="e => e.Inasistencias" />
+                                    <ApexPointSeries TItem="GraficoAsistenciaDto" Items="chartAsistencia" Name="Cancelaron" SeriesType="SeriesType.Bar" XValue="e => e.Actividad" YValue="e => e.Cancelaciones" />
+                                </ApexChart>
+                            </div>
 
                             <hr class="my-4" />
                             <h6 class="mb-3 text-muted text-center">Resumen Porcentual de Índices</h6>
@@ -176,14 +180,16 @@ else
 
                         @if (datosIngresosActividad != null && datosIngresosActividad.Count > 0 && string.IsNullOrEmpty(errorMessageActividades))
                         {
-                            <ApexChart TItem="GraficoIngresoActividadDto" Height="360" Title="Ingresos por actividad ($)">
-                                <ApexPointSeries TItem="GraficoIngresoActividadDto"
-                                                 Items="chartIngresosActividad"
-                                                 Name="Ingresos"
-                                                 SeriesType="SeriesType.Bar"
-                                                 XValue="e => e.Actividad"
-                                                 YValue="e => e.Monto" />
-                            </ApexChart>
+                            <div @key="chartKeyIngresosActividad">
+                                <ApexChart TItem="GraficoIngresoActividadDto" Height="360" Title="Ingresos por actividad ($)">
+                                    <ApexPointSeries TItem="GraficoIngresoActividadDto"
+                                                     Items="chartIngresosActividad"
+                                                     Name="Ingresos"
+                                                     SeriesType="SeriesType.Bar"
+                                                     XValue="e => e.Actividad"
+                                                     YValue="e => e.Monto" />
+                                </ApexChart>
+                            </div>
                         }
                         else if (datosIngresosActividad != null && string.IsNullOrEmpty(errorMessageActividades))
                         {
@@ -219,6 +225,9 @@ else
     private List<GraficoAsistenciaDto> chartAsistencia = new();
     private List<GraficoIngresoActividadDto> chartIngresosActividad = new();
     private List<GraficoIndiceActividadDto> chartIndiceActividad = new();
+    private object chartKeyIngresos = new();
+    private object chartKeyIngresosActividad = new();
+    private object chartKeyAsistencia = new();
 
     private string NombreActividadSeleccionada =>
         actividades.FirstOrDefault(a => a.Id == idActividadSeleccionada)?.Nombre ?? "Actividad";
@@ -296,6 +305,11 @@ else
                 chartIngresos = datosIngresos
                     .Select(d => new GraficoIngresoMesDto { Mes = d.Mes, Monto = d.MontoTotal })
                     .ToList();
+                // Forzar re-render del gráfico
+                chartKeyIngresos = new object();
+                await InvokeAsync(StateHasChanged);
+                await Task.Delay(60);
+                await InvokeAsync(StateHasChanged);
             }
         }
         finally
@@ -309,9 +323,16 @@ else
     {
         if (isFetching) return;
         isFetching = true;
+        errorMessageActividades = string.Empty;
         try
         {
-            if (hastaDate < desdeDate) return;
+            if (hastaDate < desdeDate)
+            {
+                errorMessageActividades = "Error: el periodo ingresado es incorrecto";
+                datosIndiceActividad = new();
+                chartIndiceActividad = new();
+                return;
+            }
 
             var desde = DateOnly.FromDateTime(desdeDate);
             var hasta = DateOnly.FromDateTime(hastaDate);
@@ -344,6 +365,19 @@ else
                     Cancelaciones = a.CantidadCancelaciones
                 })
                 .ToList();
+            // Forzar re-render del componente de gráfico
+            chartKeyAsistencia = new object();
+            try
+            {
+                Console.WriteLine($"[Estadisticas] FetchAsistenciaAsync - rango: {desdeDate:d} - {hastaDate:d}, resultados: {chartAsistencia.Count}");
+                await InvokeAsync(StateHasChanged);
+                await Task.Delay(60);
+                await InvokeAsync(StateHasChanged);
+            }
+            catch
+            {
+                // Ignorar errores de render asincrónico
+            }
         }
         finally
         {
@@ -393,6 +427,19 @@ else
                 chartIngresosActividad = datosIngresosActividad
                     .Select(r => new GraficoIngresoActividadDto { Actividad = r.Actividad, Monto = r.Monto })
                     .ToList();
+                // Forzar re-render del gráfico de ingresos por actividad
+                chartKeyIngresosActividad = new object();
+                try
+                {
+                    Console.WriteLine($"[Estadisticas] FetchIngresosActividadAsync - rango: {desdeDate:d} - {hastaDate:d}, resultados: {chartIngresosActividad.Count}");
+                    await InvokeAsync(StateHasChanged);
+                    await Task.Delay(60);
+                    await InvokeAsync(StateHasChanged);
+                }
+                catch
+                {
+                    // Ignorar errores de render asincrónico
+                }
             }
         }
         finally
@@ -455,6 +502,30 @@ else
     {
         public string Etiqueta { get; set; } = string.Empty;
         public int Cantidad { get; set; }
+    }
+
+    private async Task OnFechaChanged(ChangeEventArgs e)
+    {
+        // Cuando cambian las fechas, re-ejecutamos la sección activa para actualizar los gráficos
+        try
+        {
+            if (seccionActiva == "ingresos")
+            {
+                await FetchIngresosAsync();
+            }
+            else if (seccionActiva == "asistencia")
+            {
+                await FetchAsistenciaAsync();
+            }
+            else if (seccionActiva == "ingresoPorActividad")
+            {
+                await FetchIngresosActividadAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"ESTADISTICAS-OnFechaChanged: {ex.Message}");
+        }
     }
 }
 
