@@ -37,15 +37,19 @@
         }
         else
         {
-            @if (!string.IsNullOrEmpty(error))
+            @if (!string.IsNullOrEmpty(mensajeAlerta))
             {
-                bool esExito = error.Contains("éxito", StringComparison.OrdinalIgnoreCase) ||
-                               error.Contains("exitosamente", StringComparison.OrdinalIgnoreCase) ||
-                               error.Contains("confirmada", StringComparison.OrdinalIgnoreCase);
+                // Seleccionamos el ícono de Bootstrap Icons adecuado para cada color
+                string icono = tipoAlerta switch
+                {
+                    "success" => "bi-check-circle-fill",
+                    "info" => "bi-info-circle-fill", // Ícono de información para el color azul
+                    _ => "bi-exclamation-triangle-fill" // Para "danger" o cualquier otro error
+                };
 
-                <div class="alert @(esExito ? "alert-success" : "alert-danger") border-0 shadow-sm mb-4" style="border-radius: 12px;">
-                    <i class="bi @(esExito ? "bi-check-circle-fill" : "bi-exclamation-triangle-fill") me-2"></i>
-                    @error
+                <div class="alert alert-@tipoAlerta border-0 shadow-sm mb-4" style="border-radius: 12px;">
+                    <i class="bi @icono me-2"></i>
+                    @mensajeAlerta
                 </div>
             }
 
@@ -100,7 +104,7 @@
                                             {
                                                 <button class="btn btn-success btn-sm me-1 fw-bold"
                                                         @onclick="() => PagarSaldoRestante(r.Id)">
-                                                    <i class="bi bi-credit-card me-1"></i> Pagar Saldo (50%)
+                                                    <i class="bi bi-credit-card me-1"></i> Completar pago
                                                 </button>
                                             }
 
@@ -237,7 +241,7 @@
                     {
                         <div class="card p-5 text-center text-muted bg-white shadow-sm border-0" style="border-radius: 12px;">
                             <i class="bi bi-box-seam fs-2 d-block mb-2"></i>
-                            No registra pases mensuales o reservas adelantadas activas.
+                            No registra clases reservadas por adelantado
                         </div>
                     }
                 </div>
@@ -276,7 +280,7 @@
                                             {
                                                 <button class="btn btn-success btn-sm me-1 fw-bold"
                                                         @onclick="() => ReservarLugarLiberado(inscripcion.Id_Turno)">
-                                                    <i class="bi bi-check-circle me-1"></i> Reservar Lugar
+                                                    <i class="bi bi-check-circle me-1"></i> Reservar 
                                                 </button>
                                             }
                                             <button class="btn btn-outline-danger btn-sm"
@@ -293,7 +297,7 @@
                     {
                         <div class="text-center py-5 text-muted">
                             <i class="bi bi-hourglass-x fs-2 d-block mb-2"></i>
-                            No registras turnos vigentes en lista de espera.
+                            No registra turnos en lista de espera.
                         </div>
                     }
                 </div>
@@ -335,7 +339,7 @@
                                 <span class="fw-bold">@detalleRenovacion.NombreMes</span>
                             </div>
                             <div class="list-group-item px-0 d-flex justify-content-between">
-                                <span class="text-muted">Cantidad de clases estimadas:</span>
+                                <span class="text-muted">Cantidad de turnos:</span>
                                 <span class="fw-bold">@detalleRenovacion.CantidadClases</span>
                             </div>
                             <div class="list-group-item px-0 d-flex justify-content-between">
@@ -373,7 +377,7 @@
                                 disabled="@detalleRenovacion.YaRenovo"
                                 @onclick="ConfirmarRenovacion">
                             <i class="bi bi-credit-card-2-back-fill me-1"></i>
-                            @(detalleRenovacion.YaRenovo ? "Ya Abonado" : "Confirmar y pagar")
+                            @(detalleRenovacion.YaRenovo ? "Ya Abonado" : "Ir a pagar")
                         </button>
                     }
                 </div>
@@ -395,6 +399,10 @@
     private bool mostrarModalRenovacion = false;
     private DetalleRenovacionDTO? detalleRenovacion;
     private Guid codigoPaqueteARenovar;
+
+    // Variables de alertas unificadas
+    private string mensajeAlerta = string.Empty;
+    private string tipoAlerta = "info";
 
     private Dictionary<Guid, bool> estadosRenovacionPaquetes = new();
 
@@ -443,16 +451,19 @@
             try
             {
                 await ConfirmarPagoRestanteReservaOcasionalUseCase.Ejecutar(reservaId!.Value, PaymentId);
-                error = "¡Pago procesado con éxito! Reserva confirmada.";
+                mensajeAlerta = "¡Pago procesado con éxito! Reserva confirmada.";
+                tipoAlerta = "success";
             }
             catch (Exception ex)
             {
-                error = $"Error al confirmar el pago: {ex.Message}";
+                mensajeAlerta = $"Error al confirmar el pago: {ex.Message}";
+                tipoAlerta = "danger";
             }
         }
         else
         {
-            error = "El pago fue cancelado o no pudo procesarse.";
+            mensajeAlerta = "El pago fue cancelado o no pudo procesarse.";
+            tipoAlerta = "danger";
         }
 
         await CargarReservas();
@@ -463,7 +474,7 @@
     {
         try
         {
-            error = "";
+            mensajeAlerta = ""; // Limpiamos alertas anteriores
             codigoPaqueteARenovar = codigoPaquete;
             detalleRenovacion = await ObtenerDetalleRenovacionUseCase.Ejecutar(
                 UsuarioSesion.UsuarioActual!.Id, codigoPaquete);
@@ -471,7 +482,8 @@
         }
         catch (Exception ex)
         {
-            error = ex.Message;
+            mensajeAlerta = ex.Message;
+            tipoAlerta = "danger";
         }
     }
 
@@ -515,14 +527,15 @@
     {
         try
         {
-            error = "";
+            mensajeAlerta = "";
             string urlRedireccion = await IniciarRenovarReservaAdelantadaUseCase.Ejecutar(
                 UsuarioSesion.UsuarioActual!.Id, codigoPaquete);
             Navigation.NavigateTo(urlRedireccion, true);
         }
         catch (Exception ex)
         {
-            error = ex.Message;
+            mensajeAlerta = ex.Message;
+            tipoAlerta = "danger";
         }
     }
 
@@ -537,16 +550,19 @@
                                   .ToList();
                 await RenovarReservaAdelantadaUseCase.Ejecutar(
                     UsuarioSesion.UsuarioActual!.Id, ids, PaymentId);
-                error = "¡Renovación realizada con éxito!";
+                mensajeAlerta = "¡Renovación realizada con éxito!";
+                tipoAlerta = "success";
             }
             catch (Exception ex)
             {
-                error = $"Error al confirmar la renovación: {ex.Message}";
+                mensajeAlerta = $"Error al confirmar la renovación: {ex.Message}";
+                tipoAlerta = "danger";
             }
         }
         else
         {
-            error = "El pago no se pudo realizar. Intente nuevamente.";
+            mensajeAlerta = "El pago no se pudo realizar. Intente nuevamente.";
+            tipoAlerta = "danger";
         }
 
         await CargarReservas();
@@ -557,12 +573,11 @@
     private int tipoFiltroActivo = 1;
     private int? reservaSeleccionadaId;
     private byte[] qrCode = Array.Empty<byte>();
-    private string error = "";
     private List<Reserva>? todasLasReservasAdelantadas;
 
     protected override async Task OnInitializedAsync()
     {
-        error = "";
+        mensajeAlerta = "";
         await CargarReservas();
     }
 
@@ -612,7 +627,8 @@
         }
         catch (Exception ex)
         {
-            error = ex.Message;
+            mensajeAlerta = ex.Message;
+            tipoAlerta = "danger";
         }
     }
 
@@ -620,7 +636,7 @@
     {
         try
         {
-            error = "";
+            mensajeAlerta = "";
             string urlRedireccion = await CompletarPagoReservaCase.Ejecutar(idReserva);
 
             if (!string.IsNullOrEmpty(urlRedireccion))
@@ -629,12 +645,14 @@
             }
             else
             {
-                error = "No se pudo generar la pasarela de pago en este momento.";
+                mensajeAlerta = "No se pudo generar la pasarela de pago en este momento.";
+                tipoAlerta = "danger";
             }
         }
         catch (Exception ex)
         {
-            error = ex.Message;
+            mensajeAlerta = ex.Message;
+            tipoAlerta = "danger";
         }
     }
 
@@ -648,16 +666,19 @@
                     UsuarioSesion.UsuarioActual!.Id,
                     turnoId!.Value,
                     PaymentId);
-                error = "¡Reserva confirmada! Ya tenés tu lugar en el turno.";
+                mensajeAlerta = "¡Reserva confirmada! Ya tenés tu lugar en el turno.";
+                tipoAlerta = "success";
             }
             catch (Exception ex)
             {
-                error = $"Error al confirmar la reserva: {ex.Message}";
+                mensajeAlerta = $"Error al confirmar la reserva: {ex.Message}";
+                tipoAlerta = "danger";
             }
         }
         else
         {
-            error = "El pago fue cancelado o no pudo procesarse.";
+            mensajeAlerta = "Error con el pago, intente nuevamente";
+            tipoAlerta = "danger";
         }
 
         await CargarReservas();
@@ -675,7 +696,7 @@
 
     async Task GenerarQr(int reservaId)
     {
-        error = "";
+        mensajeAlerta = "";
         if (reservaSeleccionadaId == reservaId)
         {
             CerrarQr();
@@ -689,7 +710,8 @@
         }
         catch (Exception ex)
         {
-            error = ex.Message;
+            mensajeAlerta = ex.Message;
+            tipoAlerta = "danger";
             StateHasChanged();
         }
     }
@@ -706,16 +728,20 @@
         {
             var (conDevolucion, monto) = await cancelarReservasUseCase.Ejecutar(idReserva);
 
-            error = conDevolucion
+            mensajeAlerta = conDevolucion
                 ? $"Reserva cancelada exitosamente. Se ha generado una devolución de: ${monto}"
                 : "Reserva cancelada exitosamente. No corresponde devolución.";
+
+            // Las cancelaciones exitosas se informan en azul
+            tipoAlerta = "info";
 
             await CargarReservas();
             StateHasChanged();
         }
         catch (Exception ex)
         {
-            error = ex.Message;
+            mensajeAlerta = ex.Message;
+            tipoAlerta = "danger";
         }
     }
 
@@ -725,13 +751,19 @@
         {
             var (seOtorgoCredito, mensaje) = await CancelarReservaAdelantadaUseCase.Ejecutar(
                 UsuarioSesion.UsuarioActual!.Id, idReserva);
-            error = mensaje;
+
+            mensajeAlerta = mensaje;
+
+            // Las cancelaciones exitosas se informan en azul
+            tipoAlerta = "info";
+
             await CargarReservas();
             StateHasChanged();
         }
         catch (Exception ex)
         {
-            error = ex.Message;
+            mensajeAlerta = ex.Message;
+            tipoAlerta = "danger";
         }
     }
 
@@ -739,15 +771,17 @@
     {
         try
         {
-            error = "";
+            mensajeAlerta = "";
             await AbandonarListaEsperaUseCase.Ejecutar(UsuarioSesion.UsuarioActual!.Id, idTurno);
-            error = "Has abandonado la lista de espera correctamente.";
+            mensajeAlerta = "Has abandonado la lista de espera correctamente.";
+            tipoAlerta = "success";
             await CargarReservas();
             StateHasChanged();
         }
         catch (Exception ex)
         {
-            error = ex.Message;
+            mensajeAlerta = ex.Message;
+            tipoAlerta = "danger";
         }
     }
 
@@ -779,18 +813,24 @@
     {
         try
         {
-            error = "";
+            mensajeAlerta = "";
             string urlRedireccion = await IniciarPagoListaEsperaUseCase.Ejecutar(
                 UsuarioSesion.UsuarioActual!.Id, idTurno);
 
             if (!string.IsNullOrEmpty(urlRedireccion))
+            {
                 Navigation.NavigateTo(urlRedireccion, true);
+            }
             else
-                error = "Ocurrió un error al intentar conectarse con la pasarela de pagos.";
+            {
+                mensajeAlerta = "Error con el pago, intente nuevamente";
+                tipoAlerta = "danger";
+            }
         }
         catch (Exception ex)
         {
-            error = ex.Message;
+            mensajeAlerta = ex.Message;
+            tipoAlerta = "danger";
         }
     }
 }

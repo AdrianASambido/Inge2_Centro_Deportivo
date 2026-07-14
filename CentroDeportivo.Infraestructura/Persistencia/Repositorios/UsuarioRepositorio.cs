@@ -57,7 +57,12 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
 
         public async Task<Usuario?> ObtenerPorEmail(string email)
         {
-            return await context.Usuarios.FirstOrDefaultAsync(u => u.Email == email);
+            if (string.IsNullOrWhiteSpace(email)) return null;
+
+            string emailNormalizado = email.Trim().ToLowerInvariant();
+
+            return await context.Usuarios
+                .FirstOrDefaultAsync(u => u.Email.ToLower() == emailNormalizado);
         }
 
         public async Task<Usuario?> ObtenerPorIdAsync(int id)
@@ -89,7 +94,12 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
 
         public async Task<bool> YaExisteEmailParaEditar(string email, int idActual)
         {
-            return await context.Usuarios.AnyAsync(u => u.Email == email && u.Id != idActual);
+            if (string.IsNullOrWhiteSpace(email)) return false;
+
+            string emailNormalizado = email.Trim().ToLowerInvariant();
+
+            return await context.Usuarios
+                .AnyAsync(u => u.Email.ToLower() == emailNormalizado && u.Id != idActual);
         }
 
         public async Task<Usuario?> ObtenerPorToken(string token)

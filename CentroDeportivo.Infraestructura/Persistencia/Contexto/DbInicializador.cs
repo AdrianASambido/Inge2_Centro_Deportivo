@@ -13,11 +13,11 @@ public static class DbInicializador
         {
             var usuarios = new List<Usuario>
             {
-                new Usuario("Pablo", "Nicolas", "Calle 123", "2322534", BCrypt.Net.BCrypt.HashPassword("Boca1999"), "nicolas@gmail.com", false, Rol.Cliente),
+                new Usuario("Pablo", "Nicolas", "Calle 123", "2322534", BCrypt.Net.BCrypt.HashPassword("ASD12345"), "nicolas@gmail.com", false, Rol.Cliente),
                 new Usuario("Mario", "Tevez", "Calle 123", "112345534", BCrypt.Net.BCrypt.HashPassword("Admin1234"), "admin@gmail.com", false, Rol.Administrador),
-                new Usuario("Joaquin", "Pinanelli", "Calle 456", "30111222", BCrypt.Net.BCrypt.HashPassword("Boca1999"), "joa64919@gmail.com", false, Rol.Cliente),
-                new Usuario("Maria", "Gomez", "Calle 789", "32444555", BCrypt.Net.BCrypt.HashPassword("Boca1999"), "maria@gmail.com", false, Rol.Cliente),
-                new Usuario("nel", "pinanelli", "Calle10", "123456", BCrypt.Net.BCrypt.HashPassword("Boca1999"), "nelsonjp1999@gmail.com", false, Rol.Cliente)
+                new Usuario("Joaquin", "P", "Calle 456", "30111222", BCrypt.Net.BCrypt.HashPassword("ASD12345"), "joaquinnnn@gmail.com", false, Rol.Cliente),
+                new Usuario("Maria", "Gomez", "Calle 789", "32444555", BCrypt.Net.BCrypt.HashPassword("ASD12345"), "maria@gmail.com", false, Rol.Cliente),
+                new Usuario("nel", "p", "Calle10", "123456", BCrypt.Net.BCrypt.HashPassword("ASD12345"), "n9@gmail.com", false, Rol.Cliente)
             };
             context.Usuarios.AddRange(usuarios);
             context.SaveChanges();
@@ -145,7 +145,7 @@ public static class DbInicializador
                     Fecha = fecha,
                     HoraInicio = new TimeOnly(20, 30),
                     HoraFin = new TimeOnly(21, 30),
-                    PrecioTurno = 4000,
+                    PrecioTurno = 5000,
                     CupoMaximo = 10,
                     CupoDisponible = 10,
                     Estado = EstadoTurno.Disponible,
@@ -201,7 +201,7 @@ public static class DbInicializador
                     Fecha = new DateOnly(2026, 7, 31),
                     HoraInicio = new TimeOnly(22, 0),
                     HoraFin = new TimeOnly(23, 0),
-                    PrecioTurno = 1000,
+                    PrecioTurno = 5000,
                     CupoMaximo = 1,
                     CupoDisponible = 1,
                     Estado = EstadoTurno.Disponible,
@@ -216,7 +216,7 @@ public static class DbInicializador
                     Fecha = new DateOnly(2026, 7, 17),
                     HoraInicio = new TimeOnly(19, 0),
                     HoraFin = new TimeOnly(20, 0),
-                    PrecioTurno = 1000,
+                    PrecioTurno = 2000,
                     CupoMaximo = 5,
                     CupoDisponible = 5,
                     Estado = EstadoTurno.Disponible,

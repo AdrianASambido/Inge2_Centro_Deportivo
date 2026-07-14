@@ -25,6 +25,18 @@ namespace CentroDeportivo.Infraestructura.Persistencia.Repositorios
             }
         }
 
+        public async Task<int> ObtenerPosicionEnListaAsync(int idUsuario, int idTurno)
+        {
+            var inscripciones = await contexto.InscripcionListaEsperas
+                .Where(i => i.Id_Turno == idTurno
+                         && i.Estado == EstadoListaEspera.Esperando)
+                .OrderBy(i => i.FechaInscripcion)
+                .ToListAsync();
+
+            int posicion = inscripciones.FindIndex(i => i.Id_Usuario == idUsuario) + 1;
+            return posicion > 0 ? posicion : 1;
+        }
+
         public async Task AgregarAsync(InscripcionListaEspera lista)
         {
             await contexto.InscripcionListaEsperas.AddAsync(lista);

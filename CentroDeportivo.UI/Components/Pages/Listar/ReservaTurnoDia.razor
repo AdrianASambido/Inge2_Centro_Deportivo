@@ -239,7 +239,7 @@ else
                 Id_Turno = TurnoId
             };
             await CrearReservaUseCase.Ejecutar(nuevaReserva, PaymentId);
-            mensajeExito = "Pago y reserva realizados con éxito.";
+            mensajeExito = "Reserva realizada con éxito.";
             await CargarTurnos();
         }
         else
