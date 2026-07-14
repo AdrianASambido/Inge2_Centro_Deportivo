@@ -96,6 +96,11 @@ else
                             </div>
                         </div>
 
+                        @if (!string.IsNullOrEmpty(errorMessageActividades))
+                        {
+                            <div class="alert alert-danger mt-3">@errorMessageActividades</div>
+                        }
+
                         @if (datosAsistencia == null || datosAsistencia.Count == 0)
                         {
                             <p><em>No hay datos de asistencia para mostrar.</em></p>
@@ -329,8 +334,8 @@ else
             if (hastaDate < desdeDate)
             {
                 errorMessageActividades = "Error: el periodo ingresado es incorrecto";
-                datosIndiceActividad = new();
-                chartIndiceActividad = new();
+                datosAsistencia = new();
+                chartAsistencia = new();
                 return;
             }
 
