@@ -273,22 +273,30 @@ else
                 chartIngresos = new();
                 return;
             }
-            var start = DateOnly.FromDateTime(new DateTime(desdeDate.Year, desdeDate.Month, 1));
-            var endMonth = new DateTime(hastaDate.Year, hastaDate.Month, 1);
-            int totalMeses = ((endMonth.Year - start.Year) * 12) + endMonth.Month - start.Month;
+            // Queremos sumar ingresos respetando el intervalo exacto seleccionado
+            var startDate = DateOnly.FromDateTime(desdeDate);
+            var endDate = DateOnly.FromDateTime(hastaDate);
+
+            var startMonth = new DateOnly(startDate.Year, startDate.Month, 1);
+            var endMonth = new DateOnly(endDate.Year, endDate.Month, 1);
+            int totalMeses = ((endMonth.Year - startMonth.Year) * 12) + endMonth.Month - startMonth.Month;
             if (totalMeses > 24) totalMeses = 24;
 
             var resultadosList = new List<IngresoPorMesDto>();
 
             for (int i = 0; i <= totalMeses; i++)
             {
-                var dt = new DateTime(start.Year, start.Month, 1).AddMonths(i);
-                var mesStart = DateOnly.FromDateTime(dt);
+                var dt = startMonth.AddMonths(i);
+                var mesStart = dt;
                 var mesEnd = mesStart.AddMonths(1).AddDays(-1);
+
+                // Ajustar los límites para respetar desde/hasta exactos (evitar sumar todo el mes cuando el rango es parcial)
+                var effectiveStart = mesStart < startDate ? startDate : mesStart;
+                var effectiveEnd = mesEnd > endDate ? endDate : mesEnd;
 
                 try
                 {
-                    var total = await ConsultarIngresosDelNegocioUseCase.Ejecutar(mesStart, mesEnd);
+                    var total = await ConsultarIngresosDelNegocioUseCase.Ejecutar(effectiveStart, effectiveEnd);
                     resultadosList.Add(new IngresoPorMesDto { Mes = mesStart.ToString("MMM yyyy"), MontoTotal = total });
                 }
                 catch (Exception ex)
@@ -414,10 +422,37 @@ else
 
             var resultados = new List<IngresoPorActividadDto>();
 
+            // Para evitar que se sumen meses completos cuando el rango es parcial,
+            // sumamos por meses respetando los límites desde/hasta (mismo enfoque que en ingresos generales).
+            var startMonth = new DateOnly(desde.Year, desde.Month, 1);
+            var endMonth = new DateOnly(hasta.Year, hasta.Month, 1);
+            int totalMeses = ((endMonth.Year - startMonth.Year) * 12) + endMonth.Month - startMonth.Month;
+            if (totalMeses > 24) totalMeses = 24;
+
             foreach (var actividad in actividades)
             {
-                var monto = await ConsultarIngresosActividadUseCase.Ejecutar(actividad.Id, desde, hasta);
-                resultados.Add(new IngresoPorActividadDto { Actividad = actividad.Nombre, Monto = monto });
+                decimal montoTotal = 0m;
+                for (int i = 0; i <= totalMeses; i++)
+                {
+                    var dt = startMonth.AddMonths(i);
+                    var mesStart = dt;
+                    var mesEnd = mesStart.AddMonths(1).AddDays(-1);
+
+                    var effectiveStart = mesStart < desde ? desde : mesStart;
+                    var effectiveEnd = mesEnd > hasta ? hasta : mesEnd;
+
+                    try
+                    {
+                        var parte = await ConsultarIngresosActividadUseCase.Ejecutar(actividad.Id, effectiveStart, effectiveEnd);
+                        montoTotal += parte;
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"ESTADISTICAS-ERROR (ingresos actividad {actividad.Id} mes {mesStart}): {ex.Message}");
+                    }
+                }
+
+                resultados.Add(new IngresoPorActividadDto { Actividad = actividad.Nombre, Monto = montoTotal });
             }
 
             if (resultados.All(r => r.Monto == 0m))
